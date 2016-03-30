@@ -1,0 +1,374 @@
+/*IR.C file
+ */
+
+#include "stm8s.h"
+#include "stm8s_gpio.h"
+#include "stm8s_clk.h"
+#include "stm8s_exti.h"
+#include "stm8s_tim1.h"
+#include "stm8s_tim2.h"
+#include "stm8s_tim4.h"
+#include "stm8s_flash.h"
+#include "stm8s_adc2.h"
+
+#include "ir.h"
+#include "sw_i2c.h"
+
+#define IR_IN_PORT			GPIOA
+#define IR_IN_PIN			GPIO_PIN_6
+
+#define KEY_IN_PORT			GPIOB
+#define KEY_IN_PIN			GPIO_PIN_7
+
+#define IRKEY_DUMY 			0xFF
+
+typedef enum
+{
+IR_RECEIVE_HEAD,
+IR_RECEIVE_CODE
+}IR_DECODE_ENUM;
+
+typedef enum
+{
+NEC_HEAD,
+NEC_CODE,
+NEC_SPACE_0,
+NEC_REPEAT,
+NEC_SPACE_1,
+NEC_IDLE
+}IR_SNED_ENUM;
+
+typedef enum
+{
+KEY_DEEP_0,
+KEY_DEEP_1,
+KEY_DEEP_2,
+KEY_DEEP_3,
+KEY_DEEP_4,
+KEY_DEEP_5,
+KEY_POWER,
+KEY_ONOFF_3D,
+KEY_SOURCE,
+KEY_PC,
+KEY_HDMI,
+KEY_VOLUME_PLUS,
+KEY_VOLUME_MINUS,
+KEY_LEFT,
+KEY_RIGHT,
+KEY_DEBUG,
+KEY_DUMMY = 0xFF
+}IR_KEY_ENUM;
+
+#define NEC_HEAD_LOW			(9000)
+#define NEC_HEAD_HIGH			(4500)
+#define NEC_REPEAT_LOW			(9000)
+#define NEC_REPEAT_HIGH			(2250)
+#define NEC_LOGIC_LOW			(560)
+#define NEC_LOGIC_1_HIGH		(1690)
+#define NEC_LOGIC_0_HIGH		(560)
+
+#define LEADER_UPPER_LIMIT 		(13500+2000)
+#define LEADER_LOWER_LIMIT 		(13500-1000)
+#define REPEAT_UPPER_LIMIT 		(11250+1000)
+#define REPEAT_LOWER_LIMIT 		(11250-1000)
+#define HIGH_UPPER_LIMIT 		(2250+550)
+#define HIGH_LOWER_LIMIT 		(2250-550)
+#define LOW_UPPER_LIMIT 		(1125+325)
+#define LOW_LOWER_LIMIT 		(1125-325)
+
+#define KEY_DETECT_TIME			(100 + 1)
+#define IR_RELEASE_TIME			(128 + TIMER_EXPIRED)
+
+static u8 ir_state, ir_bit_number, ir_code[4], head_type, receive_code, ir_pressed, ir_fisrt_process;
+static u8 ir_release_timer; 
+static volatile u32 delay_timer;
+static u32 ir_process_timer, Key_detect_timer;
+static u16 Conversion_Value;
+
+static u8 value_c8;
+static u8 value_c9;
+static u8 value_ca;
+static u8 value_cb;
+
+u32 System_Clock = 0;
+/*==========================================================================*/
+static u8 _Compare_Count(u16 a, u16 max, u16 min)
+{
+	return (a < max && a > min);
+}
+/*==========================================================================*/
+static u8 _convert_IR(void)
+{
+	if (head_type)
+	{
+		switch (receive_code)
+		{
+			case 0x0: 		return KEY_DEEP_0;
+			case 0x1: 		return KEY_DEEP_1;
+			case 0x2: 		return KEY_DEEP_2;
+			case 0x3: 		return KEY_DEEP_3;
+			case 0x4: 		return KEY_DEEP_4;
+			case 0x5: 		return KEY_DEEP_5;
+			case 0xC7:		return KEY_POWER;
+			case 0xC0: 		return KEY_PC;
+			case 0xC3: 		return KEY_HDMI;
+			case 0x75: 		return KEY_ONOFF_3D;
+			case 0xC1: 		return KEY_DEBUG;
+			default:
+				return KEY_DUMMY;
+		}
+	}
+	else
+	{
+		switch (receive_code)
+		{
+			case 0x11: 		return KEY_DEEP_0;
+			case 0x12: 		return KEY_DEEP_1;
+			case 0x13: 		return KEY_DEEP_2;
+			case 0x14: 		return KEY_DEEP_3;
+			case 0x15: 		return KEY_DEEP_4;
+			case 0x16: 		return KEY_DEEP_5;
+			case 0x1C: 		return KEY_POWER;
+			case 0: 		return KEY_ONOFF_3D;
+			case 0x5B: 		return KEY_ONOFF_3D;
+			case 0x01: 		return KEY_DEBUG;
+			default:
+				return KEY_DUMMY;
+		}
+	}
+}
+/*==========================================================================*/
+void IR_IN_Init(void)
+{	
+	GPIO_Init(IR_IN_PORT, IR_IN_PIN, GPIO_MODE_IN_FL_IT);
+	EXTI_SetExtIntSensitivity(EXTI_PORT_GPIOA, EXTI_SENSITIVITY_FALL_ONLY);
+
+	TIM2_TimeBaseInit(TIM2_PRESCALER_16, 0xffff);
+	TIM2_Cmd(ENABLE); 
+
+	GPIO_Init(KEY_IN_PORT, KEY_IN_PIN, GPIO_MODE_IN_FL_NO_IT);
+	ADC2_Init(ADC2_CONVERSIONMODE_CONTINUOUS, ADC2_CHANNEL_7, ADC2_PRESSEL_FCPU_D2,\
+					ADC2_EXTTRIG_TIM, DISABLE, ADC2_ALIGN_RIGHT, ADC2_SCHMITTTRIG_CHANNEL7, DISABLE);
+	//ADC2_ITConfig(ENABLE);
+	ADC2_StartConversion();
+
+	ir_state = IR_RECEIVE_HEAD;
+	ir_pressed = FALSE;	
+	ir_fisrt_process = FALSE;
+	receive_code = IRKEY_DUMY;	
+
+	value_c8 = FLASH_ReadByte(0x4001);
+	value_c9 = FLASH_ReadByte(0x4002);
+	value_ca = FLASH_ReadByte(0x4003);
+	value_cb = FLASH_ReadByte(0x4004);
+}
+/*==========================================================================*/
+void Timer_Init(void)
+{
+	TIM4_TimeBaseInit(TIM4_PRESCALER_128, 125);
+	TIM4_ITConfig(TIM4_IT_UPDATE, ENABLE);
+	TIM4_Cmd(ENABLE); 
+
+	ir_release_timer = TIMER_STOPPED;
+	delay_timer = TIMER_STOPPED;
+	ir_process_timer = TIMER_STOPPED;
+	Key_detect_timer = TIMER_EXPIRED;
+}
+/*==========================================================================*/
+static u8 value_debug = 0;
+void IR_Update(void)
+{
+	if (ir_pressed)
+	{
+		if (ir_process_timer == TIMER_EXPIRED)
+		{
+			u8 ir_key = _convert_IR();
+			switch (ir_key)
+			{
+				case KEY_DEBUG:
+					SWI2C_ToggleI2CMode();
+					break;
+				case KEY_ONOFF_3D:
+					SWI2C_Set3D();
+					break;
+				case KEY_DEEP_0:
+					SWI2C_Set_deep(0);
+					break;
+				case KEY_DEEP_1:
+					SWI2C_Set_deep(1);
+					break;
+				case KEY_DEEP_2:
+					SWI2C_Set_deep(2);
+					break;
+				case KEY_DEEP_3:
+					SWI2C_Set_deep(3);
+					break;
+				case KEY_DEEP_4:
+					SWI2C_Set_deep(4);
+					break;
+				case KEY_DEEP_5:
+					SWI2C_Set_deep(5);
+					break;
+				case KEY_POWER:
+					SWI2C_ProcessPower();
+					break;
+				default:
+					break;
+			}
+			if (ir_key != KEY_VOLUME_PLUS && ir_key != KEY_VOLUME_MINUS && ir_key != KEY_LEFT &&ir_key != KEY_RIGHT)
+			{
+				receive_code = IRKEY_DUMY;
+			}
+			if (ir_fisrt_process)
+			{
+				ir_fisrt_process = FALSE;
+				ir_process_timer = 500 + 1;
+			}
+			else
+			{
+				ir_process_timer = 50 + 1;
+			}
+		}
+	}
+	
+	if (ir_release_timer == TIMER_EXPIRED)
+	{
+		ir_release_timer = TIMER_STOPPED;
+		ir_process_timer = TIMER_STOPPED;
+		ir_pressed = FALSE;	
+	}
+
+	if (Key_detect_timer == TIMER_EXPIRED)
+	{
+		Conversion_Value = ADC2_GetConversionValue();
+		Key_detect_timer = KEY_DETECT_TIME;
+	}
+}
+/*==========================================================================*/
+INTERRUPT_HANDLER(IR_IN_ISR, 3)
+{
+	u16 count;
+	u8 fault = FALSE;
+	
+	TIM2_Cmd(DISABLE);
+	TIM2_ClearFlag(TIM2_FLAG_UPDATE);
+	count = TIM2_GetCounter();
+	TIM2_SetCounter(0);			
+	TIM2_Cmd(ENABLE);
+
+	if (count > LEADER_UPPER_LIMIT)
+	{
+		fault = TRUE;
+	}
+	else
+	{
+		switch (ir_state)
+		{
+			case IR_RECEIVE_HEAD:
+				if (_Compare_Count(count, LEADER_UPPER_LIMIT, LEADER_LOWER_LIMIT))
+				{
+					ir_release_timer = IR_RELEASE_TIME;
+					ir_state = IR_RECEIVE_CODE;
+				}
+				else if (_Compare_Count(count, REPEAT_UPPER_LIMIT, REPEAT_LOWER_LIMIT))
+				{
+					ir_release_timer = IR_RELEASE_TIME;
+				}
+				ir_bit_number = 0;
+				break;
+			case IR_RECEIVE_CODE:
+				if (_Compare_Count(count, HIGH_UPPER_LIMIT, HIGH_LOWER_LIMIT))
+				{
+					ir_code[ir_bit_number/8] = (ir_code[ir_bit_number/8]>>1)|0x80;
+				}
+				else if (_Compare_Count(count, LOW_UPPER_LIMIT, LOW_LOWER_LIMIT))
+				{
+					ir_code[ir_bit_number/8] = ir_code[ir_bit_number/8]>>1;
+				}
+				else
+				{
+					fault = TRUE;
+				}
+				ir_bit_number++;
+				if (ir_bit_number == 32 && !fault)
+				{
+					ir_state = IR_RECEIVE_HEAD;
+					if (((ir_code[0] == 0x0 && ir_code[1] == 0xDF) || (ir_code[0] == 0x4F && ir_code[1] == 0x50)) 
+					&& ((ir_code[2]^ir_code[3]) == 0xFF))
+					{
+						if (!ir_pressed)
+						{
+							receive_code = ir_code[2];						
+							ir_pressed = TRUE;
+							ir_fisrt_process = TRUE;
+							ir_process_timer = TIMER_EXPIRED;
+							if (ir_code[0] == 0x4F && ir_code[1] == 0x50)
+							{
+								head_type = 1;
+							}
+							else
+							{
+								head_type = 0;
+							}
+						}				
+					}
+					else
+					{
+						fault = TRUE;
+					}
+				}
+				break;
+			default:
+				break;
+		}
+	}
+	if (fault)
+	{
+		ir_state = IR_RECEIVE_HEAD;
+	}
+}
+/*==========================================================================*/
+INTERRUPT_HANDLER(TIMER4_ISR, 23)
+{		
+	TIM4_Cmd(DISABLE);
+	TIM4_ClearFlag(TIM4_IT_UPDATE);
+	nop();
+	nop();
+	nop();
+	nop();
+	nop();
+	nop();
+	nop();
+	nop();
+	nop();
+	nop();
+	nop();
+	TIM4_Cmd(ENABLE);
+
+	if (ir_release_timer > TIMER_EXPIRED)
+	{
+		ir_release_timer--;
+	}
+	if (delay_timer > TIMER_EXPIRED)
+	{
+		delay_timer--;
+	}
+	if (ir_process_timer > TIMER_EXPIRED)
+	{
+		ir_process_timer--;
+	}
+	if (Key_detect_timer > TIMER_EXPIRED)
+	{
+		Key_detect_timer--;
+	}
+	SWI2C_UpdateTimer();
+	System_Clock++;
+}
+/*==========================================================================*/
+void IR_DelayNMiliseconds(u16 delay)
+{
+	delay_timer = delay;
+	while (delay_timer > TIMER_EXPIRED);
+	delay_timer = TIMER_STOPPED;
+}
+/*==========================================================================*/	
