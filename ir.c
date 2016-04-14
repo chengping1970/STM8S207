@@ -189,7 +189,7 @@ void IR_Update(void)
 					SWI2C_ToggleI2CMode();
 					break;
 				case KEY_ONOFF_3D:
-					SWI2C_Set3D();
+					SWI2C_Toggle3DOnOff();
 					break;
 				case KEY_DEEP_0:
 					SWI2C_Set_deep(0);

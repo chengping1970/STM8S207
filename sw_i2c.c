@@ -44,12 +44,18 @@
 #define FRC_BOARD_ADDRESS		0x22
 
 #define FRC_UPDATE_TIME			(500 + 1)
-#define BACKLIGHT_DELAY_TIME	(1000 + 1)
+#define BACKLIGHT_DELAY_TIME	(5000 + 1)
+
+#define IIC_FAIL				0
+#define IIC_OK					1
+#define IIC_ACK_TIMEOUT			50
+
 static u32 frc_update_timer = TIMER_EXPIRED;
 static u32 Backlight_on_timer = TIMER_STOPPED;
 static u8 LVDS_mode = 0;
 static u8 Power_status = FALSE;
 static u8 I2C_stop = FALSE;
+static u8 Have_FRC;
 /*==========================================================================*/
 static void _Delay_5us(void)
 {
@@ -100,19 +106,19 @@ static u8 _SWI2C_SendByte(u8 value)
 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_IN_FL_NO_IT);
 	_Delay_5us();
 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
-	for (count = 0;count < 20;count++)
+	for (count = 0;count < IIC_ACK_TIMEOUT;count++)
 	{
 		if (GPIO_ReadInputPin(IIC_SDA_PORT, IIC_SDA_PIN) == 0)
 		{
 			GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
 			GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_LOW_FAST);
-			return TRUE;
+			return IIC_OK;
 		}
 	}
 	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
 	
-	return FALSE;
+	return IIC_FAIL;
 }
 
 /*==========================================================================*/
@@ -165,28 +171,34 @@ u8 SWI2C_TestDevice(u8 addr)
 	return result;
 }
 /*==========================================================================*/
-u8 SWI2C_ReadByte(u8 addr, u8 subaddr)
+u8 SWI2C_ReadByte(u8 addr, u8 subaddr, u8 * pValue)
 {
-	u8 value;
-	
-	_SWI2C_Start();
-	_SWI2C_SendByte(addr);
-	_SWI2C_SendByte(subaddr);
-	_SWI2C_Start();
-	_SWI2C_SendByte(addr|0x01);
-	value = _SWI2C_ReceiveByte(FALSE);
-	_SWI2C_Stop();
-
-	return value;
+	return SWI2C_ReadBytes(addr, subaddr, 1, pValue);
 }
 /*==========================================================================*/
 u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 {	
+	u8 result;
 	_SWI2C_Start();
-	_SWI2C_SendByte(addr);
-	_SWI2C_SendByte(subaddr);
+	result = _SWI2C_SendByte(addr);
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
+	result = _SWI2C_SendByte(subaddr);
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
 	_SWI2C_Start();
-	_SWI2C_SendByte(addr|0x01);
+	result = _SWI2C_SendByte(addr|0x01);
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
 	while (number--)
 	{
 		*p_data = _SWI2C_ReceiveByte(number);
@@ -194,40 +206,74 @@ u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 	}
 	_SWI2C_Stop();
 
-	return TRUE;
+	return IIC_OK;
 }
 /*==========================================================================*/
-void SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value)
+u8 SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value)
 {	
-	_SWI2C_Start();
-	_SWI2C_SendByte(addr);
-	_SWI2C_SendByte(subaddr);
-	_SWI2C_SendByte(value);
-	_SWI2C_Stop();
+	return SWI2C_WriteBytes(addr, subaddr, 1, &value);
 }
 /*==========================================================================*/
-void SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data) 
-{	                                             
+u8 SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data) 
+{
+	u8 result;
 	_SWI2C_Start();                              
-	_SWI2C_SendByte(addr);                      
-	_SWI2C_SendByte(subaddr);                   
-	_SWI2C_SendByte(data>>8);                   
-	_SWI2C_SendByte(data);                      
-	_SWI2C_Stop();                               
+	result = _SWI2C_SendByte(addr);  
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
+	result = _SWI2C_SendByte(subaddr);     
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
+	result = _SWI2C_SendByte(data>>8);     
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
+	result = _SWI2C_SendByte(data);   
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
+	_SWI2C_Stop();    
+	return IIC_OK;
 }      
 /*==========================================================================*/
 u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
-{	
+{
+	u8 result;
 	_SWI2C_Start();
-	_SWI2C_SendByte(addr);
-	_SWI2C_SendByte(subaddr);
+	result = _SWI2C_SendByte(addr);
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
+	result = _SWI2C_SendByte(subaddr);
+	if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
 	while (number--)
 	{
-		_SWI2C_SendByte(*p_data);
+		result = _SWI2C_SendByte(*p_data);
+		if (result == IIC_FAIL)
+	{
+		_SWI2C_Stop();
+		return result;
+	}
 		p_data++;
 	}
 	_SWI2C_Stop();
-	return TRUE;
+	return IIC_OK;
 }
 /*==========================================================================*/
 void SWI2C_Init(void)
@@ -247,7 +293,7 @@ void SWI2C_Init(void)
 
 	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 
-	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 	GPIO_Init(BACKLIGHT_PWM_PORT, BACKLIGHT_PWM_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	GPIO_Init(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 	
@@ -263,10 +309,9 @@ void SWI2C_Update(void)
 {	
 	if (Backlight_on_timer == TIMER_EXPIRED)
 	{
-		GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN);
-		IR_DelayNMiliseconds(500);
-		GPIO_WriteLow(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN);
-				
+		//GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN);
+		//IR_DelayNMiliseconds(500);
+		GPIO_WriteLow(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN);	
 		Backlight_on_timer = TIMER_STOPPED;
 	}
 
@@ -274,15 +319,15 @@ void SWI2C_Update(void)
 	{
 		IT6802_fsm();
 
-		if (frc_update_timer == TIMER_EXPIRED)
+		if (frc_update_timer == TIMER_EXPIRED && Have_FRC)
 		{
 			u8 read_LVDS_mode, read_MFC;
-			read_LVDS_mode = SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x18);
+			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x18, &read_LVDS_mode);
 			if (read_LVDS_mode != LVDS_mode)
 			{
 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x18, LVDS_mode);
 			}
-			read_MFC = SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x0A);
+			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x0A, &read_MFC);
 			if (read_MFC != 0)
 			{
 				IR_DelayNMiliseconds(50);
@@ -307,6 +352,8 @@ void SWI2C_SystemPowerUp(void)
 	IR_DelayNMiliseconds(1000);
 	FPGA_Init();	
 	IT6802_fsm_init();
+	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
+	GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN);
 	Backlight_on_timer = BACKLIGHT_DELAY_TIME;
 }
 /*==========================================================================*/
@@ -352,15 +399,12 @@ void SWI2C_ProcessPower(void)
 	}
 }
 /*==========================================================================*/
-static u8 OnOff_3D = FALSE;
+static u8 Set3DOn = TRUE;
 
-void SWI2C_Set3D(void)
+static void SWI2C_Set3DOnOff(u8 OnOff)
 {
-		u8 i;
-	u8 reg_value;
-
-	OnOff_3D = !OnOff_3D;
-	if (OnOff_3D)
+	u8 reg_value, retry;
+	if (OnOff)
 	{
 		reg_value = 0x80;
 	}
@@ -368,7 +412,22 @@ void SWI2C_Set3D(void)
 	{
 		reg_value = 0x0;
 	}
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
+	for (retry = 0; retry < 3; retry++)
+	{
+		u8 value;
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
+		if (value == reg_value)
+		{
+			break;
+		}
+	}
+}
+/*==========================================================================*/
+void SWI2C_Toggle3DOnOff(void)
+{	
+	Set3DOn = !Set3DOn;
+	SWI2C_Set3DOnOff(Set3DOn);
 }
 /*==========================================================================*/
 void FPGA_Init(void)
@@ -389,8 +448,9 @@ void FPGA_Init(void)
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x59, 0x40);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, 0x80);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x5c, 0x80);
-		
-	SWI2C_Set3D();	
+
+	
+	SWI2C_Set3DOnOff(Set3DOn);	
 }
 /*==========================================================================*/
 void HDMI_HotPlug(u8 value)

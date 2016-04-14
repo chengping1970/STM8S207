@@ -350,8 +350,8 @@
  677  01d2 2039          	jra	L762
  678  01d4               L322:
  679                     ; 191 				case KEY_ONOFF_3D:
- 679                     ; 192 					SWI2C_Set3D();
- 681  01d4 8d000000      	callf	f_SWI2C_Set3D
+ 679                     ; 192 					SWI2C_Toggle3DOnOff();
+ 681  01d4 8d000000      	callf	f_SWI2C_Toggle3DOnOff
  683                     ; 193 					break;
  685  01d8 2033          	jra	L762
  686  01da               L522:
@@ -859,7 +859,7 @@
 1634  001c 00            	ds.b	1
 1635                     	xref	f_SWI2C_UpdateTimer
 1636                     	xref	f_SWI2C_Set_deep
-1637                     	xref	f_SWI2C_Set3D
+1637                     	xref	f_SWI2C_Toggle3DOnOff
 1638                     	xref	f_SWI2C_ToggleI2CMode
 1639                     	xref	f_SWI2C_ProcessPower
 1640                     	xdef	_System_Clock

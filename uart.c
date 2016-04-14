@@ -7,13 +7,14 @@
 
 #include "sw_i2c.h"
 
-#define UART_BUFFER_MAX_LENGTH	5
+#define UART_BUFFER_MAX_LENGTH	(256 + 5)
 
 static u8 uart_rx_buffer[UART_BUFFER_MAX_LENGTH + 2];
 static u8 uart_rx_index;
 static u8 uart_received = FALSE;
 static u8 uart_data[UART_BUFFER_MAX_LENGTH];
 static u8 uart_send_data[UART_BUFFER_MAX_LENGTH + 2];
+static u16 uart_data_length = 8;
 
 /*==========================================================================*/
 INTERRUPT_HANDLER(UART_ISR, 18)
@@ -37,10 +38,17 @@ INTERRUPT_HANDLER(UART_ISR, 18)
 			return;
 		}
 	}
-	
+	if (uart_rx_buffer[2] == 2)
+	{
+		uart_data_length = UART_BUFFER_MAX_LENGTH + 2;
+	}
+	else
+	{
+		uart_data_length = 8;
+	}
 	uart_rx_index++;
 	
-	if (uart_rx_index == UART_BUFFER_MAX_LENGTH + 2)
+	if (uart_rx_index == uart_data_length)
 	{
 		uart_rx_index = 0;
 		uart_received = TRUE;
@@ -79,33 +87,7 @@ void UART_Update(void)
 {
 	if (uart_received)
 	{
-		u8 i;
-		u8 checksum = 0;
-		
-		uart_received = FALSE;
-		for (i = 0; i < UART_BUFFER_MAX_LENGTH + 2;i++)
-		{
-			uart_send_data[i] = uart_rx_buffer[i];
-		}	
-		for (i = 0; i < UART_BUFFER_MAX_LENGTH;i++)
-		{
-			uart_data[i] = uart_rx_buffer[i + 2];
-		}		
-
-		switch (uart_data[0])
-		{
-			case 1:
-				SWI2C_WriteByte(uart_data[1], uart_data[2], uart_data[3]);
-				break;
-			case 2:
-				uart_send_data[5] = SWI2C_ReadByte(uart_data[1], uart_data[2]);
-				break;
-
-			default:
-				break;
-		}
-		
-		UART_Send(uart_send_data, UART_BUFFER_MAX_LENGTH + 2);
+		uart_received = FALSE;		
 	}
 }
 /*==========================================================================*/
