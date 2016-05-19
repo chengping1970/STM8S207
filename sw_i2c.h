@@ -3,6 +3,27 @@
 
 #include "stm8s.h"
 
+#define IIC_FAIL				0
+#define IIC_OK					1
+
+enum EEPROM_ADDRESS
+{
+REG_0x57,
+REG_0xC8,
+REG_0xC9,
+REG_0xCA,
+REG_0xCB,
+REG_0x18,
+REG_0x47,
+REG_0x48,
+REG_0x49,
+REG_0x58,
+REG_0x59,
+REG_0x5A,
+REG_0x5C,
+REG_0x0D
+};
+
 extern void SWI2C_Init(void);
 extern void SWI2C_Update(void);
 extern void SWI2C_SystemPowerUp(void);

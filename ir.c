@@ -1,6 +1,5 @@
 /*IR.C file
  */
-
 #include "stm8s.h"
 #include "stm8s_gpio.h"
 #include "stm8s_clk.h"
@@ -84,12 +83,12 @@ static u8 ir_release_timer;
 static volatile u32 delay_timer;
 static u32 ir_process_timer, Key_detect_timer;
 static u16 Conversion_Value;
-
+#if 0
 static u8 value_c8;
 static u8 value_c9;
 static u8 value_ca;
 static u8 value_cb;
-
+#endif
 u32 System_Clock = 0;
 /*==========================================================================*/
 static u8 _Compare_Count(u16 a, u16 max, u16 min)
@@ -122,14 +121,15 @@ static u8 _convert_IR(void)
 	{
 		switch (receive_code)
 		{
-			case 0x11: 		return KEY_DEEP_0;
-			case 0x12: 		return KEY_DEEP_1;
-			case 0x13: 		return KEY_DEEP_2;
-			case 0x14: 		return KEY_DEEP_3;
-			case 0x15: 		return KEY_DEEP_4;
-			case 0x16: 		return KEY_DEEP_5;
+			case 0x10: 		return KEY_DEEP_0;
+			case 0x54: 		return KEY_DEEP_1;
+			case 0x16: 		return KEY_DEEP_2;
+			case 0x15: 		return KEY_DEEP_3;
+			case 0x50: 		return KEY_DEEP_4;
+			case 0x12: 		return KEY_DEEP_5;
 			case 0x1C: 		return KEY_POWER;
-			case 0: 		return KEY_ONOFF_3D;
+			case 0x56: 		return KEY_PC;
+			case 0x57: 		return KEY_HDMI;
 			case 0x5B: 		return KEY_ONOFF_3D;
 			case 0x01: 		return KEY_DEBUG;
 			default:
@@ -156,11 +156,12 @@ void IR_IN_Init(void)
 	ir_pressed = FALSE;	
 	ir_fisrt_process = FALSE;
 	receive_code = IRKEY_DUMY;	
-
-	value_c8 = FLASH_ReadByte(0x4001);
-	value_c9 = FLASH_ReadByte(0x4002);
-	value_ca = FLASH_ReadByte(0x4003);
-	value_cb = FLASH_ReadByte(0x4004);
+	#if 0
+	value_c8 = FLASH_ReadByte(0x4001 + REG_0xC8);
+	value_c9 = FLASH_ReadByte(0x4001 + REG_0xC9);
+	value_ca = FLASH_ReadByte(0x4001 + REG_0xCA);
+	value_cb = FLASH_ReadByte(0x4001 + REG_0xCB);
+	#endif
 }
 /*==========================================================================*/
 void Timer_Init(void)

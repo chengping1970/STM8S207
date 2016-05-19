@@ -8,5 +8,5 @@ Filename=stm8s207.stp
 Dependencies=
 [Options]
 ActiveProject=stm8s207
-ActiveConfig=Debug
+ActiveConfig=Release
 AddSortedElements=0

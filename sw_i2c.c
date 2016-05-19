@@ -5,6 +5,7 @@
 #include "stm8s_gpio.h"
 #include "stm8s_exti.h"
 #include "stm8s_tim1.h"
+#include "stm8s_flash.h"
 #include "ir.h" 
 #include "sw_i2c.h"
 #include "it680x.h"
@@ -46,8 +47,6 @@
 #define FRC_UPDATE_TIME			(500 + 1)
 #define BACKLIGHT_DELAY_TIME	(5000 + 1)
 
-#define IIC_FAIL				0
-#define IIC_OK					1
 #define IIC_ACK_TIMEOUT			50
 
 static u32 frc_update_timer = TIMER_EXPIRED;
@@ -399,7 +398,7 @@ void SWI2C_ProcessPower(void)
 	}
 }
 /*==========================================================================*/
-static u8 Set3DOn = TRUE;
+static u8 Set3DOn = FALSE;
 
 static void SWI2C_Set3DOnOff(u8 OnOff)
 {
@@ -430,26 +429,19 @@ void SWI2C_Toggle3DOnOff(void)
 	SWI2C_Set3DOnOff(Set3DOn);
 }
 /*==========================================================================*/
+const u8 address_table[] = { 0x57, 0xC8, 0xC9, 0xCA, 0xCB, 0x18, 0x47, 0x48, 0x49, 0x58, 0x59, 0x5A, 0x5C, 0x0D }; 		
+
 void FPGA_Init(void)
- {		
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, 0x26);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x57, 0x80);
- 	SWI2C_WriteByte(FPGA_ADDRESS, 0x58, 0x17);	
- 	SWI2C_WriteByte(FPGA_ADDRESS, 0x47, 0x10); 
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x48, 0x01); 
-	//SWI2C_WriteByte(FPGA_ADDRESS, 0x18, 0x0);	
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x49, 0x85);
-
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xc9, 0x05);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xc8, 0x05);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xcb, 0);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xca, 0x19);	
-	
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x59, 0x40);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, 0x80);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x5c, 0x80);
-
-	
+ {	
+ 	u8 i;
+	for (i = 0; i < sizeof(address_table); i++)
+	{
+		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], FLASH_ReadByte(0x4001 + i));
+	}
+	if (FLASH_ReadByte(0x4001))
+	{
+		Set3DOn = TRUE;
+	}
 	SWI2C_Set3DOnOff(Set3DOn);	
 }
 /*==========================================================================*/
@@ -477,9 +469,18 @@ static const u8 deep_value[6][3] =
 	};
 void SWI2C_Set_deep(u8 deep)
 {
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x59, deep_value[deep][0]);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, deep_value[deep][1]);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, deep_value[deep][2]);
+	if (deep == 0)
+	{
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, FLASH_ReadByte(0x4000 + REG_0x59 + 1));
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, FLASH_ReadByte(0x4000 + REG_0x5C + 1));
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, FLASH_ReadByte(0x4000 + REG_0x5A + 1));
+	}
+	else
+	{
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, deep_value[deep][0]);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, deep_value[deep][1]);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, deep_value[deep][2]);
+	}
 }
 /*==========================================================================*/
 void SWI2C_UpdateTimer(void)

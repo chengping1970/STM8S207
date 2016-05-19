@@ -1,19 +1,39 @@
 /*IR.C file
  */
+#include <string.h>
 
 #include "stm8s.h"
 #include "stm8s_uart1.h"
 #include "stm8s_uart3.h"
 
 #include "sw_i2c.h"
+#include "ir.h"
 
+#define PRINTF_USE_UART3		1
 #define UART_BUFFER_MAX_LENGTH	(256 + 5)
+
+#define DP_COMMAND			2
+#define DP_DEVICE_ADDR		3
+#define DP_SUB_ADDR			4
+#define DP_SUB_ADDR_2		5
+#define DP_DATA				6
+#define DP_CHECK_SUM		7
+
+typedef enum
+  {
+	DATA_COMMAND_WRITE_BYTE,
+	DATA_COMMAND_READ_BYTE,
+	DATA_COMMAND_WRITE_BANK,
+	DATA_COMMAND_READ_BANK
+}EXTERN_COMMAND_ENUM;
+
+#define MULTI_BYTE_RW		1
+
 
 static u8 uart_rx_buffer[UART_BUFFER_MAX_LENGTH + 2];
 static u8 uart_rx_index;
 static u8 uart_received = FALSE;
-static u8 uart_data[UART_BUFFER_MAX_LENGTH];
-static u8 uart_send_data[UART_BUFFER_MAX_LENGTH + 2];
+static u8 uart_rxtx_data[UART_BUFFER_MAX_LENGTH + 2];
 static u16 uart_data_length = 8;
 
 /*==========================================================================*/
@@ -87,11 +107,160 @@ void UART_Update(void)
 {
 	if (uart_received)
 	{
+		u8 checksum, ret;
 		uart_received = FALSE;		
+		
+		
+		memcpy(uart_rxtx_data, uart_rx_buffer, UART_BUFFER_MAX_LENGTH + 2);
+		
+		switch (uart_rxtx_data[DP_COMMAND])
+		{
+			case DATA_COMMAND_WRITE_BYTE:
+				checksum = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
+				if (checksum == uart_rxtx_data[DP_CHECK_SUM])
+				{
+					ret = SWI2C_WriteBytes(uart_rxtx_data[DP_DEVICE_ADDR], uart_rxtx_data[DP_SUB_ADDR], 1, &uart_rxtx_data[DP_DATA]);
+					if (ret == IIC_FAIL)
+					{
+						uart_rxtx_data[DP_COMMAND] = 0xFF;
+					}
+				}
+				else
+				{
+					uart_rxtx_data[DP_COMMAND] = 0xFE;
+				}
+				UART_Send(uart_rxtx_data, 8);
+				break;
+			case DATA_COMMAND_READ_BYTE:
+				checksum = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
+				if (checksum == uart_rxtx_data[DP_CHECK_SUM])
+				{
+					ret = SWI2C_ReadBytes(uart_rxtx_data[DP_DEVICE_ADDR], uart_rxtx_data[DP_SUB_ADDR], 1, &uart_rxtx_data[DP_DATA]);
+					uart_rxtx_data[DP_CHECK_SUM] = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
+					if (ret == IIC_FAIL)
+					{
+						uart_rxtx_data[DP_COMMAND] = 0xFF;
+					}
+				}
+				else
+				{
+					uart_rxtx_data[DP_COMMAND] = 0xFE;
+				}
+				UART_Send(uart_rxtx_data, 8);
+				break;
+			case DATA_COMMAND_WRITE_BANK:
+				{
+					uint32_t i;
+					checksum = uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2];
+					for (i = 0; i < 256; i++)
+					{
+						checksum += uart_rxtx_data[DP_DATA + i];
+					}
+					checksum = 0x100 - checksum;
+					if (checksum == uart_rxtx_data[6 + 256])
+					{
+						#if MULTI_BYTE_RW
+						for (i = 0; i < 32;i++)
+						{
+							ret = SWI2C_WriteBytes(uart_rxtx_data[DP_DEVICE_ADDR], i*8, 8, &uart_rxtx_data[DP_DATA + i*8]);
+							if (ret == IIC_FAIL)
+							{
+								break;
+							}
+							if (uart_rxtx_data[DP_DEVICE_ADDR] >= 0xA0 && uart_rxtx_data[DP_DEVICE_ADDR] < 0xB0)
+							{
+								IR_DelayNMiliseconds(20);
+							}
+						}
+						#else
+						if (uart_rxtx_data[DP_DEVICE_ADDR] >= 0xA0 && uart_rxtx_data[DP_DEVICE_ADDR] < 0xB0)
+						{
+							for (i = 0; i < 32;i++)
+							{
+								ret = SWI2C_WriteBytes(uart_rxtx_data[DP_DEVICE_ADDR], i*8, 8, &uart_rxtx_data[DP_DATA + i*8]);
+								if (ret == IIC_FAIL)
+								{
+									break;
+								}
+								IR_DelayNMiliseconds(20);
+							}
+						}
+						else
+						{
+							for (i = 0; i < 256;i++)
+							{
+								ret = SWI2C_WriteBytes(uart_rxtx_data[DP_DEVICE_ADDR], i, 1, &uart_rxtx_data[DP_DATA + i]);
+								if (ret == IIC_FAIL)
+								{
+									break;
+								}
+							}
+						}
+						#endif
+						uart_rxtx_data[DP_CHECK_SUM] = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
+						if (ret == IIC_FAIL)
+						{
+							uart_rxtx_data[DP_COMMAND] = 0xFF;
+						}
+					}
+					else
+					{
+						uart_rxtx_data[DP_COMMAND] = 0xFE;
+					}
+					UART_Send(uart_rxtx_data, 8);
+				}
+				break;
+			case DATA_COMMAND_READ_BANK:
+				{
+					uint32_t i;
+					checksum = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
+					if (checksum == uart_rxtx_data[DP_CHECK_SUM])
+					{
+						memset(&uart_rxtx_data[6], 0, 256);
+						#if MULTI_BYTE_RW
+						for (i = 0; i < 16;i++)
+						{
+							ret = SWI2C_ReadBytes(uart_rxtx_data[DP_DEVICE_ADDR], i*16, 16, &uart_rxtx_data[DP_DATA + i*16]);
+							if (ret == IIC_FAIL)
+							{
+								break;
+							}
+						}
+						#else
+						for (i = 0; i < 256;i++)
+						{
+							ret = SWI2C_ReadBytes(uart_rxtx_data[DP_DEVICE_ADDR], i, 1, &uart_rxtx_data[DP_DATA + i]);
+							if (ret == IIC_FAIL)
+							{
+								break;
+							}
+						}
+						#endif
+						checksum = uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2];
+						for (i = 0; i < 256;i++)
+						{
+							checksum += uart_rxtx_data[DP_DATA + i];
+						}
+						uart_rxtx_data[6 + 256] = 0x100 - checksum;
+						if (ret == IIC_FAIL)
+						{
+							uart_rxtx_data[DP_COMMAND] = 0xFF;
+						}
+					}
+					else
+					{
+						uart_rxtx_data[DP_COMMAND] = 0xFE;
+					}
+					UART_Send(uart_rxtx_data, 256 + 7);
+				}
+				break;
+			default:
+				break;
+		}
 	}
 }
 /*==========================================================================*/
-#if 1
+#if PRINTF_USE_UART3
 char putchar(char c)
 {
 	/* Write a character to the UART1 */

@@ -15,6 +15,26 @@
 #include "Mhlrx.h"
 #include "Mhlrx_reg.h"
 
+#define INIT_FLAG 0xAA
+const u8 register_default_value[] =
+{
+INIT_FLAG,	// flag
+0x80,	// 57
+0x05,	// C8
+0x05,	// C9
+0x19,	// CA
+0x00,	// CB
+0x03,	// 18
+0x10,	// 47
+0x01,	// 48
+0x85,	// 49
+0x17,	// 58
+0x40,	// 59
+0x80,	// 5A
+0x80,	// 5C
+0x2D,	// 0D
+};
+
 void flash_init(void)
 {
 	/* Define flash programming Time*/
@@ -26,13 +46,13 @@ void flash_init(void)
 	while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET)
 	{};
 
-	if (FLASH_ReadByte(0x4000) != 0x55)
+	if (FLASH_ReadByte(0x4000) != INIT_FLAG)
 	{
-		FLASH_ProgramByte(0x4000,0x55);
-		FLASH_ProgramByte(0x4001,0x05);
-		FLASH_ProgramByte(0x4002,0x05);
-		FLASH_ProgramByte(0x4003,0x19);
-		FLASH_ProgramByte(0x4004,0x00);
+		u8 i;
+		for (i = 0; i < sizeof(register_default_value); i++)
+		{
+			FLASH_ProgramByte(0x4000 + i,register_default_value[i]);
+		}
 	}
 }
 
