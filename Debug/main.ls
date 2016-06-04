@@ -1,117 +1,146 @@
    1                     ; C Compiler for STM8 (COSMIC Software)
    2                     ; Parser V4.8.32 - 23 Mar 2010
    3                     ; Generator V4.3.4 - 23 Mar 2010
-  48                     ; 18 void flash_init(void)
-  48                     ; 19 {
-  49                     	switch	.text
-  50  0000               f_flash_init:
-  54                     ; 21 	FLASH_SetProgrammingTime(FLASH_PROGRAMTIME_STANDARD);
-  56  0000 4f            	clr	a
-  57  0001 8d000000      	callf	f_FLASH_SetProgrammingTime
-  59                     ; 24 	FLASH_Unlock(FLASH_MEMTYPE_DATA);
-  61  0005 a6f7          	ld	a,#247
-  62  0007 8d000000      	callf	f_FLASH_Unlock
-  65  000b               L32:
-  66                     ; 26 	while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET)
-  68  000b a608          	ld	a,#8
-  69  000d 8d000000      	callf	f_FLASH_GetFlagStatus
-  71  0011 4d            	tnz	a
-  72  0012 27f7          	jreq	L32
-  73                     ; 29 	if (FLASH_ReadByte(0x4000) != 0x55)
-  76  0014 ae4000        	ldw	x,#16384
-  77  0017 89            	pushw	x
-  78  0018 ae0000        	ldw	x,#0
-  79  001b 89            	pushw	x
-  80  001c 8d000000      	callf	f_FLASH_ReadByte
-  82  0020 5b04          	addw	sp,#4
-  83  0022 a155          	cp	a,#85
-  84  0024 2750          	jreq	L72
-  85                     ; 31 		FLASH_ProgramByte(0x4000,0x55);
-  87  0026 4b55          	push	#85
-  88  0028 ae4000        	ldw	x,#16384
-  89  002b 89            	pushw	x
-  90  002c ae0000        	ldw	x,#0
-  91  002f 89            	pushw	x
-  92  0030 8d000000      	callf	f_FLASH_ProgramByte
-  94  0034 5b05          	addw	sp,#5
-  95                     ; 32 		FLASH_ProgramByte(0x4001,0x05);
-  97  0036 4b05          	push	#5
-  98  0038 ae4001        	ldw	x,#16385
-  99  003b 89            	pushw	x
- 100  003c ae0000        	ldw	x,#0
- 101  003f 89            	pushw	x
- 102  0040 8d000000      	callf	f_FLASH_ProgramByte
- 104  0044 5b05          	addw	sp,#5
- 105                     ; 33 		FLASH_ProgramByte(0x4002,0x05);
- 107  0046 4b05          	push	#5
- 108  0048 ae4002        	ldw	x,#16386
- 109  004b 89            	pushw	x
- 110  004c ae0000        	ldw	x,#0
- 111  004f 89            	pushw	x
- 112  0050 8d000000      	callf	f_FLASH_ProgramByte
- 114  0054 5b05          	addw	sp,#5
- 115                     ; 34 		FLASH_ProgramByte(0x4003,0x19);
- 117  0056 4b19          	push	#25
- 118  0058 ae4003        	ldw	x,#16387
- 119  005b 89            	pushw	x
- 120  005c ae0000        	ldw	x,#0
- 121  005f 89            	pushw	x
- 122  0060 8d000000      	callf	f_FLASH_ProgramByte
- 124  0064 5b05          	addw	sp,#5
- 125                     ; 35 		FLASH_ProgramByte(0x4004,0x00);
- 127  0066 4b00          	push	#0
- 128  0068 ae4004        	ldw	x,#16388
- 129  006b 89            	pushw	x
- 130  006c ae0000        	ldw	x,#0
- 131  006f 89            	pushw	x
- 132  0070 8d000000      	callf	f_FLASH_ProgramByte
- 134  0074 5b05          	addw	sp,#5
- 135  0076               L72:
- 136                     ; 37 }
- 139  0076 87            	retf
- 172                     ; 39 main()
- 172                     ; 40 {	
- 173                     	switch	.text
- 174  0077               f_main:
- 178                     ; 49   	CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
- 180  0077 4f            	clr	a
- 181  0078 8d000000      	callf	f_CLK_HSIPrescalerConfig
- 183                     ; 51 	SWI2C_Init();
- 185  007c 8d000000      	callf	f_SWI2C_Init
- 187                     ; 52 	flash_init();	
- 189  0080 8d000000      	callf	f_flash_init
- 191                     ; 53 	IR_IN_Init();
- 193  0084 8d000000      	callf	f_IR_IN_Init
- 195                     ; 54 	Timer_Init();
- 197  0088 8d000000      	callf	f_Timer_Init
- 199                     ; 55 	UART_Init();
- 201  008c 8d000000      	callf	f_UART_Init
- 203                     ; 58 	enableInterrupts();	
- 206  0090 9a            rim
- 208                     ; 60 	SWI2C_SystemPowerUp();
- 211  0091 8d000000      	callf	f_SWI2C_SystemPowerUp
- 213  0095               L14:
- 214                     ; 64 		IR_Update();
- 216  0095 8d000000      	callf	f_IR_Update
- 218                     ; 65 		SWI2C_Update();
- 220  0099 8d000000      	callf	f_SWI2C_Update
- 222                     ; 66 		UART_Update();		
- 224  009d 8d000000      	callf	f_UART_Update
- 227  00a1 20f2          	jra	L14
- 239                     	xdef	f_main
- 240                     	xdef	f_flash_init
- 241                     	xref	f_FLASH_GetFlagStatus
- 242                     	xref	f_FLASH_SetProgrammingTime
- 243                     	xref	f_FLASH_ReadByte
- 244                     	xref	f_FLASH_ProgramByte
- 245                     	xref	f_FLASH_Unlock
- 246                     	xref	f_UART_Update
- 247                     	xref	f_UART_Init
- 248                     	xref	f_IR_Update
- 249                     	xref	f_Timer_Init
- 250                     	xref	f_IR_IN_Init
- 251                     	xref	f_SWI2C_SystemPowerUp
- 252                     	xref	f_SWI2C_Update
- 253                     	xref	f_SWI2C_Init
- 254                     	xref	f_CLK_HSIPrescalerConfig
- 273                     	end
+  15                     .const:	section	.text
+  16  0000               _address_table:
+  17  0000 57            	dc.b	87
+  18  0001 c8            	dc.b	200
+  19  0002 c9            	dc.b	201
+  20  0003 ca            	dc.b	202
+  21  0004 cb            	dc.b	203
+  22  0005 18            	dc.b	24
+  23  0006 47            	dc.b	71
+  24  0007 48            	dc.b	72
+  25  0008 49            	dc.b	73
+  26  0009 4a            	dc.b	74
+  27  000a 5b            	dc.b	91
+  28  000b 7d            	dc.b	125
+  29  000c df            	dc.b	223
+  30  000d e7            	dc.b	231
+  31  000e 0d            	dc.b	13
+  32  000f               _register_default_value:
+  33  000f a5            	dc.b	165
+  34  0010 80            	dc.b	128
+  35  0011 cc            	dc.b	204
+  36  0012 8f            	dc.b	143
+  37  0013 de            	dc.b	222
+  38  0014 60            	dc.b	96
+  39  0015 00            	dc.b	0
+  40  0016 30            	dc.b	48
+  41  0017 01            	dc.b	1
+  42  0018 ff            	dc.b	255
+  43  0019 04            	dc.b	4
+  44  001a 17            	dc.b	23
+  45  001b 2c            	dc.b	44
+  46  001c 97            	dc.b	151
+  47  001d bb            	dc.b	187
+  48  001e 24            	dc.b	36
+  49  001f               _table_size:
+  50  001f 0f            	dc.b	15
+  94                     ; 64 void flash_init(void)
+  94                     ; 65 {
+  95                     	switch	.text
+  96  0000               f_flash_init:
+  98  0000 88            	push	a
+  99       00000001      OFST:	set	1
+ 102                     ; 67 	FLASH_SetProgrammingTime(FLASH_PROGRAMTIME_STANDARD);
+ 104  0001 4f            	clr	a
+ 105  0002 8d000000      	callf	f_FLASH_SetProgrammingTime
+ 107                     ; 70 	FLASH_Unlock(FLASH_MEMTYPE_DATA);
+ 109  0006 a6f7          	ld	a,#247
+ 110  0008 8d000000      	callf	f_FLASH_Unlock
+ 113  000c               L72:
+ 114                     ; 72 	while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET)
+ 116  000c a608          	ld	a,#8
+ 117  000e 8d000000      	callf	f_FLASH_GetFlagStatus
+ 119  0012 4d            	tnz	a
+ 120  0013 27f7          	jreq	L72
+ 121                     ; 75 	if (FLASH_ReadByte(0x4000) != INIT_FLAG)
+ 124  0015 ae4000        	ldw	x,#16384
+ 125  0018 89            	pushw	x
+ 126  0019 ae0000        	ldw	x,#0
+ 127  001c 89            	pushw	x
+ 128  001d 8d000000      	callf	f_FLASH_ReadByte
+ 130  0021 5b04          	addw	sp,#4
+ 131  0023 a1a5          	cp	a,#165
+ 132  0025 2729          	jreq	L33
+ 133                     ; 78 		for (i = 0; i < sizeof(register_default_value); i++)
+ 135  0027 0f01          	clr	(OFST+0,sp)
+ 136  0029               L53:
+ 137                     ; 80 			FLASH_ProgramByte(0x4000 + i,register_default_value[i]);
+ 139  0029 7b01          	ld	a,(OFST+0,sp)
+ 140  002b 5f            	clrw	x
+ 141  002c 97            	ld	xl,a
+ 142  002d d6000f        	ld	a,(_register_default_value,x)
+ 143  0030 88            	push	a
+ 144  0031 7b02          	ld	a,(OFST+1,sp)
+ 145  0033 5f            	clrw	x
+ 146  0034 97            	ld	xl,a
+ 147  0035 1c4000        	addw	x,#16384
+ 148  0038 8d000000      	callf	d_itolx
+ 150  003c be02          	ldw	x,c_lreg+2
+ 151  003e 89            	pushw	x
+ 152  003f be00          	ldw	x,c_lreg
+ 153  0041 89            	pushw	x
+ 154  0042 8d000000      	callf	f_FLASH_ProgramByte
+ 156  0046 5b05          	addw	sp,#5
+ 157                     ; 78 		for (i = 0; i < sizeof(register_default_value); i++)
+ 159  0048 0c01          	inc	(OFST+0,sp)
+ 162  004a 7b01          	ld	a,(OFST+0,sp)
+ 163  004c a110          	cp	a,#16
+ 164  004e 25d9          	jrult	L53
+ 165  0050               L33:
+ 166                     ; 83 }
+ 169  0050 84            	pop	a
+ 170  0051 87            	retf
+ 203                     ; 85 main()
+ 203                     ; 86 {	
+ 204                     	switch	.text
+ 205  0052               f_main:
+ 209                     ; 95   	CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
+ 211  0052 4f            	clr	a
+ 212  0053 8d000000      	callf	f_CLK_HSIPrescalerConfig
+ 214                     ; 97 	SWI2C_Init();
+ 216  0057 8d000000      	callf	f_SWI2C_Init
+ 218                     ; 98 	flash_init();	
+ 220  005b 8d000000      	callf	f_flash_init
+ 222                     ; 99 	IR_IN_Init();
+ 224  005f 8d000000      	callf	f_IR_IN_Init
+ 226                     ; 100 	Timer_Init();
+ 228  0063 8d000000      	callf	f_Timer_Init
+ 230                     ; 101 	UART_Init();
+ 232  0067 8d000000      	callf	f_UART_Init
+ 234                     ; 104 	enableInterrupts();	
+ 237  006b 9a            rim
+ 239                     ; 106 	SWI2C_SystemPowerUp();
+ 242  006c 8d000000      	callf	f_SWI2C_SystemPowerUp
+ 244  0070               L35:
+ 245                     ; 110 		IR_Update();
+ 247  0070 8d000000      	callf	f_IR_Update
+ 249                     ; 111 		SWI2C_Update();
+ 251  0074 8d000000      	callf	f_SWI2C_Update
+ 253                     ; 112 		UART_Update();		
+ 255  0078 8d000000      	callf	f_UART_Update
+ 258  007c 20f2          	jra	L35
+ 302                     	xdef	f_main
+ 303                     	xdef	f_flash_init
+ 304                     	xdef	_table_size
+ 305                     	xdef	_register_default_value
+ 306                     	xdef	_address_table
+ 307                     	xref	f_FLASH_GetFlagStatus
+ 308                     	xref	f_FLASH_SetProgrammingTime
+ 309                     	xref	f_FLASH_ReadByte
+ 310                     	xref	f_FLASH_ProgramByte
+ 311                     	xref	f_FLASH_Unlock
+ 312                     	xref	f_UART_Update
+ 313                     	xref	f_UART_Init
+ 314                     	xref	f_IR_Update
+ 315                     	xref	f_Timer_Init
+ 316                     	xref	f_IR_IN_Init
+ 317                     	xref	f_SWI2C_SystemPowerUp
+ 318                     	xref	f_SWI2C_Update
+ 319                     	xref	f_SWI2C_Init
+ 320                     	xref	f_CLK_HSIPrescalerConfig
+ 321                     	xref.b	c_lreg
+ 340                     	xref	d_itolx
+ 341                     	end

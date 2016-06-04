@@ -429,12 +429,12 @@ void SWI2C_Toggle3DOnOff(void)
 	SWI2C_Set3DOnOff(Set3DOn);
 }
 /*==========================================================================*/
-const u8 address_table[] = { 0x57, 0xC8, 0xC9, 0xCA, 0xCB, 0x18, 0x47, 0x48, 0x49, 0x58, 0x59, 0x5A, 0x5C, 0x0D }; 		
-
+extern const u8 address_table[];
+extern const u8 table_size;
 void FPGA_Init(void)
  {	
  	u8 i;
-	for (i = 0; i < sizeof(address_table); i++)
+	for (i = 0; i < table_size; i++)
 	{
 		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], FLASH_ReadByte(0x4001 + i));
 	}
