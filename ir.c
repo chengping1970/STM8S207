@@ -54,6 +54,8 @@ KEY_VOLUME_PLUS,
 KEY_VOLUME_MINUS,
 KEY_LEFT,
 KEY_RIGHT,
+KEY_RESET_HDMI,
+KEY_RESET_FPGA,
 KEY_DEBUG,
 KEY_DUMMY = 0xFF
 }IR_KEY_ENUM;
@@ -113,6 +115,8 @@ static u8 _convert_IR(void)
 			case 0xC3: 		return KEY_HDMI;
 			case 0x75: 		return KEY_ONOFF_3D;
 			case 0xC1: 		return KEY_DEBUG;
+			case 0xC4:		return KEY_RESET_HDMI;
+			case 0x58:		return KEY_RESET_FPGA;
 			default:
 				return KEY_DUMMY;
 		}
@@ -131,7 +135,9 @@ static u8 _convert_IR(void)
 			case 0x56: 		return KEY_PC;
 			case 0x57: 		return KEY_HDMI;
 			case 0x5B: 		return KEY_ONOFF_3D;
-			case 0x01: 		return KEY_DEBUG;
+			case 0x01: 		return KEY_DEBUG;		
+			case 0x08:		return KEY_RESET_HDMI;
+			case 0x1F:		return KEY_RESET_FPGA;
 			default:
 				return KEY_DUMMY;
 		}
@@ -213,6 +219,14 @@ void IR_Update(void)
 				case KEY_POWER:
 					SWI2C_ProcessPower();
 					break;
+				#if 0
+				case KEY_RESET_HDMI:
+					SWI2C_ResetHDMI();
+					break;
+				case KEY_RESET_FPGA:
+					SWI2C_ResetFPGA();
+					break;
+				#endif
 				default:
 					break;
 			}

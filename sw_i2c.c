@@ -12,7 +12,7 @@
 #include "Mhlrx.h"
 #include "Mhlrx_reg.h"
 
-#define FPGA_KEY_VERIFY			0
+#define FPGA_KEY_VERIFY			1
 
 #define IIC_SCL_PORT			GPIOB
 #define IIC_SCL_PIN				GPIO_PIN_4
@@ -51,6 +51,7 @@
 #define SINGNAL_TETECT_TIME		(500 + 1) 
 #define BACKLIGHT_DELAY_TIME	(5000 + 1)
 
+#define SIGNAL_STABLE_COUNT		5
 #define IIC_ACK_TIMEOUT			50
 
 #define SET_VPANEL_ON()			GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN)
@@ -67,7 +68,6 @@ static u32 secret_detect_timer = TIMER_EXPIRED;
 static u32 signal_detect_timer	= TIMER_EXPIRED;
 static u8 LVDS_mode = 0;
 static u8 Power_status = FALSE;
-static u8 run_status = FALSE;
 static u8 signal_status, singal_change_count;
 static u8 I2C_stop = FALSE;
 static u8 Have_FRC;
@@ -262,7 +262,7 @@ static u8 SWI2C_GetSignalStatus(void)
 {
 	u8 p0_status;
 	SWI2C_ReadByte(0x90, 0x0A, &p0_status);
-	if (p0_status&0x0C)
+	if ((p0_status&0x0C) == 0x0C)
 	{
 		return 1;
 	}
@@ -521,18 +521,7 @@ void SWI2C_Update(void)
 	{
 		//GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN);
 		//IR_DelayNMiliseconds(500);
-		singal_change_count = 0;
-		if (SWI2C_GetSignalStatus())
-		{
-			SET_BACKLIGHT_ON();	
-			signal_status = TRUE;
-		}
-		else
-		{
-			SET_VPANEL_OFF();
-			signal_status = FALSE;
-		}
-		run_status = TRUE;
+		SET_BACKLIGHT_ON();
 		Backlight_on_timer = TIMER_STOPPED;
 	}
 
@@ -576,10 +565,6 @@ void SWI2C_Update(void)
 			secret_detect_timer = SECRET_DETECT_TIME;
 		}
 #endif
-	}
-
-	if (run_status && !I2C_stop)
-	{
 		if (signal_detect_timer == TIMER_EXPIRED)
 		{
 			
@@ -589,18 +574,20 @@ void SWI2C_Update(void)
 			if (current_signal_status != signal_status)
 			{
 				singal_change_count++;
-				if (singal_change_count > 3)
+				if (singal_change_count > SIGNAL_STABLE_COUNT)
 				{
 					signal_status = current_signal_status;
 					if (signal_status)
 					{
-						SET_VPANEL_ON();
-						IR_DelayNMiliseconds(200);
-						SET_BACKLIGHT_ON();
+						//SET_VPANEL_ON();
 						GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+						SWI2C_ResetFPGA();
+						SET_VPANEL_ON();
+						Backlight_on_timer = BACKLIGHT_DELAY_TIME;
 					}
 					else
 					{
+						Backlight_on_timer = TIMER_STOPPED;
 						SET_BACKLIGHT_OFF();
 						IR_DelayNMiliseconds(200);
 						SET_VPANEL_OFF();
@@ -621,7 +608,7 @@ void SWI2C_Update(void)
 			{
 				GPIO_WriteReverse(LED_G_PORT, LED_G_PIN);
 			}
-		}
+		}	
 	}
 }
 /*==========================================================================*/
@@ -633,19 +620,44 @@ void SWI2C_SystemPowerUp(void)
 	IR_DelayNMiliseconds(50);
 	Power_status = TRUE;
 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
-	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	//GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	IR_DelayNMiliseconds(200);
 	GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
-	GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
-	IR_DelayNMiliseconds(1000);
-	FPGA_Init();	
-#if PANEL_65INCH
-	FPGA_WriteWaveTable();
-#endif
+	//GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	IR_DelayNMiliseconds(200);
 	IT6802_fsm_init();
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
-	SET_VPANEL_ON();
-	Backlight_on_timer = BACKLIGHT_DELAY_TIME;
+	singal_change_count = 0;
+	signal_status = FALSE;
+}
+/*==========================================================================*/
+void SWI2C_ResetFPGA(void)
+{
+	if (Power_status)
+	{
+		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+		IR_DelayNMiliseconds(200);
+		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+		IR_DelayNMiliseconds(1500);
+		FPGA_Init();	
+#if PANEL_65INCH
+		FPGA_WriteWaveTable();
+#endif
+	}
+}
+/*==========================================================================*/
+void SWI2C_ResetHDMI(void)
+{
+	if (Power_status)
+	{
+		GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);
+		GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
+		IR_DelayNMiliseconds(200);
+		GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
+		IR_DelayNMiliseconds(200);
+		IT6802_fsm_init();
+		GPIO_WriteLow(LED_R_PORT, LED_R_PIN);
+	}
 }
 /*==========================================================================*/
 void SWI2C_SystemPowerDown(void)
@@ -656,8 +668,8 @@ void SWI2C_SystemPowerDown(void)
 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+	Backlight_on_timer = TIMER_STOPPED;
 	Power_status = FALSE;
-	run_status = FALSE;
 	I2C_stop = FALSE;
 }
 /*==========================================================================*/

@@ -4,13 +4,13 @@
   15                     	switch	.data
   16  0000               _System_Clock:
   17  0000 00000000      	dc.l	0
-  69                     ; 94 static u8 _Compare_Count(u16 a, u16 max, u16 min)
-  69                     ; 95 {
+  69                     ; 96 static u8 _Compare_Count(u16 a, u16 max, u16 min)
+  69                     ; 97 {
   70                     	switch	.text
   71  0000               L33f__Compare_Count:
   73  0000 89            	pushw	x
   74       00000000      OFST:	set	0
-  77                     ; 96 	return (a < max && a > min);
+  77                     ; 98 	return (a < max && a > min);
   79  0001 1306          	cpw	x,(OFST+6,sp)
   80  0003 2408          	jruge	L6
   81  0005 1308          	cpw	x,(OFST+8,sp)
@@ -22,840 +22,864 @@
   87  000e               L01:
   90  000e 85            	popw	x
   91  000f 87            	retf
- 115                     ; 99 static u8 _convert_IR(void)
- 115                     ; 100 {
+ 115                     ; 101 static u8 _convert_IR(void)
+ 115                     ; 102 {
  116                     	switch	.text
  117  0010               L36f__convert_IR:
- 121                     ; 101 	if (head_type)
+ 121                     ; 103 	if (head_type)
  123  0010 725d0012      	tnz	L11_head_type
- 124  0014 274b          	jreq	L551
- 125                     ; 103 		switch (receive_code)
+ 124  0014 2758          	jreq	L561
+ 125                     ; 105 		switch (receive_code)
  127  0016 c60011        	ld	a,L31_receive_code
- 129                     ; 116 			default:
- 129                     ; 117 				return KEY_DUMMY;
+ 129                     ; 120 			default:
+ 129                     ; 121 				return KEY_DUMMY;
  130  0019 4d            	tnz	a
- 131  001a 2725          	jreq	L56
+ 131  001a 272c          	jreq	L56
  132  001c 4a            	dec	a
- 133  001d 2724          	jreq	L76
+ 133  001d 272b          	jreq	L76
  134  001f 4a            	dec	a
- 135  0020 2724          	jreq	L17
+ 135  0020 272b          	jreq	L17
  136  0022 4a            	dec	a
- 137  0023 2724          	jreq	L37
+ 137  0023 272b          	jreq	L37
  138  0025 4a            	dec	a
- 139  0026 2724          	jreq	L57
+ 139  0026 272b          	jreq	L57
  140  0028 4a            	dec	a
- 141  0029 2724          	jreq	L77
- 142  002b a070          	sub	a,#112
- 143  002d 272c          	jreq	L701
- 144  002f a04b          	sub	a,#75
- 145  0031 2722          	jreq	L301
- 146  0033 4a            	dec	a
- 147  0034 2728          	jreq	L111
- 148  0036 a002          	sub	a,#2
- 149  0038 271e          	jreq	L501
- 150  003a a004          	sub	a,#4
- 151  003c 2714          	jreq	L101
- 152  003e               L311:
- 155  003e a6ff          	ld	a,#255
- 158  0040 87            	retf
- 159  0041               L56:
- 160                     ; 105 			case 0x0: 		return KEY_DEEP_0;
- 162  0041 4f            	clr	a
- 165  0042 87            	retf
- 166  0043               L76:
- 167                     ; 106 			case 0x1: 		return KEY_DEEP_1;
- 169  0043 a601          	ld	a,#1
- 172  0045 87            	retf
- 173  0046               L17:
- 174                     ; 107 			case 0x2: 		return KEY_DEEP_2;
- 176  0046 a602          	ld	a,#2
- 179  0048 87            	retf
- 180  0049               L37:
- 181                     ; 108 			case 0x3: 		return KEY_DEEP_3;
- 183  0049 a603          	ld	a,#3
- 186  004b 87            	retf
- 187  004c               L57:
- 188                     ; 109 			case 0x4: 		return KEY_DEEP_4;
- 190  004c a604          	ld	a,#4
- 193  004e 87            	retf
- 194  004f               L77:
- 195                     ; 110 			case 0x5: 		return KEY_DEEP_5;
- 197  004f a605          	ld	a,#5
- 200  0051 87            	retf
- 201  0052               L101:
- 202                     ; 111 			case 0xC7:		return KEY_POWER;
- 204  0052 a606          	ld	a,#6
- 207  0054 87            	retf
- 208  0055               L301:
- 209                     ; 112 			case 0xC0: 		return KEY_PC;
- 211  0055 a609          	ld	a,#9
- 214  0057 87            	retf
- 215  0058               L501:
- 216                     ; 113 			case 0xC3: 		return KEY_HDMI;
- 218  0058 a60a          	ld	a,#10
- 221  005a 87            	retf
- 222  005b               L701:
- 223                     ; 114 			case 0x75: 		return KEY_ONOFF_3D;
- 225  005b a607          	ld	a,#7
- 228  005d 87            	retf
- 229  005e               L111:
- 230                     ; 115 			case 0xC1: 		return KEY_DEBUG;
- 232  005e a60f          	ld	a,#15
- 235  0060 87            	retf
- 236  0061               L551:
- 237                     ; 122 		switch (receive_code)
- 239  0061 c60011        	ld	a,L31_receive_code
- 241                     ; 135 			default:
- 241                     ; 136 				return KEY_DUMMY;
- 242  0064 4a            	dec	a
- 243  0065 2746          	jreq	L141
- 244  0067 a00f          	sub	a,#15
- 245  0069 2725          	jreq	L511
- 246  006b a002          	sub	a,#2
- 247  006d 272f          	jreq	L721
- 248  006f a003          	sub	a,#3
- 249  0071 2725          	jreq	L321
- 250  0073 4a            	dec	a
- 251  0074 271f          	jreq	L121
- 252  0076 a006          	sub	a,#6
- 253  0078 2727          	jreq	L131
- 254  007a a034          	sub	a,#52
- 255  007c 271d          	jreq	L521
- 256  007e a004          	sub	a,#4
- 257  0080 2710          	jreq	L711
- 258  0082 a002          	sub	a,#2
- 259  0084 271e          	jreq	L331
- 260  0086 4a            	dec	a
- 261  0087 271e          	jreq	L531
- 262  0089 a004          	sub	a,#4
- 263  008b 271d          	jreq	L731
- 264  008d               L341:
- 267  008d a6ff          	ld	a,#255
- 270  008f 87            	retf
- 271  0090               L511:
- 272                     ; 124 			case 0x10: 		return KEY_DEEP_0;
- 274  0090 4f            	clr	a
- 277  0091 87            	retf
- 278  0092               L711:
- 279                     ; 125 			case 0x54: 		return KEY_DEEP_1;
- 281  0092 a601          	ld	a,#1
- 284  0094 87            	retf
- 285  0095               L121:
- 286                     ; 126 			case 0x16: 		return KEY_DEEP_2;
- 288  0095 a602          	ld	a,#2
- 291  0097 87            	retf
- 292  0098               L321:
- 293                     ; 127 			case 0x15: 		return KEY_DEEP_3;
- 295  0098 a603          	ld	a,#3
- 298  009a 87            	retf
- 299  009b               L521:
- 300                     ; 128 			case 0x50: 		return KEY_DEEP_4;
- 302  009b a604          	ld	a,#4
- 305  009d 87            	retf
- 306  009e               L721:
- 307                     ; 129 			case 0x12: 		return KEY_DEEP_5;
- 309  009e a605          	ld	a,#5
- 312  00a0 87            	retf
- 313  00a1               L131:
- 314                     ; 130 			case 0x1C: 		return KEY_POWER;
- 316  00a1 a606          	ld	a,#6
- 319  00a3 87            	retf
- 320  00a4               L331:
- 321                     ; 131 			case 0x56: 		return KEY_PC;
- 323  00a4 a609          	ld	a,#9
- 326  00a6 87            	retf
- 327  00a7               L531:
- 328                     ; 132 			case 0x57: 		return KEY_HDMI;
- 330  00a7 a60a          	ld	a,#10
- 333  00a9 87            	retf
- 334  00aa               L731:
- 335                     ; 133 			case 0x5B: 		return KEY_ONOFF_3D;
- 337  00aa a607          	ld	a,#7
- 340  00ac 87            	retf
- 341  00ad               L141:
- 342                     ; 134 			case 0x01: 		return KEY_DEBUG;
- 344  00ad a60f          	ld	a,#15
- 347  00af 87            	retf
- 379                     ; 141 void IR_IN_Init(void)
- 379                     ; 142 {	
- 380                     	switch	.text
- 381  00b0               f_IR_IN_Init:
- 385                     ; 143 	GPIO_Init(IR_IN_PORT, IR_IN_PIN, GPIO_MODE_IN_FL_IT);
- 387  00b0 4b20          	push	#32
- 388  00b2 4b40          	push	#64
- 389  00b4 ae5000        	ldw	x,#20480
- 390  00b7 8d000000      	callf	f_GPIO_Init
- 392  00bb 85            	popw	x
- 393                     ; 144 	EXTI_SetExtIntSensitivity(EXTI_PORT_GPIOA, EXTI_SENSITIVITY_FALL_ONLY);
- 395  00bc ae0002        	ldw	x,#2
- 396  00bf 4f            	clr	a
- 397  00c0 95            	ld	xh,a
- 398  00c1 8d000000      	callf	f_EXTI_SetExtIntSensitivity
- 400                     ; 146 	TIM2_TimeBaseInit(TIM2_PRESCALER_16, 0xffff);
- 402  00c5 aeffff        	ldw	x,#65535
- 403  00c8 89            	pushw	x
- 404  00c9 a604          	ld	a,#4
- 405  00cb 8d000000      	callf	f_TIM2_TimeBaseInit
- 407  00cf 85            	popw	x
- 408                     ; 147 	TIM2_Cmd(ENABLE); 
- 410  00d0 a601          	ld	a,#1
- 411  00d2 8d000000      	callf	f_TIM2_Cmd
- 413                     ; 149 	GPIO_Init(KEY_IN_PORT, KEY_IN_PIN, GPIO_MODE_IN_FL_NO_IT);
- 415  00d6 4b00          	push	#0
- 416  00d8 4b80          	push	#128
- 417  00da ae5005        	ldw	x,#20485
- 418  00dd 8d000000      	callf	f_GPIO_Init
- 420  00e1 85            	popw	x
- 421                     ; 150 	ADC2_Init(ADC2_CONVERSIONMODE_CONTINUOUS, ADC2_CHANNEL_7, ADC2_PRESSEL_FCPU_D2,\
- 421                     ; 151 					ADC2_EXTTRIG_TIM, DISABLE, ADC2_ALIGN_RIGHT, ADC2_SCHMITTTRIG_CHANNEL7, DISABLE);
- 423  00e2 4b00          	push	#0
- 424  00e4 4b07          	push	#7
- 425  00e6 4b08          	push	#8
- 426  00e8 4b00          	push	#0
- 427  00ea 4b00          	push	#0
- 428  00ec 4b00          	push	#0
- 429  00ee ae0007        	ldw	x,#7
- 430  00f1 a601          	ld	a,#1
- 431  00f3 95            	ld	xh,a
- 432  00f4 8d000000      	callf	f_ADC2_Init
- 434  00f8 5b06          	addw	sp,#6
- 435                     ; 153 	ADC2_StartConversion();
- 437  00fa 8d000000      	callf	f_ADC2_StartConversion
- 439                     ; 155 	ir_state = IR_RECEIVE_HEAD;
- 441  00fe 725f0018      	clr	L3_ir_state
- 442                     ; 156 	ir_pressed = FALSE;	
- 444  0102 725f0010      	clr	L51_ir_pressed
- 445                     ; 157 	ir_fisrt_process = FALSE;
- 447  0106 725f000f      	clr	L71_ir_fisrt_process
- 448                     ; 158 	receive_code = IRKEY_DUMY;	
- 450  010a 35ff0011      	mov	L31_receive_code,#255
- 451                     ; 165 }
- 454  010e 87            	retf
- 483                     ; 167 void Timer_Init(void)
- 483                     ; 168 {
- 484                     	switch	.text
- 485  010f               f_Timer_Init:
- 489                     ; 169 	TIM4_TimeBaseInit(TIM4_PRESCALER_128, 125);
- 491  010f ae007d        	ldw	x,#125
- 492  0112 a607          	ld	a,#7
- 493  0114 95            	ld	xh,a
- 494  0115 8d000000      	callf	f_TIM4_TimeBaseInit
- 496                     ; 170 	TIM4_ITConfig(TIM4_IT_UPDATE, ENABLE);
- 498  0119 ae0001        	ldw	x,#1
- 499  011c a601          	ld	a,#1
- 500  011e 95            	ld	xh,a
- 501  011f 8d000000      	callf	f_TIM4_ITConfig
- 503                     ; 171 	TIM4_Cmd(ENABLE); 
- 505  0123 a601          	ld	a,#1
- 506  0125 8d000000      	callf	f_TIM4_Cmd
- 508                     ; 173 	ir_release_timer = TIMER_STOPPED;
- 510  0129 725f000e      	clr	L12_ir_release_timer
- 511                     ; 174 	delay_timer = TIMER_STOPPED;
- 513  012d ae0000        	ldw	x,#0
- 514  0130 cf000c        	ldw	L32_delay_timer+2,x
- 515  0133 ae0000        	ldw	x,#0
- 516  0136 cf000a        	ldw	L32_delay_timer,x
- 517                     ; 175 	ir_process_timer = TIMER_STOPPED;
- 519  0139 ae0000        	ldw	x,#0
- 520  013c cf0008        	ldw	L52_ir_process_timer+2,x
- 521  013f ae0000        	ldw	x,#0
- 522  0142 cf0006        	ldw	L52_ir_process_timer,x
- 523                     ; 176 	Key_detect_timer = TIMER_EXPIRED;
- 525  0145 ae0001        	ldw	x,#1
- 526  0148 cf0004        	ldw	L72_Key_detect_timer+2,x
- 527  014b ae0000        	ldw	x,#0
- 528  014e cf0002        	ldw	L72_Key_detect_timer,x
- 529                     ; 177 }
- 532  0151 87            	retf
- 534                     	switch	.data
- 535  0004               L112_value_debug:
- 536  0004 00            	dc.b	0
- 579                     .const:	section	.text
- 580  0000               L22:
- 581  0000 00000001      	dc.l	1
- 582                     ; 180 void IR_Update(void)
- 582                     ; 181 {
- 583                     	switch	.text
- 584  0152               f_IR_Update:
- 586  0152 88            	push	a
- 587       00000001      OFST:	set	1
- 590                     ; 182 	if (ir_pressed)
- 592  0153 725d0010      	tnz	L51_ir_pressed
- 593  0157 2604          	jrne	L42
- 594  0159 ac140214      	jpf	L352
- 595  015d               L42:
- 596                     ; 184 		if (ir_process_timer == TIMER_EXPIRED)
- 598  015d ae0006        	ldw	x,#L52_ir_process_timer
- 599  0160 8d000000      	callf	d_ltor
- 601  0164 ae0000        	ldw	x,#L22
- 602  0167 8d000000      	callf	d_lcmp
- 604  016b 2704          	jreq	L62
- 605  016d ac140214      	jpf	L352
- 606  0171               L62:
- 607                     ; 186 			u8 ir_key = _convert_IR();
- 609  0171 8d100010      	callf	L36f__convert_IR
- 611  0175 6b01          	ld	(OFST+0,sp),a
- 612                     ; 187 			switch (ir_key)
- 614  0177 7b01          	ld	a,(OFST+0,sp)
- 616                     ; 216 				default:
- 616                     ; 217 					break;
- 617  0179 4d            	tnz	a
- 618  017a 2725          	jreq	L712
- 619  017c 4a            	dec	a
- 620  017d 2729          	jreq	L122
- 621  017f 4a            	dec	a
- 622  0180 272e          	jreq	L322
- 623  0182 4a            	dec	a
- 624  0183 2733          	jreq	L522
- 625  0185 4a            	dec	a
- 626  0186 2738          	jreq	L722
- 627  0188 4a            	dec	a
- 628  0189 273d          	jreq	L132
- 629  018b 4a            	dec	a
- 630  018c 2742          	jreq	L332
- 631  018e 4a            	dec	a
- 632  018f 270a          	jreq	L512
- 633  0191 a008          	sub	a,#8
- 634  0193 263f          	jrne	L162
- 635                     ; 189 				case KEY_DEBUG:
- 635                     ; 190 					SWI2C_ToggleI2CMode();
- 637  0195 8d000000      	callf	f_SWI2C_ToggleI2CMode
- 639                     ; 191 					break;
- 641  0199 2039          	jra	L162
- 642  019b               L512:
- 643                     ; 192 				case KEY_ONOFF_3D:
- 643                     ; 193 					SWI2C_Toggle3DOnOff();
- 645  019b 8d000000      	callf	f_SWI2C_Toggle3DOnOff
- 647                     ; 194 					break;
- 649  019f 2033          	jra	L162
- 650  01a1               L712:
- 651                     ; 195 				case KEY_DEEP_0:
- 651                     ; 196 					SWI2C_Set_deep(0);
- 653  01a1 4f            	clr	a
- 654  01a2 8d000000      	callf	f_SWI2C_Set_deep
- 656                     ; 197 					break;
- 658  01a6 202c          	jra	L162
- 659  01a8               L122:
- 660                     ; 198 				case KEY_DEEP_1:
- 660                     ; 199 					SWI2C_Set_deep(1);
- 662  01a8 a601          	ld	a,#1
- 663  01aa 8d000000      	callf	f_SWI2C_Set_deep
- 665                     ; 200 					break;
- 667  01ae 2024          	jra	L162
- 668  01b0               L322:
- 669                     ; 201 				case KEY_DEEP_2:
- 669                     ; 202 					SWI2C_Set_deep(2);
- 671  01b0 a602          	ld	a,#2
- 672  01b2 8d000000      	callf	f_SWI2C_Set_deep
- 674                     ; 203 					break;
- 676  01b6 201c          	jra	L162
- 677  01b8               L522:
- 678                     ; 204 				case KEY_DEEP_3:
- 678                     ; 205 					SWI2C_Set_deep(3);
- 680  01b8 a603          	ld	a,#3
- 681  01ba 8d000000      	callf	f_SWI2C_Set_deep
- 683                     ; 206 					break;
- 685  01be 2014          	jra	L162
- 686  01c0               L722:
- 687                     ; 207 				case KEY_DEEP_4:
- 687                     ; 208 					SWI2C_Set_deep(4);
- 689  01c0 a604          	ld	a,#4
- 690  01c2 8d000000      	callf	f_SWI2C_Set_deep
- 692                     ; 209 					break;
- 694  01c6 200c          	jra	L162
- 695  01c8               L132:
- 696                     ; 210 				case KEY_DEEP_5:
- 696                     ; 211 					SWI2C_Set_deep(5);
- 698  01c8 a605          	ld	a,#5
- 699  01ca 8d000000      	callf	f_SWI2C_Set_deep
- 701                     ; 212 					break;
- 703  01ce 2004          	jra	L162
- 704  01d0               L332:
- 705                     ; 213 				case KEY_POWER:
- 705                     ; 214 					SWI2C_ProcessPower();
- 707  01d0 8d000000      	callf	f_SWI2C_ProcessPower
- 709                     ; 215 					break;
- 711  01d4               L532:
- 712                     ; 216 				default:
- 712                     ; 217 					break;
- 714  01d4               L162:
- 715                     ; 219 			if (ir_key != KEY_VOLUME_PLUS && ir_key != KEY_VOLUME_MINUS && ir_key != KEY_LEFT &&ir_key != KEY_RIGHT)
- 717  01d4 7b01          	ld	a,(OFST+0,sp)
- 718  01d6 a10b          	cp	a,#11
- 719  01d8 2716          	jreq	L362
- 721  01da 7b01          	ld	a,(OFST+0,sp)
- 722  01dc a10c          	cp	a,#12
- 723  01de 2710          	jreq	L362
- 725  01e0 7b01          	ld	a,(OFST+0,sp)
- 726  01e2 a10d          	cp	a,#13
- 727  01e4 270a          	jreq	L362
- 729  01e6 7b01          	ld	a,(OFST+0,sp)
- 730  01e8 a10e          	cp	a,#14
- 731  01ea 2704          	jreq	L362
- 732                     ; 221 				receive_code = IRKEY_DUMY;
- 734  01ec 35ff0011      	mov	L31_receive_code,#255
- 735  01f0               L362:
- 736                     ; 223 			if (ir_fisrt_process)
- 738  01f0 725d000f      	tnz	L71_ir_fisrt_process
- 739  01f4 2712          	jreq	L562
- 740                     ; 225 				ir_fisrt_process = FALSE;
- 742  01f6 725f000f      	clr	L71_ir_fisrt_process
- 743                     ; 226 				ir_process_timer = 500 + 1;
- 745  01fa ae01f5        	ldw	x,#501
- 746  01fd cf0008        	ldw	L52_ir_process_timer+2,x
- 747  0200 ae0000        	ldw	x,#0
- 748  0203 cf0006        	ldw	L52_ir_process_timer,x
- 750  0206 200c          	jra	L352
- 751  0208               L562:
- 752                     ; 230 				ir_process_timer = 50 + 1;
- 754  0208 ae0033        	ldw	x,#51
- 755  020b cf0008        	ldw	L52_ir_process_timer+2,x
- 756  020e ae0000        	ldw	x,#0
- 757  0211 cf0006        	ldw	L52_ir_process_timer,x
- 758  0214               L352:
- 759                     ; 235 	if (ir_release_timer == TIMER_EXPIRED)
- 761  0214 c6000e        	ld	a,L12_ir_release_timer
- 762  0217 a101          	cp	a,#1
- 763  0219 2614          	jrne	L172
- 764                     ; 237 		ir_release_timer = TIMER_STOPPED;
- 766  021b 725f000e      	clr	L12_ir_release_timer
- 767                     ; 238 		ir_process_timer = TIMER_STOPPED;
- 769  021f ae0000        	ldw	x,#0
- 770  0222 cf0008        	ldw	L52_ir_process_timer+2,x
- 771  0225 ae0000        	ldw	x,#0
- 772  0228 cf0006        	ldw	L52_ir_process_timer,x
- 773                     ; 239 		ir_pressed = FALSE;	
- 775  022b 725f0010      	clr	L51_ir_pressed
- 776  022f               L172:
- 777                     ; 242 	if (Key_detect_timer == TIMER_EXPIRED)
- 779  022f ae0002        	ldw	x,#L72_Key_detect_timer
- 780  0232 8d000000      	callf	d_ltor
- 782  0236 ae0000        	ldw	x,#L22
- 783  0239 8d000000      	callf	d_lcmp
- 785  023d 2613          	jrne	L372
- 786                     ; 244 		Conversion_Value = ADC2_GetConversionValue();
- 788  023f 8d000000      	callf	f_ADC2_GetConversionValue
- 790  0243 cf0000        	ldw	L13_Conversion_Value,x
- 791                     ; 245 		Key_detect_timer = KEY_DETECT_TIME;
- 793  0246 ae0065        	ldw	x,#101
- 794  0249 cf0004        	ldw	L72_Key_detect_timer+2,x
- 795  024c ae0000        	ldw	x,#0
- 796  024f cf0002        	ldw	L72_Key_detect_timer,x
- 797  0252               L372:
- 798                     ; 247 }
- 801  0252 84            	pop	a
- 802  0253 87            	retf
- 854                     ; 249 INTERRUPT_HANDLER(IR_IN_ISR, 3)
- 854                     ; 250 {
- 855                     	switch	.text
- 856  0254               f_IR_IN_ISR:
- 858       00000003      OFST:	set	3
- 859  0254 3b0002        	push	c_x+2
- 860  0257 be00          	ldw	x,c_x
- 861  0259 89            	pushw	x
- 862  025a 3b0002        	push	c_y+2
- 863  025d be00          	ldw	x,c_y
- 864  025f 89            	pushw	x
- 865  0260 5203          	subw	sp,#3
- 868                     ; 252 	u8 fault = FALSE;
- 870  0262 0f01          	clr	(OFST-2,sp)
- 871                     ; 254 	TIM2_Cmd(DISABLE);
- 873  0264 4f            	clr	a
- 874  0265 8d000000      	callf	f_TIM2_Cmd
- 876                     ; 255 	TIM2_ClearFlag(TIM2_FLAG_UPDATE);
- 878  0269 ae0001        	ldw	x,#1
- 879  026c 8d000000      	callf	f_TIM2_ClearFlag
- 881                     ; 256 	count = TIM2_GetCounter();
- 883  0270 8d000000      	callf	f_TIM2_GetCounter
- 885  0274 1f02          	ldw	(OFST-1,sp),x
- 886                     ; 257 	TIM2_SetCounter(0);			
- 888  0276 5f            	clrw	x
- 889  0277 8d000000      	callf	f_TIM2_SetCounter
- 891                     ; 258 	TIM2_Cmd(ENABLE);
- 893  027b a601          	ld	a,#1
- 894  027d 8d000000      	callf	f_TIM2_Cmd
- 896                     ; 260 	if (count > LEADER_UPPER_LIMIT)
- 898  0281 1e02          	ldw	x,(OFST-1,sp)
- 899  0283 a33c8d        	cpw	x,#15501
- 900  0286 2506          	jrult	L123
- 901                     ; 262 		fault = TRUE;
- 903  0288 a601          	ld	a,#1
- 904  028a 6b01          	ld	(OFST-2,sp),a
- 906  028c 2043          	jra	L323
- 907  028e               L123:
- 908                     ; 266 		switch (ir_state)
- 910  028e c60018        	ld	a,L3_ir_state
- 912                     ; 322 			default:
- 912                     ; 323 				break;
- 913  0291 4d            	tnz	a
- 914  0292 2705          	jreq	L572
- 915  0294 4a            	dec	a
- 916  0295 274a          	jreq	L772
- 917  0297 2038          	jra	L323
- 918  0299               L572:
- 919                     ; 268 			case IR_RECEIVE_HEAD:
- 919                     ; 269 				if (_Compare_Count(count, LEADER_UPPER_LIMIT, LEADER_LOWER_LIMIT))
- 921  0299 ae30d4        	ldw	x,#12500
- 922  029c 89            	pushw	x
- 923  029d ae3c8c        	ldw	x,#15500
- 924  02a0 89            	pushw	x
- 925  02a1 1e06          	ldw	x,(OFST+3,sp)
- 926  02a3 8d000000      	callf	L33f__Compare_Count
- 928  02a7 5b04          	addw	sp,#4
- 929  02a9 4d            	tnz	a
- 930  02aa 270a          	jreq	L133
- 931                     ; 271 					ir_release_timer = IR_RELEASE_TIME;
- 933  02ac 3581000e      	mov	L12_ir_release_timer,#129
- 934                     ; 272 					ir_state = IR_RECEIVE_CODE;
- 936  02b0 35010018      	mov	L3_ir_state,#1
- 938  02b4 2017          	jra	L333
- 939  02b6               L133:
- 940                     ; 274 				else if (_Compare_Count(count, REPEAT_UPPER_LIMIT, REPEAT_LOWER_LIMIT))
- 942  02b6 ae280a        	ldw	x,#10250
- 943  02b9 89            	pushw	x
- 944  02ba ae2fda        	ldw	x,#12250
- 945  02bd 89            	pushw	x
- 946  02be 1e06          	ldw	x,(OFST+3,sp)
- 947  02c0 8d000000      	callf	L33f__Compare_Count
- 949  02c4 5b04          	addw	sp,#4
- 950  02c6 4d            	tnz	a
- 951  02c7 2704          	jreq	L333
- 952                     ; 276 					ir_release_timer = IR_RELEASE_TIME;
- 954  02c9 3581000e      	mov	L12_ir_release_timer,#129
- 955  02cd               L333:
- 956                     ; 278 				ir_bit_number = 0;
- 958  02cd 725f0017      	clr	L5_ir_bit_number
- 959                     ; 279 				break;
- 960  02d1               L323:
- 961                     ; 326 	if (fault)
- 963  02d1 0d01          	tnz	(OFST-2,sp)
- 964  02d3 2604          	jrne	L23
- 965  02d5 acc003c0      	jpf	L763
- 966  02d9               L23:
- 967                     ; 328 		ir_state = IR_RECEIVE_HEAD;
- 969  02d9 725f0018      	clr	L3_ir_state
- 970  02dd acc003c0      	jpf	L763
- 971  02e1               L772:
- 972                     ; 280 			case IR_RECEIVE_CODE:
- 972                     ; 281 				if (_Compare_Count(count, HIGH_UPPER_LIMIT, HIGH_LOWER_LIMIT))
- 974  02e1 ae06a4        	ldw	x,#1700
- 975  02e4 89            	pushw	x
- 976  02e5 ae0af0        	ldw	x,#2800
- 977  02e8 89            	pushw	x
- 978  02e9 1e06          	ldw	x,(OFST+3,sp)
- 979  02eb 8d000000      	callf	L33f__Compare_Count
- 981  02ef 5b04          	addw	sp,#4
- 982  02f1 4d            	tnz	a
- 983  02f2 271e          	jreq	L733
- 984                     ; 283 					ir_code[ir_bit_number/8] = (ir_code[ir_bit_number/8]>>1)|0x80;
- 986  02f4 c60017        	ld	a,L5_ir_bit_number
- 987  02f7 44            	srl	a
- 988  02f8 44            	srl	a
- 989  02f9 44            	srl	a
- 990  02fa 5f            	clrw	x
- 991  02fb 97            	ld	xl,a
- 992  02fc c60017        	ld	a,L5_ir_bit_number
- 993  02ff 44            	srl	a
- 994  0300 44            	srl	a
- 995  0301 44            	srl	a
- 996  0302 905f          	clrw	y
- 997  0304 9097          	ld	yl,a
- 998  0306 90d60013      	ld	a,(L7_ir_code,y)
- 999  030a 44            	srl	a
-1000  030b aa80          	or	a,#128
-1001  030d d70013        	ld	(L7_ir_code,x),a
-1003  0310 2025          	jra	L143
-1004  0312               L733:
-1005                     ; 285 				else if (_Compare_Count(count, LOW_UPPER_LIMIT, LOW_LOWER_LIMIT))
-1007  0312 ae0320        	ldw	x,#800
-1008  0315 89            	pushw	x
-1009  0316 ae05aa        	ldw	x,#1450
-1010  0319 89            	pushw	x
-1011  031a 1e06          	ldw	x,(OFST+3,sp)
-1012  031c 8d000000      	callf	L33f__Compare_Count
-1014  0320 5b04          	addw	sp,#4
-1015  0322 4d            	tnz	a
-1016  0323 270e          	jreq	L343
-1017                     ; 287 					ir_code[ir_bit_number/8] = ir_code[ir_bit_number/8]>>1;
-1019  0325 c60017        	ld	a,L5_ir_bit_number
-1020  0328 44            	srl	a
-1021  0329 44            	srl	a
-1022  032a 44            	srl	a
-1023  032b 5f            	clrw	x
-1024  032c 97            	ld	xl,a
-1025  032d 72440013      	srl	(L7_ir_code,x)
-1027  0331 2004          	jra	L143
-1028  0333               L343:
-1029                     ; 291 					fault = TRUE;
-1031  0333 a601          	ld	a,#1
-1032  0335 6b01          	ld	(OFST-2,sp),a
-1033  0337               L143:
-1034                     ; 293 				ir_bit_number++;
-1036  0337 725c0017      	inc	L5_ir_bit_number
-1037                     ; 294 				if (ir_bit_number == 32 && !fault)
-1039  033b c60017        	ld	a,L5_ir_bit_number
-1040  033e a120          	cp	a,#32
-1041  0340 268f          	jrne	L323
-1043  0342 0d01          	tnz	(OFST-2,sp)
-1044  0344 268b          	jrne	L323
-1045                     ; 296 					ir_state = IR_RECEIVE_HEAD;
-1047  0346 725f0018      	clr	L3_ir_state
-1048                     ; 297 					if (((ir_code[0] == 0x0 && ir_code[1] == 0xDF) || (ir_code[0] == 0x4F && ir_code[1] == 0x50)) 
-1048                     ; 298 					&& ((ir_code[2]^ir_code[3]) == 0xFF))
-1050  034a 725d0013      	tnz	L7_ir_code
-1051  034e 2607          	jrne	L553
-1053  0350 c60014        	ld	a,L7_ir_code+1
-1054  0353 a1df          	cp	a,#223
-1055  0355 270e          	jreq	L353
-1056  0357               L553:
-1058  0357 c60013        	ld	a,L7_ir_code
-1059  035a a14f          	cp	a,#79
-1060  035c 2652          	jrne	L153
-1062  035e c60014        	ld	a,L7_ir_code+1
-1063  0361 a150          	cp	a,#80
-1064  0363 264b          	jrne	L153
-1065  0365               L353:
-1067  0365 c60015        	ld	a,L7_ir_code+2
-1068  0368 c80016        	xor	a,L7_ir_code+3
-1069  036b a1ff          	cp	a,#255
-1070  036d 2641          	jrne	L153
-1071                     ; 300 						if (!ir_pressed)
-1073  036f 725d0010      	tnz	L51_ir_pressed
-1074  0373 2704          	jreq	L43
-1075  0375 acd102d1      	jpf	L323
-1076  0379               L43:
-1077                     ; 302 							receive_code = ir_code[2];						
-1079  0379 5500150011    	mov	L31_receive_code,L7_ir_code+2
-1080                     ; 303 							ir_pressed = TRUE;
-1082  037e 35010010      	mov	L51_ir_pressed,#1
-1083                     ; 304 							ir_fisrt_process = TRUE;
-1085  0382 3501000f      	mov	L71_ir_fisrt_process,#1
-1086                     ; 305 							ir_process_timer = TIMER_EXPIRED;
-1088  0386 ae0001        	ldw	x,#1
-1089  0389 cf0008        	ldw	L52_ir_process_timer+2,x
-1090  038c ae0000        	ldw	x,#0
-1091  038f cf0006        	ldw	L52_ir_process_timer,x
-1092                     ; 306 							if (ir_code[0] == 0x4F && ir_code[1] == 0x50)
-1094  0392 c60013        	ld	a,L7_ir_code
-1095  0395 a14f          	cp	a,#79
-1096  0397 260f          	jrne	L163
-1098  0399 c60014        	ld	a,L7_ir_code+1
-1099  039c a150          	cp	a,#80
-1100  039e 2608          	jrne	L163
-1101                     ; 308 								head_type = 1;
-1103  03a0 35010012      	mov	L11_head_type,#1
-1105  03a4 acd102d1      	jpf	L323
-1106  03a8               L163:
-1107                     ; 312 								head_type = 0;
-1109  03a8 725f0012      	clr	L11_head_type
-1110  03ac acd102d1      	jpf	L323
-1111  03b0               L153:
-1112                     ; 318 						fault = TRUE;
-1114  03b0 a601          	ld	a,#1
-1115  03b2 6b01          	ld	(OFST-2,sp),a
-1116  03b4 acd102d1      	jpf	L323
-1117  03b8               L103:
-1118                     ; 322 			default:
-1118                     ; 323 				break;
-1120  03b8 acd102d1      	jpf	L323
-1121  03bc               L723:
-1122  03bc acd102d1      	jpf	L323
-1123  03c0               L763:
-1124                     ; 330 }
-1127  03c0 5b03          	addw	sp,#3
-1128  03c2 85            	popw	x
-1129  03c3 bf00          	ldw	c_y,x
-1130  03c5 320002        	pop	c_y+2
-1131  03c8 85            	popw	x
-1132  03c9 bf00          	ldw	c_x,x
-1133  03cb 320002        	pop	c_x+2
-1134  03ce 80            	iret
-1175                     	switch	.const
-1176  0004               L04:
-1177  0004 00000002      	dc.l	2
-1178                     ; 332 INTERRUPT_HANDLER(TIMER4_ISR, 23)
-1178                     ; 333 {		
-1179                     	switch	.text
-1180  03cf               f_TIMER4_ISR:
-1182  03cf 3b0002        	push	c_x+2
-1183  03d2 be00          	ldw	x,c_x
-1184  03d4 89            	pushw	x
-1185  03d5 3b0002        	push	c_y+2
-1186  03d8 be00          	ldw	x,c_y
-1187  03da 89            	pushw	x
-1188  03db be02          	ldw	x,c_lreg+2
-1189  03dd 89            	pushw	x
-1190  03de be00          	ldw	x,c_lreg
-1191  03e0 89            	pushw	x
-1194                     ; 334 	TIM4_Cmd(DISABLE);
-1196  03e1 4f            	clr	a
-1197  03e2 8d000000      	callf	f_TIM4_Cmd
-1199                     ; 335 	TIM4_ClearFlag(TIM4_IT_UPDATE);
-1201  03e6 a601          	ld	a,#1
-1202  03e8 8d000000      	callf	f_TIM4_ClearFlag
-1204                     ; 336 	nop();
-1207  03ec 9d            nop
-1209                     ; 337 	nop();
-1213  03ed 9d            nop
-1215                     ; 338 	nop();
-1219  03ee 9d            nop
-1221                     ; 339 	nop();
-1225  03ef 9d            nop
-1227                     ; 340 	nop();
-1231  03f0 9d            nop
-1233                     ; 341 	nop();
-1237  03f1 9d            nop
-1239                     ; 342 	nop();
-1243  03f2 9d            nop
-1245                     ; 343 	nop();
-1249  03f3 9d            nop
-1251                     ; 344 	nop();
-1255  03f4 9d            nop
-1257                     ; 345 	nop();
-1261  03f5 9d            nop
-1263                     ; 346 	nop();
-1267  03f6 9d            nop
-1269                     ; 347 	TIM4_Cmd(ENABLE);
-1272  03f7 a601          	ld	a,#1
-1273  03f9 8d000000      	callf	f_TIM4_Cmd
-1275                     ; 349 	if (ir_release_timer > TIMER_EXPIRED)
-1277  03fd c6000e        	ld	a,L12_ir_release_timer
-1278  0400 a102          	cp	a,#2
-1279  0402 2504          	jrult	L104
-1280                     ; 351 		ir_release_timer--;
-1282  0404 725a000e      	dec	L12_ir_release_timer
-1283  0408               L104:
-1284                     ; 353 	if (delay_timer > TIMER_EXPIRED)
-1286  0408 ae000a        	ldw	x,#L32_delay_timer
-1287  040b 8d000000      	callf	d_ltor
-1289  040f ae0004        	ldw	x,#L04
-1290  0412 8d000000      	callf	d_lcmp
-1292  0416 2509          	jrult	L304
-1293                     ; 355 		delay_timer--;
-1295  0418 ae000a        	ldw	x,#L32_delay_timer
-1296  041b a601          	ld	a,#1
-1297  041d 8d000000      	callf	d_lgsbc
-1299  0421               L304:
-1300                     ; 357 	if (ir_process_timer > TIMER_EXPIRED)
-1302  0421 ae0006        	ldw	x,#L52_ir_process_timer
-1303  0424 8d000000      	callf	d_ltor
-1305  0428 ae0004        	ldw	x,#L04
-1306  042b 8d000000      	callf	d_lcmp
-1308  042f 2509          	jrult	L504
-1309                     ; 359 		ir_process_timer--;
-1311  0431 ae0006        	ldw	x,#L52_ir_process_timer
-1312  0434 a601          	ld	a,#1
-1313  0436 8d000000      	callf	d_lgsbc
-1315  043a               L504:
-1316                     ; 361 	if (Key_detect_timer > TIMER_EXPIRED)
-1318  043a ae0002        	ldw	x,#L72_Key_detect_timer
-1319  043d 8d000000      	callf	d_ltor
-1321  0441 ae0004        	ldw	x,#L04
-1322  0444 8d000000      	callf	d_lcmp
-1324  0448 2509          	jrult	L704
-1325                     ; 363 		Key_detect_timer--;
-1327  044a ae0002        	ldw	x,#L72_Key_detect_timer
-1328  044d a601          	ld	a,#1
-1329  044f 8d000000      	callf	d_lgsbc
-1331  0453               L704:
-1332                     ; 365 	SWI2C_UpdateTimer();
-1334  0453 8d000000      	callf	f_SWI2C_UpdateTimer
-1336                     ; 366 	System_Clock++;
-1338  0457 ae0000        	ldw	x,#_System_Clock
-1339  045a a601          	ld	a,#1
-1340  045c 8d000000      	callf	d_lgadc
-1342                     ; 367 }
-1345  0460 85            	popw	x
-1346  0461 bf00          	ldw	c_lreg,x
-1347  0463 85            	popw	x
-1348  0464 bf02          	ldw	c_lreg+2,x
-1349  0466 85            	popw	x
-1350  0467 bf00          	ldw	c_y,x
-1351  0469 320002        	pop	c_y+2
-1352  046c 85            	popw	x
-1353  046d bf00          	ldw	c_x,x
-1354  046f 320002        	pop	c_x+2
-1355  0472 80            	iret
-1388                     ; 369 void IR_DelayNMiliseconds(u16 delay)
-1388                     ; 370 {
-1389                     	switch	.text
-1390  0473               f_IR_DelayNMiliseconds:
-1394                     ; 371 	delay_timer = delay;
-1396  0473 8d000000      	callf	d_uitolx
-1398  0477 ae000a        	ldw	x,#L32_delay_timer
-1399  047a 8d000000      	callf	d_rtol
-1402  047e               L134:
-1403                     ; 372 	while (delay_timer > TIMER_EXPIRED);
-1405  047e ae000a        	ldw	x,#L32_delay_timer
-1406  0481 8d000000      	callf	d_ltor
-1408  0485 ae0004        	ldw	x,#L04
-1409  0488 8d000000      	callf	d_lcmp
-1411  048c 24f0          	jruge	L134
-1412                     ; 373 	delay_timer = TIMER_STOPPED;
-1414  048e ae0000        	ldw	x,#0
-1415  0491 cf000c        	ldw	L32_delay_timer+2,x
-1416  0494 ae0000        	ldw	x,#0
-1417  0497 cf000a        	ldw	L32_delay_timer,x
-1418                     ; 374 }
-1421  049a 87            	retf
-1538                     	switch	.bss
-1539  0000               L13_Conversion_Value:
-1540  0000 0000          	ds.b	2
-1541  0002               L72_Key_detect_timer:
-1542  0002 00000000      	ds.b	4
-1543  0006               L52_ir_process_timer:
-1544  0006 00000000      	ds.b	4
-1545  000a               L32_delay_timer:
-1546  000a 00000000      	ds.b	4
-1547  000e               L12_ir_release_timer:
-1548  000e 00            	ds.b	1
-1549  000f               L71_ir_fisrt_process:
-1550  000f 00            	ds.b	1
-1551  0010               L51_ir_pressed:
-1552  0010 00            	ds.b	1
-1553  0011               L31_receive_code:
-1554  0011 00            	ds.b	1
-1555  0012               L11_head_type:
-1556  0012 00            	ds.b	1
-1557  0013               L7_ir_code:
-1558  0013 00000000      	ds.b	4
-1559  0017               L5_ir_bit_number:
-1560  0017 00            	ds.b	1
-1561  0018               L3_ir_state:
-1562  0018 00            	ds.b	1
-1563                     	xref	f_SWI2C_UpdateTimer
-1564                     	xref	f_SWI2C_Set_deep
-1565                     	xref	f_SWI2C_Toggle3DOnOff
-1566                     	xref	f_SWI2C_ToggleI2CMode
-1567                     	xref	f_SWI2C_ProcessPower
-1568                     	xdef	_System_Clock
-1569                     	xdef	f_TIMER4_ISR
-1570                     	xdef	f_IR_IN_ISR
-1571                     	xdef	f_IR_DelayNMiliseconds
-1572                     	xdef	f_IR_Update
-1573                     	xdef	f_Timer_Init
-1574                     	xdef	f_IR_IN_Init
-1575                     	xref	f_ADC2_GetConversionValue
-1576                     	xref	f_ADC2_StartConversion
-1577                     	xref	f_ADC2_Init
-1578                     	xref	f_TIM4_ClearFlag
-1579                     	xref	f_TIM4_ITConfig
-1580                     	xref	f_TIM4_Cmd
-1581                     	xref	f_TIM4_TimeBaseInit
-1582                     	xref	f_TIM2_ClearFlag
-1583                     	xref	f_TIM2_GetCounter
-1584                     	xref	f_TIM2_SetCounter
-1585                     	xref	f_TIM2_Cmd
-1586                     	xref	f_TIM2_TimeBaseInit
-1587                     	xref	f_EXTI_SetExtIntSensitivity
-1588                     	xref	f_GPIO_Init
-1589                     	xref.b	c_lreg
-1590                     	xref.b	c_x
-1591                     	xref.b	c_y
-1611                     	xref	d_rtol
-1612                     	xref	d_uitolx
-1613                     	xref	d_lgadc
-1614                     	xref	d_lgsbc
-1615                     	xref	d_lcmp
-1616                     	xref	d_ltor
-1617                     	end
+ 141  0029 272b          	jreq	L77
+ 142  002b a053          	sub	a,#83
+ 143  002d 273c          	jreq	L511
+ 144  002f a01d          	sub	a,#29
+ 145  0031 272f          	jreq	L701
+ 146  0033 a04b          	sub	a,#75
+ 147  0035 2725          	jreq	L301
+ 148  0037 4a            	dec	a
+ 149  0038 272b          	jreq	L111
+ 150  003a a002          	sub	a,#2
+ 151  003c 2721          	jreq	L501
+ 152  003e 4a            	dec	a
+ 153  003f 2727          	jreq	L311
+ 154  0041 a003          	sub	a,#3
+ 155  0043 2714          	jreq	L101
+ 156  0045               L711:
+ 159  0045 a6ff          	ld	a,#255
+ 162  0047 87            	retf
+ 163  0048               L56:
+ 164                     ; 107 			case 0x0: 		return KEY_DEEP_0;
+ 166  0048 4f            	clr	a
+ 169  0049 87            	retf
+ 170  004a               L76:
+ 171                     ; 108 			case 0x1: 		return KEY_DEEP_1;
+ 173  004a a601          	ld	a,#1
+ 176  004c 87            	retf
+ 177  004d               L17:
+ 178                     ; 109 			case 0x2: 		return KEY_DEEP_2;
+ 180  004d a602          	ld	a,#2
+ 183  004f 87            	retf
+ 184  0050               L37:
+ 185                     ; 110 			case 0x3: 		return KEY_DEEP_3;
+ 187  0050 a603          	ld	a,#3
+ 190  0052 87            	retf
+ 191  0053               L57:
+ 192                     ; 111 			case 0x4: 		return KEY_DEEP_4;
+ 194  0053 a604          	ld	a,#4
+ 197  0055 87            	retf
+ 198  0056               L77:
+ 199                     ; 112 			case 0x5: 		return KEY_DEEP_5;
+ 201  0056 a605          	ld	a,#5
+ 204  0058 87            	retf
+ 205  0059               L101:
+ 206                     ; 113 			case 0xC7:		return KEY_POWER;
+ 208  0059 a606          	ld	a,#6
+ 211  005b 87            	retf
+ 212  005c               L301:
+ 213                     ; 114 			case 0xC0: 		return KEY_PC;
+ 215  005c a609          	ld	a,#9
+ 218  005e 87            	retf
+ 219  005f               L501:
+ 220                     ; 115 			case 0xC3: 		return KEY_HDMI;
+ 222  005f a60a          	ld	a,#10
+ 225  0061 87            	retf
+ 226  0062               L701:
+ 227                     ; 116 			case 0x75: 		return KEY_ONOFF_3D;
+ 229  0062 a607          	ld	a,#7
+ 232  0064 87            	retf
+ 233  0065               L111:
+ 234                     ; 117 			case 0xC1: 		return KEY_DEBUG;
+ 236  0065 a611          	ld	a,#17
+ 239  0067 87            	retf
+ 240  0068               L311:
+ 241                     ; 118 			case 0xC4:		return KEY_RESET_HDMI;
+ 243  0068 a60f          	ld	a,#15
+ 246  006a 87            	retf
+ 247  006b               L511:
+ 248                     ; 119 			case 0x58:		return KEY_RESET_FPGA;
+ 250  006b a610          	ld	a,#16
+ 253  006d 87            	retf
+ 254  006e               L561:
+ 255                     ; 126 		switch (receive_code)
+ 257  006e c60011        	ld	a,L31_receive_code
+ 259                     ; 141 			default:
+ 259                     ; 142 				return KEY_DUMMY;
+ 260  0071 4a            	dec	a
+ 261  0072 274e          	jreq	L541
+ 262  0074 a007          	sub	a,#7
+ 263  0076 274d          	jreq	L741
+ 264  0078 a008          	sub	a,#8
+ 265  007a 2729          	jreq	L121
+ 266  007c a002          	sub	a,#2
+ 267  007e 2733          	jreq	L331
+ 268  0080 a003          	sub	a,#3
+ 269  0082 2729          	jreq	L721
+ 270  0084 4a            	dec	a
+ 271  0085 2723          	jreq	L521
+ 272  0087 a006          	sub	a,#6
+ 273  0089 272b          	jreq	L531
+ 274  008b a003          	sub	a,#3
+ 275  008d 2739          	jreq	L151
+ 276  008f a031          	sub	a,#49
+ 277  0091 271d          	jreq	L131
+ 278  0093 a004          	sub	a,#4
+ 279  0095 2710          	jreq	L321
+ 280  0097 a002          	sub	a,#2
+ 281  0099 271e          	jreq	L731
+ 282  009b 4a            	dec	a
+ 283  009c 271e          	jreq	L141
+ 284  009e a004          	sub	a,#4
+ 285  00a0 271d          	jreq	L341
+ 286  00a2               L351:
+ 289  00a2 a6ff          	ld	a,#255
+ 292  00a4 87            	retf
+ 293  00a5               L121:
+ 294                     ; 128 			case 0x10: 		return KEY_DEEP_0;
+ 296  00a5 4f            	clr	a
+ 299  00a6 87            	retf
+ 300  00a7               L321:
+ 301                     ; 129 			case 0x54: 		return KEY_DEEP_1;
+ 303  00a7 a601          	ld	a,#1
+ 306  00a9 87            	retf
+ 307  00aa               L521:
+ 308                     ; 130 			case 0x16: 		return KEY_DEEP_2;
+ 310  00aa a602          	ld	a,#2
+ 313  00ac 87            	retf
+ 314  00ad               L721:
+ 315                     ; 131 			case 0x15: 		return KEY_DEEP_3;
+ 317  00ad a603          	ld	a,#3
+ 320  00af 87            	retf
+ 321  00b0               L131:
+ 322                     ; 132 			case 0x50: 		return KEY_DEEP_4;
+ 324  00b0 a604          	ld	a,#4
+ 327  00b2 87            	retf
+ 328  00b3               L331:
+ 329                     ; 133 			case 0x12: 		return KEY_DEEP_5;
+ 331  00b3 a605          	ld	a,#5
+ 334  00b5 87            	retf
+ 335  00b6               L531:
+ 336                     ; 134 			case 0x1C: 		return KEY_POWER;
+ 338  00b6 a606          	ld	a,#6
+ 341  00b8 87            	retf
+ 342  00b9               L731:
+ 343                     ; 135 			case 0x56: 		return KEY_PC;
+ 345  00b9 a609          	ld	a,#9
+ 348  00bb 87            	retf
+ 349  00bc               L141:
+ 350                     ; 136 			case 0x57: 		return KEY_HDMI;
+ 352  00bc a60a          	ld	a,#10
+ 355  00be 87            	retf
+ 356  00bf               L341:
+ 357                     ; 137 			case 0x5B: 		return KEY_ONOFF_3D;
+ 359  00bf a607          	ld	a,#7
+ 362  00c1 87            	retf
+ 363  00c2               L541:
+ 364                     ; 138 			case 0x01: 		return KEY_DEBUG;		
+ 366  00c2 a611          	ld	a,#17
+ 369  00c4 87            	retf
+ 370  00c5               L741:
+ 371                     ; 139 			case 0x08:		return KEY_RESET_HDMI;
+ 373  00c5 a60f          	ld	a,#15
+ 376  00c7 87            	retf
+ 377  00c8               L151:
+ 378                     ; 140 			case 0x1F:		return KEY_RESET_FPGA;
+ 380  00c8 a610          	ld	a,#16
+ 383  00ca 87            	retf
+ 415                     ; 147 void IR_IN_Init(void)
+ 415                     ; 148 {	
+ 416                     	switch	.text
+ 417  00cb               f_IR_IN_Init:
+ 421                     ; 149 	GPIO_Init(IR_IN_PORT, IR_IN_PIN, GPIO_MODE_IN_FL_IT);
+ 423  00cb 4b20          	push	#32
+ 424  00cd 4b40          	push	#64
+ 425  00cf ae5000        	ldw	x,#20480
+ 426  00d2 8d000000      	callf	f_GPIO_Init
+ 428  00d6 85            	popw	x
+ 429                     ; 150 	EXTI_SetExtIntSensitivity(EXTI_PORT_GPIOA, EXTI_SENSITIVITY_FALL_ONLY);
+ 431  00d7 ae0002        	ldw	x,#2
+ 432  00da 4f            	clr	a
+ 433  00db 95            	ld	xh,a
+ 434  00dc 8d000000      	callf	f_EXTI_SetExtIntSensitivity
+ 436                     ; 152 	TIM2_TimeBaseInit(TIM2_PRESCALER_16, 0xffff);
+ 438  00e0 aeffff        	ldw	x,#65535
+ 439  00e3 89            	pushw	x
+ 440  00e4 a604          	ld	a,#4
+ 441  00e6 8d000000      	callf	f_TIM2_TimeBaseInit
+ 443  00ea 85            	popw	x
+ 444                     ; 153 	TIM2_Cmd(ENABLE); 
+ 446  00eb a601          	ld	a,#1
+ 447  00ed 8d000000      	callf	f_TIM2_Cmd
+ 449                     ; 155 	GPIO_Init(KEY_IN_PORT, KEY_IN_PIN, GPIO_MODE_IN_FL_NO_IT);
+ 451  00f1 4b00          	push	#0
+ 452  00f3 4b80          	push	#128
+ 453  00f5 ae5005        	ldw	x,#20485
+ 454  00f8 8d000000      	callf	f_GPIO_Init
+ 456  00fc 85            	popw	x
+ 457                     ; 156 	ADC2_Init(ADC2_CONVERSIONMODE_CONTINUOUS, ADC2_CHANNEL_7, ADC2_PRESSEL_FCPU_D2,\
+ 457                     ; 157 					ADC2_EXTTRIG_TIM, DISABLE, ADC2_ALIGN_RIGHT, ADC2_SCHMITTTRIG_CHANNEL7, DISABLE);
+ 459  00fd 4b00          	push	#0
+ 460  00ff 4b07          	push	#7
+ 461  0101 4b08          	push	#8
+ 462  0103 4b00          	push	#0
+ 463  0105 4b00          	push	#0
+ 464  0107 4b00          	push	#0
+ 465  0109 ae0007        	ldw	x,#7
+ 466  010c a601          	ld	a,#1
+ 467  010e 95            	ld	xh,a
+ 468  010f 8d000000      	callf	f_ADC2_Init
+ 470  0113 5b06          	addw	sp,#6
+ 471                     ; 159 	ADC2_StartConversion();
+ 473  0115 8d000000      	callf	f_ADC2_StartConversion
+ 475                     ; 161 	ir_state = IR_RECEIVE_HEAD;
+ 477  0119 725f0018      	clr	L3_ir_state
+ 478                     ; 162 	ir_pressed = FALSE;	
+ 480  011d 725f0010      	clr	L51_ir_pressed
+ 481                     ; 163 	ir_fisrt_process = FALSE;
+ 483  0121 725f000f      	clr	L71_ir_fisrt_process
+ 484                     ; 164 	receive_code = IRKEY_DUMY;	
+ 486  0125 35ff0011      	mov	L31_receive_code,#255
+ 487                     ; 171 }
+ 490  0129 87            	retf
+ 519                     ; 173 void Timer_Init(void)
+ 519                     ; 174 {
+ 520                     	switch	.text
+ 521  012a               f_Timer_Init:
+ 525                     ; 175 	TIM4_TimeBaseInit(TIM4_PRESCALER_128, 125);
+ 527  012a ae007d        	ldw	x,#125
+ 528  012d a607          	ld	a,#7
+ 529  012f 95            	ld	xh,a
+ 530  0130 8d000000      	callf	f_TIM4_TimeBaseInit
+ 532                     ; 176 	TIM4_ITConfig(TIM4_IT_UPDATE, ENABLE);
+ 534  0134 ae0001        	ldw	x,#1
+ 535  0137 a601          	ld	a,#1
+ 536  0139 95            	ld	xh,a
+ 537  013a 8d000000      	callf	f_TIM4_ITConfig
+ 539                     ; 177 	TIM4_Cmd(ENABLE); 
+ 541  013e a601          	ld	a,#1
+ 542  0140 8d000000      	callf	f_TIM4_Cmd
+ 544                     ; 179 	ir_release_timer = TIMER_STOPPED;
+ 546  0144 725f000e      	clr	L12_ir_release_timer
+ 547                     ; 180 	delay_timer = TIMER_STOPPED;
+ 549  0148 ae0000        	ldw	x,#0
+ 550  014b cf000c        	ldw	L32_delay_timer+2,x
+ 551  014e ae0000        	ldw	x,#0
+ 552  0151 cf000a        	ldw	L32_delay_timer,x
+ 553                     ; 181 	ir_process_timer = TIMER_STOPPED;
+ 555  0154 ae0000        	ldw	x,#0
+ 556  0157 cf0008        	ldw	L52_ir_process_timer+2,x
+ 557  015a ae0000        	ldw	x,#0
+ 558  015d cf0006        	ldw	L52_ir_process_timer,x
+ 559                     ; 182 	Key_detect_timer = TIMER_EXPIRED;
+ 561  0160 ae0001        	ldw	x,#1
+ 562  0163 cf0004        	ldw	L72_Key_detect_timer+2,x
+ 563  0166 ae0000        	ldw	x,#0
+ 564  0169 cf0002        	ldw	L72_Key_detect_timer,x
+ 565                     ; 183 }
+ 568  016c 87            	retf
+ 570                     	switch	.data
+ 571  0004               L122_value_debug:
+ 572  0004 00            	dc.b	0
+ 615                     .const:	section	.text
+ 616  0000               L22:
+ 617  0000 00000001      	dc.l	1
+ 618                     ; 186 void IR_Update(void)
+ 618                     ; 187 {
+ 619                     	switch	.text
+ 620  016d               f_IR_Update:
+ 622  016d 88            	push	a
+ 623       00000001      OFST:	set	1
+ 626                     ; 188 	if (ir_pressed)
+ 628  016e 725d0010      	tnz	L51_ir_pressed
+ 629  0172 2604          	jrne	L42
+ 630  0174 ac2f022f      	jpf	L362
+ 631  0178               L42:
+ 632                     ; 190 		if (ir_process_timer == TIMER_EXPIRED)
+ 634  0178 ae0006        	ldw	x,#L52_ir_process_timer
+ 635  017b 8d000000      	callf	d_ltor
+ 637  017f ae0000        	ldw	x,#L22
+ 638  0182 8d000000      	callf	d_lcmp
+ 640  0186 2704          	jreq	L62
+ 641  0188 ac2f022f      	jpf	L362
+ 642  018c               L62:
+ 643                     ; 192 			u8 ir_key = _convert_IR();
+ 645  018c 8d100010      	callf	L36f__convert_IR
+ 647  0190 6b01          	ld	(OFST+0,sp),a
+ 648                     ; 193 			switch (ir_key)
+ 650  0192 7b01          	ld	a,(OFST+0,sp)
+ 652                     ; 230 				default:
+ 652                     ; 231 					break;
+ 653  0194 4d            	tnz	a
+ 654  0195 2725          	jreq	L722
+ 655  0197 4a            	dec	a
+ 656  0198 2729          	jreq	L132
+ 657  019a 4a            	dec	a
+ 658  019b 272e          	jreq	L332
+ 659  019d 4a            	dec	a
+ 660  019e 2733          	jreq	L532
+ 661  01a0 4a            	dec	a
+ 662  01a1 2738          	jreq	L732
+ 663  01a3 4a            	dec	a
+ 664  01a4 273d          	jreq	L142
+ 665  01a6 4a            	dec	a
+ 666  01a7 2742          	jreq	L342
+ 667  01a9 4a            	dec	a
+ 668  01aa 270a          	jreq	L522
+ 669  01ac a00a          	sub	a,#10
+ 670  01ae 263f          	jrne	L172
+ 671                     ; 195 				case KEY_DEBUG:
+ 671                     ; 196 					SWI2C_ToggleI2CMode();
+ 673  01b0 8d000000      	callf	f_SWI2C_ToggleI2CMode
+ 675                     ; 197 					break;
+ 677  01b4 2039          	jra	L172
+ 678  01b6               L522:
+ 679                     ; 198 				case KEY_ONOFF_3D:
+ 679                     ; 199 					SWI2C_Toggle3DOnOff();
+ 681  01b6 8d000000      	callf	f_SWI2C_Toggle3DOnOff
+ 683                     ; 200 					break;
+ 685  01ba 2033          	jra	L172
+ 686  01bc               L722:
+ 687                     ; 201 				case KEY_DEEP_0:
+ 687                     ; 202 					SWI2C_Set_deep(0);
+ 689  01bc 4f            	clr	a
+ 690  01bd 8d000000      	callf	f_SWI2C_Set_deep
+ 692                     ; 203 					break;
+ 694  01c1 202c          	jra	L172
+ 695  01c3               L132:
+ 696                     ; 204 				case KEY_DEEP_1:
+ 696                     ; 205 					SWI2C_Set_deep(1);
+ 698  01c3 a601          	ld	a,#1
+ 699  01c5 8d000000      	callf	f_SWI2C_Set_deep
+ 701                     ; 206 					break;
+ 703  01c9 2024          	jra	L172
+ 704  01cb               L332:
+ 705                     ; 207 				case KEY_DEEP_2:
+ 705                     ; 208 					SWI2C_Set_deep(2);
+ 707  01cb a602          	ld	a,#2
+ 708  01cd 8d000000      	callf	f_SWI2C_Set_deep
+ 710                     ; 209 					break;
+ 712  01d1 201c          	jra	L172
+ 713  01d3               L532:
+ 714                     ; 210 				case KEY_DEEP_3:
+ 714                     ; 211 					SWI2C_Set_deep(3);
+ 716  01d3 a603          	ld	a,#3
+ 717  01d5 8d000000      	callf	f_SWI2C_Set_deep
+ 719                     ; 212 					break;
+ 721  01d9 2014          	jra	L172
+ 722  01db               L732:
+ 723                     ; 213 				case KEY_DEEP_4:
+ 723                     ; 214 					SWI2C_Set_deep(4);
+ 725  01db a604          	ld	a,#4
+ 726  01dd 8d000000      	callf	f_SWI2C_Set_deep
+ 728                     ; 215 					break;
+ 730  01e1 200c          	jra	L172
+ 731  01e3               L142:
+ 732                     ; 216 				case KEY_DEEP_5:
+ 732                     ; 217 					SWI2C_Set_deep(5);
+ 734  01e3 a605          	ld	a,#5
+ 735  01e5 8d000000      	callf	f_SWI2C_Set_deep
+ 737                     ; 218 					break;
+ 739  01e9 2004          	jra	L172
+ 740  01eb               L342:
+ 741                     ; 219 				case KEY_POWER:
+ 741                     ; 220 					SWI2C_ProcessPower();
+ 743  01eb 8d000000      	callf	f_SWI2C_ProcessPower
+ 745                     ; 221 					break;
+ 747  01ef               L542:
+ 748                     ; 230 				default:
+ 748                     ; 231 					break;
+ 750  01ef               L172:
+ 751                     ; 233 			if (ir_key != KEY_VOLUME_PLUS && ir_key != KEY_VOLUME_MINUS && ir_key != KEY_LEFT &&ir_key != KEY_RIGHT)
+ 753  01ef 7b01          	ld	a,(OFST+0,sp)
+ 754  01f1 a10b          	cp	a,#11
+ 755  01f3 2716          	jreq	L372
+ 757  01f5 7b01          	ld	a,(OFST+0,sp)
+ 758  01f7 a10c          	cp	a,#12
+ 759  01f9 2710          	jreq	L372
+ 761  01fb 7b01          	ld	a,(OFST+0,sp)
+ 762  01fd a10d          	cp	a,#13
+ 763  01ff 270a          	jreq	L372
+ 765  0201 7b01          	ld	a,(OFST+0,sp)
+ 766  0203 a10e          	cp	a,#14
+ 767  0205 2704          	jreq	L372
+ 768                     ; 235 				receive_code = IRKEY_DUMY;
+ 770  0207 35ff0011      	mov	L31_receive_code,#255
+ 771  020b               L372:
+ 772                     ; 237 			if (ir_fisrt_process)
+ 774  020b 725d000f      	tnz	L71_ir_fisrt_process
+ 775  020f 2712          	jreq	L572
+ 776                     ; 239 				ir_fisrt_process = FALSE;
+ 778  0211 725f000f      	clr	L71_ir_fisrt_process
+ 779                     ; 240 				ir_process_timer = 500 + 1;
+ 781  0215 ae01f5        	ldw	x,#501
+ 782  0218 cf0008        	ldw	L52_ir_process_timer+2,x
+ 783  021b ae0000        	ldw	x,#0
+ 784  021e cf0006        	ldw	L52_ir_process_timer,x
+ 786  0221 200c          	jra	L362
+ 787  0223               L572:
+ 788                     ; 244 				ir_process_timer = 50 + 1;
+ 790  0223 ae0033        	ldw	x,#51
+ 791  0226 cf0008        	ldw	L52_ir_process_timer+2,x
+ 792  0229 ae0000        	ldw	x,#0
+ 793  022c cf0006        	ldw	L52_ir_process_timer,x
+ 794  022f               L362:
+ 795                     ; 249 	if (ir_release_timer == TIMER_EXPIRED)
+ 797  022f c6000e        	ld	a,L12_ir_release_timer
+ 798  0232 a101          	cp	a,#1
+ 799  0234 2614          	jrne	L103
+ 800                     ; 251 		ir_release_timer = TIMER_STOPPED;
+ 802  0236 725f000e      	clr	L12_ir_release_timer
+ 803                     ; 252 		ir_process_timer = TIMER_STOPPED;
+ 805  023a ae0000        	ldw	x,#0
+ 806  023d cf0008        	ldw	L52_ir_process_timer+2,x
+ 807  0240 ae0000        	ldw	x,#0
+ 808  0243 cf0006        	ldw	L52_ir_process_timer,x
+ 809                     ; 253 		ir_pressed = FALSE;	
+ 811  0246 725f0010      	clr	L51_ir_pressed
+ 812  024a               L103:
+ 813                     ; 256 	if (Key_detect_timer == TIMER_EXPIRED)
+ 815  024a ae0002        	ldw	x,#L72_Key_detect_timer
+ 816  024d 8d000000      	callf	d_ltor
+ 818  0251 ae0000        	ldw	x,#L22
+ 819  0254 8d000000      	callf	d_lcmp
+ 821  0258 2613          	jrne	L303
+ 822                     ; 258 		Conversion_Value = ADC2_GetConversionValue();
+ 824  025a 8d000000      	callf	f_ADC2_GetConversionValue
+ 826  025e cf0000        	ldw	L13_Conversion_Value,x
+ 827                     ; 259 		Key_detect_timer = KEY_DETECT_TIME;
+ 829  0261 ae0065        	ldw	x,#101
+ 830  0264 cf0004        	ldw	L72_Key_detect_timer+2,x
+ 831  0267 ae0000        	ldw	x,#0
+ 832  026a cf0002        	ldw	L72_Key_detect_timer,x
+ 833  026d               L303:
+ 834                     ; 261 }
+ 837  026d 84            	pop	a
+ 838  026e 87            	retf
+ 890                     ; 263 INTERRUPT_HANDLER(IR_IN_ISR, 3)
+ 890                     ; 264 {
+ 891                     	switch	.text
+ 892  026f               f_IR_IN_ISR:
+ 894       00000003      OFST:	set	3
+ 895  026f 3b0002        	push	c_x+2
+ 896  0272 be00          	ldw	x,c_x
+ 897  0274 89            	pushw	x
+ 898  0275 3b0002        	push	c_y+2
+ 899  0278 be00          	ldw	x,c_y
+ 900  027a 89            	pushw	x
+ 901  027b 5203          	subw	sp,#3
+ 904                     ; 266 	u8 fault = FALSE;
+ 906  027d 0f01          	clr	(OFST-2,sp)
+ 907                     ; 268 	TIM2_Cmd(DISABLE);
+ 909  027f 4f            	clr	a
+ 910  0280 8d000000      	callf	f_TIM2_Cmd
+ 912                     ; 269 	TIM2_ClearFlag(TIM2_FLAG_UPDATE);
+ 914  0284 ae0001        	ldw	x,#1
+ 915  0287 8d000000      	callf	f_TIM2_ClearFlag
+ 917                     ; 270 	count = TIM2_GetCounter();
+ 919  028b 8d000000      	callf	f_TIM2_GetCounter
+ 921  028f 1f02          	ldw	(OFST-1,sp),x
+ 922                     ; 271 	TIM2_SetCounter(0);			
+ 924  0291 5f            	clrw	x
+ 925  0292 8d000000      	callf	f_TIM2_SetCounter
+ 927                     ; 272 	TIM2_Cmd(ENABLE);
+ 929  0296 a601          	ld	a,#1
+ 930  0298 8d000000      	callf	f_TIM2_Cmd
+ 932                     ; 274 	if (count > LEADER_UPPER_LIMIT)
+ 934  029c 1e02          	ldw	x,(OFST-1,sp)
+ 935  029e a33c8d        	cpw	x,#15501
+ 936  02a1 2506          	jrult	L133
+ 937                     ; 276 		fault = TRUE;
+ 939  02a3 a601          	ld	a,#1
+ 940  02a5 6b01          	ld	(OFST-2,sp),a
+ 942  02a7 2043          	jra	L333
+ 943  02a9               L133:
+ 944                     ; 280 		switch (ir_state)
+ 946  02a9 c60018        	ld	a,L3_ir_state
+ 948                     ; 336 			default:
+ 948                     ; 337 				break;
+ 949  02ac 4d            	tnz	a
+ 950  02ad 2705          	jreq	L503
+ 951  02af 4a            	dec	a
+ 952  02b0 274a          	jreq	L703
+ 953  02b2 2038          	jra	L333
+ 954  02b4               L503:
+ 955                     ; 282 			case IR_RECEIVE_HEAD:
+ 955                     ; 283 				if (_Compare_Count(count, LEADER_UPPER_LIMIT, LEADER_LOWER_LIMIT))
+ 957  02b4 ae30d4        	ldw	x,#12500
+ 958  02b7 89            	pushw	x
+ 959  02b8 ae3c8c        	ldw	x,#15500
+ 960  02bb 89            	pushw	x
+ 961  02bc 1e06          	ldw	x,(OFST+3,sp)
+ 962  02be 8d000000      	callf	L33f__Compare_Count
+ 964  02c2 5b04          	addw	sp,#4
+ 965  02c4 4d            	tnz	a
+ 966  02c5 270a          	jreq	L143
+ 967                     ; 285 					ir_release_timer = IR_RELEASE_TIME;
+ 969  02c7 3581000e      	mov	L12_ir_release_timer,#129
+ 970                     ; 286 					ir_state = IR_RECEIVE_CODE;
+ 972  02cb 35010018      	mov	L3_ir_state,#1
+ 974  02cf 2017          	jra	L343
+ 975  02d1               L143:
+ 976                     ; 288 				else if (_Compare_Count(count, REPEAT_UPPER_LIMIT, REPEAT_LOWER_LIMIT))
+ 978  02d1 ae280a        	ldw	x,#10250
+ 979  02d4 89            	pushw	x
+ 980  02d5 ae2fda        	ldw	x,#12250
+ 981  02d8 89            	pushw	x
+ 982  02d9 1e06          	ldw	x,(OFST+3,sp)
+ 983  02db 8d000000      	callf	L33f__Compare_Count
+ 985  02df 5b04          	addw	sp,#4
+ 986  02e1 4d            	tnz	a
+ 987  02e2 2704          	jreq	L343
+ 988                     ; 290 					ir_release_timer = IR_RELEASE_TIME;
+ 990  02e4 3581000e      	mov	L12_ir_release_timer,#129
+ 991  02e8               L343:
+ 992                     ; 292 				ir_bit_number = 0;
+ 994  02e8 725f0017      	clr	L5_ir_bit_number
+ 995                     ; 293 				break;
+ 996  02ec               L333:
+ 997                     ; 340 	if (fault)
+ 999  02ec 0d01          	tnz	(OFST-2,sp)
+1000  02ee 2604          	jrne	L23
+1001  02f0 acdb03db      	jpf	L773
+1002  02f4               L23:
+1003                     ; 342 		ir_state = IR_RECEIVE_HEAD;
+1005  02f4 725f0018      	clr	L3_ir_state
+1006  02f8 acdb03db      	jpf	L773
+1007  02fc               L703:
+1008                     ; 294 			case IR_RECEIVE_CODE:
+1008                     ; 295 				if (_Compare_Count(count, HIGH_UPPER_LIMIT, HIGH_LOWER_LIMIT))
+1010  02fc ae06a4        	ldw	x,#1700
+1011  02ff 89            	pushw	x
+1012  0300 ae0af0        	ldw	x,#2800
+1013  0303 89            	pushw	x
+1014  0304 1e06          	ldw	x,(OFST+3,sp)
+1015  0306 8d000000      	callf	L33f__Compare_Count
+1017  030a 5b04          	addw	sp,#4
+1018  030c 4d            	tnz	a
+1019  030d 271e          	jreq	L743
+1020                     ; 297 					ir_code[ir_bit_number/8] = (ir_code[ir_bit_number/8]>>1)|0x80;
+1022  030f c60017        	ld	a,L5_ir_bit_number
+1023  0312 44            	srl	a
+1024  0313 44            	srl	a
+1025  0314 44            	srl	a
+1026  0315 5f            	clrw	x
+1027  0316 97            	ld	xl,a
+1028  0317 c60017        	ld	a,L5_ir_bit_number
+1029  031a 44            	srl	a
+1030  031b 44            	srl	a
+1031  031c 44            	srl	a
+1032  031d 905f          	clrw	y
+1033  031f 9097          	ld	yl,a
+1034  0321 90d60013      	ld	a,(L7_ir_code,y)
+1035  0325 44            	srl	a
+1036  0326 aa80          	or	a,#128
+1037  0328 d70013        	ld	(L7_ir_code,x),a
+1039  032b 2025          	jra	L153
+1040  032d               L743:
+1041                     ; 299 				else if (_Compare_Count(count, LOW_UPPER_LIMIT, LOW_LOWER_LIMIT))
+1043  032d ae0320        	ldw	x,#800
+1044  0330 89            	pushw	x
+1045  0331 ae05aa        	ldw	x,#1450
+1046  0334 89            	pushw	x
+1047  0335 1e06          	ldw	x,(OFST+3,sp)
+1048  0337 8d000000      	callf	L33f__Compare_Count
+1050  033b 5b04          	addw	sp,#4
+1051  033d 4d            	tnz	a
+1052  033e 270e          	jreq	L353
+1053                     ; 301 					ir_code[ir_bit_number/8] = ir_code[ir_bit_number/8]>>1;
+1055  0340 c60017        	ld	a,L5_ir_bit_number
+1056  0343 44            	srl	a
+1057  0344 44            	srl	a
+1058  0345 44            	srl	a
+1059  0346 5f            	clrw	x
+1060  0347 97            	ld	xl,a
+1061  0348 72440013      	srl	(L7_ir_code,x)
+1063  034c 2004          	jra	L153
+1064  034e               L353:
+1065                     ; 305 					fault = TRUE;
+1067  034e a601          	ld	a,#1
+1068  0350 6b01          	ld	(OFST-2,sp),a
+1069  0352               L153:
+1070                     ; 307 				ir_bit_number++;
+1072  0352 725c0017      	inc	L5_ir_bit_number
+1073                     ; 308 				if (ir_bit_number == 32 && !fault)
+1075  0356 c60017        	ld	a,L5_ir_bit_number
+1076  0359 a120          	cp	a,#32
+1077  035b 268f          	jrne	L333
+1079  035d 0d01          	tnz	(OFST-2,sp)
+1080  035f 268b          	jrne	L333
+1081                     ; 310 					ir_state = IR_RECEIVE_HEAD;
+1083  0361 725f0018      	clr	L3_ir_state
+1084                     ; 311 					if (((ir_code[0] == 0x0 && ir_code[1] == 0xDF) || (ir_code[0] == 0x4F && ir_code[1] == 0x50)) 
+1084                     ; 312 					&& ((ir_code[2]^ir_code[3]) == 0xFF))
+1086  0365 725d0013      	tnz	L7_ir_code
+1087  0369 2607          	jrne	L563
+1089  036b c60014        	ld	a,L7_ir_code+1
+1090  036e a1df          	cp	a,#223
+1091  0370 270e          	jreq	L363
+1092  0372               L563:
+1094  0372 c60013        	ld	a,L7_ir_code
+1095  0375 a14f          	cp	a,#79
+1096  0377 2652          	jrne	L163
+1098  0379 c60014        	ld	a,L7_ir_code+1
+1099  037c a150          	cp	a,#80
+1100  037e 264b          	jrne	L163
+1101  0380               L363:
+1103  0380 c60015        	ld	a,L7_ir_code+2
+1104  0383 c80016        	xor	a,L7_ir_code+3
+1105  0386 a1ff          	cp	a,#255
+1106  0388 2641          	jrne	L163
+1107                     ; 314 						if (!ir_pressed)
+1109  038a 725d0010      	tnz	L51_ir_pressed
+1110  038e 2704          	jreq	L43
+1111  0390 acec02ec      	jpf	L333
+1112  0394               L43:
+1113                     ; 316 							receive_code = ir_code[2];						
+1115  0394 5500150011    	mov	L31_receive_code,L7_ir_code+2
+1116                     ; 317 							ir_pressed = TRUE;
+1118  0399 35010010      	mov	L51_ir_pressed,#1
+1119                     ; 318 							ir_fisrt_process = TRUE;
+1121  039d 3501000f      	mov	L71_ir_fisrt_process,#1
+1122                     ; 319 							ir_process_timer = TIMER_EXPIRED;
+1124  03a1 ae0001        	ldw	x,#1
+1125  03a4 cf0008        	ldw	L52_ir_process_timer+2,x
+1126  03a7 ae0000        	ldw	x,#0
+1127  03aa cf0006        	ldw	L52_ir_process_timer,x
+1128                     ; 320 							if (ir_code[0] == 0x4F && ir_code[1] == 0x50)
+1130  03ad c60013        	ld	a,L7_ir_code
+1131  03b0 a14f          	cp	a,#79
+1132  03b2 260f          	jrne	L173
+1134  03b4 c60014        	ld	a,L7_ir_code+1
+1135  03b7 a150          	cp	a,#80
+1136  03b9 2608          	jrne	L173
+1137                     ; 322 								head_type = 1;
+1139  03bb 35010012      	mov	L11_head_type,#1
+1141  03bf acec02ec      	jpf	L333
+1142  03c3               L173:
+1143                     ; 326 								head_type = 0;
+1145  03c3 725f0012      	clr	L11_head_type
+1146  03c7 acec02ec      	jpf	L333
+1147  03cb               L163:
+1148                     ; 332 						fault = TRUE;
+1150  03cb a601          	ld	a,#1
+1151  03cd 6b01          	ld	(OFST-2,sp),a
+1152  03cf acec02ec      	jpf	L333
+1153  03d3               L113:
+1154                     ; 336 			default:
+1154                     ; 337 				break;
+1156  03d3 acec02ec      	jpf	L333
+1157  03d7               L733:
+1158  03d7 acec02ec      	jpf	L333
+1159  03db               L773:
+1160                     ; 344 }
+1163  03db 5b03          	addw	sp,#3
+1164  03dd 85            	popw	x
+1165  03de bf00          	ldw	c_y,x
+1166  03e0 320002        	pop	c_y+2
+1167  03e3 85            	popw	x
+1168  03e4 bf00          	ldw	c_x,x
+1169  03e6 320002        	pop	c_x+2
+1170  03e9 80            	iret
+1211                     	switch	.const
+1212  0004               L04:
+1213  0004 00000002      	dc.l	2
+1214                     ; 346 INTERRUPT_HANDLER(TIMER4_ISR, 23)
+1214                     ; 347 {		
+1215                     	switch	.text
+1216  03ea               f_TIMER4_ISR:
+1218  03ea 3b0002        	push	c_x+2
+1219  03ed be00          	ldw	x,c_x
+1220  03ef 89            	pushw	x
+1221  03f0 3b0002        	push	c_y+2
+1222  03f3 be00          	ldw	x,c_y
+1223  03f5 89            	pushw	x
+1224  03f6 be02          	ldw	x,c_lreg+2
+1225  03f8 89            	pushw	x
+1226  03f9 be00          	ldw	x,c_lreg
+1227  03fb 89            	pushw	x
+1230                     ; 348 	TIM4_Cmd(DISABLE);
+1232  03fc 4f            	clr	a
+1233  03fd 8d000000      	callf	f_TIM4_Cmd
+1235                     ; 349 	TIM4_ClearFlag(TIM4_IT_UPDATE);
+1237  0401 a601          	ld	a,#1
+1238  0403 8d000000      	callf	f_TIM4_ClearFlag
+1240                     ; 350 	nop();
+1243  0407 9d            nop
+1245                     ; 351 	nop();
+1249  0408 9d            nop
+1251                     ; 352 	nop();
+1255  0409 9d            nop
+1257                     ; 353 	nop();
+1261  040a 9d            nop
+1263                     ; 354 	nop();
+1267  040b 9d            nop
+1269                     ; 355 	nop();
+1273  040c 9d            nop
+1275                     ; 356 	nop();
+1279  040d 9d            nop
+1281                     ; 357 	nop();
+1285  040e 9d            nop
+1287                     ; 358 	nop();
+1291  040f 9d            nop
+1293                     ; 359 	nop();
+1297  0410 9d            nop
+1299                     ; 360 	nop();
+1303  0411 9d            nop
+1305                     ; 361 	TIM4_Cmd(ENABLE);
+1308  0412 a601          	ld	a,#1
+1309  0414 8d000000      	callf	f_TIM4_Cmd
+1311                     ; 363 	if (ir_release_timer > TIMER_EXPIRED)
+1313  0418 c6000e        	ld	a,L12_ir_release_timer
+1314  041b a102          	cp	a,#2
+1315  041d 2504          	jrult	L114
+1316                     ; 365 		ir_release_timer--;
+1318  041f 725a000e      	dec	L12_ir_release_timer
+1319  0423               L114:
+1320                     ; 367 	if (delay_timer > TIMER_EXPIRED)
+1322  0423 ae000a        	ldw	x,#L32_delay_timer
+1323  0426 8d000000      	callf	d_ltor
+1325  042a ae0004        	ldw	x,#L04
+1326  042d 8d000000      	callf	d_lcmp
+1328  0431 2509          	jrult	L314
+1329                     ; 369 		delay_timer--;
+1331  0433 ae000a        	ldw	x,#L32_delay_timer
+1332  0436 a601          	ld	a,#1
+1333  0438 8d000000      	callf	d_lgsbc
+1335  043c               L314:
+1336                     ; 371 	if (ir_process_timer > TIMER_EXPIRED)
+1338  043c ae0006        	ldw	x,#L52_ir_process_timer
+1339  043f 8d000000      	callf	d_ltor
+1341  0443 ae0004        	ldw	x,#L04
+1342  0446 8d000000      	callf	d_lcmp
+1344  044a 2509          	jrult	L514
+1345                     ; 373 		ir_process_timer--;
+1347  044c ae0006        	ldw	x,#L52_ir_process_timer
+1348  044f a601          	ld	a,#1
+1349  0451 8d000000      	callf	d_lgsbc
+1351  0455               L514:
+1352                     ; 375 	if (Key_detect_timer > TIMER_EXPIRED)
+1354  0455 ae0002        	ldw	x,#L72_Key_detect_timer
+1355  0458 8d000000      	callf	d_ltor
+1357  045c ae0004        	ldw	x,#L04
+1358  045f 8d000000      	callf	d_lcmp
+1360  0463 2509          	jrult	L714
+1361                     ; 377 		Key_detect_timer--;
+1363  0465 ae0002        	ldw	x,#L72_Key_detect_timer
+1364  0468 a601          	ld	a,#1
+1365  046a 8d000000      	callf	d_lgsbc
+1367  046e               L714:
+1368                     ; 379 	SWI2C_UpdateTimer();
+1370  046e 8d000000      	callf	f_SWI2C_UpdateTimer
+1372                     ; 380 	System_Clock++;
+1374  0472 ae0000        	ldw	x,#_System_Clock
+1375  0475 a601          	ld	a,#1
+1376  0477 8d000000      	callf	d_lgadc
+1378                     ; 381 }
+1381  047b 85            	popw	x
+1382  047c bf00          	ldw	c_lreg,x
+1383  047e 85            	popw	x
+1384  047f bf02          	ldw	c_lreg+2,x
+1385  0481 85            	popw	x
+1386  0482 bf00          	ldw	c_y,x
+1387  0484 320002        	pop	c_y+2
+1388  0487 85            	popw	x
+1389  0488 bf00          	ldw	c_x,x
+1390  048a 320002        	pop	c_x+2
+1391  048d 80            	iret
+1424                     ; 383 void IR_DelayNMiliseconds(u16 delay)
+1424                     ; 384 {
+1425                     	switch	.text
+1426  048e               f_IR_DelayNMiliseconds:
+1430                     ; 385 	delay_timer = delay;
+1432  048e 8d000000      	callf	d_uitolx
+1434  0492 ae000a        	ldw	x,#L32_delay_timer
+1435  0495 8d000000      	callf	d_rtol
+1438  0499               L144:
+1439                     ; 386 	while (delay_timer > TIMER_EXPIRED);
+1441  0499 ae000a        	ldw	x,#L32_delay_timer
+1442  049c 8d000000      	callf	d_ltor
+1444  04a0 ae0004        	ldw	x,#L04
+1445  04a3 8d000000      	callf	d_lcmp
+1447  04a7 24f0          	jruge	L144
+1448                     ; 387 	delay_timer = TIMER_STOPPED;
+1450  04a9 ae0000        	ldw	x,#0
+1451  04ac cf000c        	ldw	L32_delay_timer+2,x
+1452  04af ae0000        	ldw	x,#0
+1453  04b2 cf000a        	ldw	L32_delay_timer,x
+1454                     ; 388 }
+1457  04b5 87            	retf
+1574                     	switch	.bss
+1575  0000               L13_Conversion_Value:
+1576  0000 0000          	ds.b	2
+1577  0002               L72_Key_detect_timer:
+1578  0002 00000000      	ds.b	4
+1579  0006               L52_ir_process_timer:
+1580  0006 00000000      	ds.b	4
+1581  000a               L32_delay_timer:
+1582  000a 00000000      	ds.b	4
+1583  000e               L12_ir_release_timer:
+1584  000e 00            	ds.b	1
+1585  000f               L71_ir_fisrt_process:
+1586  000f 00            	ds.b	1
+1587  0010               L51_ir_pressed:
+1588  0010 00            	ds.b	1
+1589  0011               L31_receive_code:
+1590  0011 00            	ds.b	1
+1591  0012               L11_head_type:
+1592  0012 00            	ds.b	1
+1593  0013               L7_ir_code:
+1594  0013 00000000      	ds.b	4
+1595  0017               L5_ir_bit_number:
+1596  0017 00            	ds.b	1
+1597  0018               L3_ir_state:
+1598  0018 00            	ds.b	1
+1599                     	xref	f_SWI2C_UpdateTimer
+1600                     	xref	f_SWI2C_Set_deep
+1601                     	xref	f_SWI2C_Toggle3DOnOff
+1602                     	xref	f_SWI2C_ToggleI2CMode
+1603                     	xref	f_SWI2C_ProcessPower
+1604                     	xdef	_System_Clock
+1605                     	xdef	f_TIMER4_ISR
+1606                     	xdef	f_IR_IN_ISR
+1607                     	xdef	f_IR_DelayNMiliseconds
+1608                     	xdef	f_IR_Update
+1609                     	xdef	f_Timer_Init
+1610                     	xdef	f_IR_IN_Init
+1611                     	xref	f_ADC2_GetConversionValue
+1612                     	xref	f_ADC2_StartConversion
+1613                     	xref	f_ADC2_Init
+1614                     	xref	f_TIM4_ClearFlag
+1615                     	xref	f_TIM4_ITConfig
+1616                     	xref	f_TIM4_Cmd
+1617                     	xref	f_TIM4_TimeBaseInit
+1618                     	xref	f_TIM2_ClearFlag
+1619                     	xref	f_TIM2_GetCounter
+1620                     	xref	f_TIM2_SetCounter
+1621                     	xref	f_TIM2_Cmd
+1622                     	xref	f_TIM2_TimeBaseInit
+1623                     	xref	f_EXTI_SetExtIntSensitivity
+1624                     	xref	f_GPIO_Init
+1625                     	xref.b	c_lreg
+1626                     	xref.b	c_x
+1627                     	xref.b	c_y
+1647                     	xref	d_rtol
+1648                     	xref	d_uitolx
+1649                     	xref	d_lgadc
+1650                     	xref	d_lgsbc
+1651                     	xref	d_lcmp
+1652                     	xref	d_ltor
+1653                     	end
