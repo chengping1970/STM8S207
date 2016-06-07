@@ -15,9 +15,10 @@
 #include "Mhlrx.h"
 #include "Mhlrx_reg.h"
 
-#if 0
-#define INIT_FLAG 0x5A
-const u8 address_table[] = {0x57, 0xC8, 0xC9, 0xCA, 0xCB, 0x18, 0x47, 0x48, 0x49, 0x58, 0x59, 0x5A, 0x5C, 0x0D}; 		
+const u8 address_table[] = {0x57, 0xC8, 0xC9, 0xCA, 0xCB, 0x18, 0x47, 0x48, 0x49, 0x4A, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x7D, 0xDF, 0xE7, 0x0D}; 		
+const u8 table_size = sizeof(address_table);
+#define INIT_FLAG 0xA5
+#if !PANEL_65INCH
 const u8 register_default_value[] =
 {
 INIT_FLAG,	// flag
@@ -30,16 +31,18 @@ INIT_FLAG,	// flag
 0x10,	// 47
 0x01,	// 48
 0x85,	// 49
+0x04,   // 4A
 0x17,	// 58
 0x40,	// 59
 0x80,	// 5A
+0x17,	// 5B
 0x80,	// 5C
+0x2C,	// 7D
+0x9D,	// DF
+0xBB,	// E7
 0x2D,	// 0D
 };
-const u8 table_size = sizeof(address_table);
 #else
-#define INIT_FLAG 0xA5
-const u8 address_table[] = {0x57, 0xC8, 0xC9, 0xCA, 0xCB, 0x18, 0x47, 0x48, 0x49, 0x4A, 0x5B, 0x7D, 0xDF, 0xE7, 0x0D}; 		
 const u8 register_default_value[] =
 {
 INIT_FLAG,	// flag
@@ -52,14 +55,17 @@ INIT_FLAG,	// flag
 0x30,	// 47
 0x01,	// 48
 0xFF,	// 49
-0x04,	// 4A
+0x05,	// 4A
+0x23,   // 58
+0x40,   // 59
+0x80,   // 5A
 0x17,	// 5B
+0x80,   // 5C
 0x2C,	// 7D
-0x97,	// DF
+0x9D,	// DF
 0xBB,	// E7
 0x24,	// 0D
 };
-const u8 table_size = sizeof(address_table);
 #endif
 void flash_init(void)
 {
@@ -72,12 +78,12 @@ void flash_init(void)
 	while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET)
 	{};
 
-	if (FLASH_ReadByte(0x4000) != INIT_FLAG)
+	if (FLASH_ReadByte(EEPROM_START_ADDRESS) != INIT_FLAG)
 	{
 		u8 i;
 		for (i = 0; i < sizeof(register_default_value); i++)
 		{
-			FLASH_ProgramByte(0x4000 + i,register_default_value[i]);
+			FLASH_ProgramByte(EEPROM_START_ADDRESS + i,register_default_value[i]);
 		}
 	}
 }

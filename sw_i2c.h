@@ -24,6 +24,9 @@ REG_0x5C,
 REG_0x0D
 };
 
+#define PANEL_65INCH			1
+#define EEPROM_START_ADDRESS 	0x4000
+
 extern void SWI2C_Init(void);
 extern void SWI2C_Update(void);
 extern void SWI2C_SystemPowerUp(void);
