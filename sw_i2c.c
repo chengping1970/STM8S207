@@ -51,7 +51,7 @@
 #define SINGNAL_TETECT_TIME		(500 + 1) 
 #define BACKLIGHT_DELAY_TIME	(5000 + 1)
 
-#define SIGNAL_STABLE_COUNT		5
+#define SIGNAL_STABLE_COUNT		3
 #define IIC_ACK_TIMEOUT			50
 
 #define SET_VPANEL_ON()			GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN)
@@ -519,10 +519,9 @@ void SWI2C_Update(void)
 {	
 	if (Backlight_on_timer == TIMER_EXPIRED)
 	{
-		//GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN);
-		//IR_DelayNMiliseconds(500);
 		SET_BACKLIGHT_ON();
 		Backlight_on_timer = TIMER_STOPPED;
+		//SWI2C_ToggleI2CMode();
 	}
 
 	if (Power_status && !I2C_stop)

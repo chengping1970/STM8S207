@@ -3084,18 +3084,18 @@
 4102  046a ae0900        	ldw	x,#L25
 4103  046d 8d000000      	callf	d_lcmp
 4105  0471 2616          	jrne	L545
-4106                     ; 524 		SET_BACKLIGHT_ON();
+4106                     ; 522 		SET_BACKLIGHT_ON();
 4108  0473 4b80          	push	#128
 4109  0475 ae500a        	ldw	x,#20490
 4110  0478 8d000000      	callf	f_GPIO_WriteLow
 4112  047c 84            	pop	a
-4113                     ; 525 		Backlight_on_timer = TIMER_STOPPED;
+4113                     ; 523 		Backlight_on_timer = TIMER_STOPPED;
 4115  047d ae0000        	ldw	x,#0
 4116  0480 cf0006        	ldw	L5_Backlight_on_timer+2,x
 4117  0483 ae0000        	ldw	x,#0
 4118  0486 cf0004        	ldw	L5_Backlight_on_timer,x
 4119  0489               L545:
-4120                     ; 528 	if (Power_status && !I2C_stop)
+4120                     ; 527 	if (Power_status && !I2C_stop)
 4122  0489 725d0011      	tnz	L51_Power_status
 4123  048d 2604          	jrne	L45
 4124  048f ac620662      	jpf	L745
@@ -3104,9 +3104,9 @@
 4128  0497 2704          	jreq	L65
 4129  0499 ac620662      	jpf	L745
 4130  049d               L65:
-4131                     ; 530 		IT6802_fsm();
+4131                     ; 529 		IT6802_fsm();
 4133  049d 8d000000      	callf	f_IT6802_fsm
-4135                     ; 532 		if (frc_update_timer == TIMER_EXPIRED && Have_FRC)
+4135                     ; 531 		if (frc_update_timer == TIMER_EXPIRED && Have_FRC)
 4137  04a1 ae0000        	ldw	x,#L3_frc_update_timer
 4138  04a4 8d000000      	callf	d_ltor
 4140  04a8 ae0900        	ldw	x,#L25
@@ -3114,7 +3114,7 @@
 4143  04af 265f          	jrne	L155
 4145  04b1 725d0000      	tnz	L52_Have_FRC
 4146  04b5 2759          	jreq	L155
-4147                     ; 535 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x18, &read_LVDS_mode);
+4147                     ; 534 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x18, &read_LVDS_mode);
 4149  04b7 96            	ldw	x,sp
 4150  04b8 1c0004        	addw	x,#OFST-1
 4151  04bb 89            	pushw	x
@@ -3123,11 +3123,11 @@
 4154  04c1 95            	ld	xh,a
 4155  04c2 8d4a024a      	callf	f_SWI2C_ReadByte
 4157  04c6 85            	popw	x
-4158                     ; 536 			if (read_LVDS_mode != LVDS_mode)
+4158                     ; 535 			if (read_LVDS_mode != LVDS_mode)
 4160  04c7 7b04          	ld	a,(OFST-1,sp)
 4161  04c9 c10010        	cp	a,L31_LVDS_mode
 4162  04cc 270e          	jreq	L355
-4163                     ; 538 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x18, LVDS_mode);
+4163                     ; 537 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x18, LVDS_mode);
 4165  04ce 3b0010        	push	L31_LVDS_mode
 4166  04d1 ae0018        	ldw	x,#24
 4167  04d4 a622          	ld	a,#34
@@ -3135,7 +3135,7 @@
 4169  04d7 8dc602c6      	callf	f_SWI2C_WriteByte
 4171  04db 84            	pop	a
 4172  04dc               L355:
-4173                     ; 540 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x0A, &read_MFC);
+4173                     ; 539 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x0A, &read_MFC);
 4175  04dc 96            	ldw	x,sp
 4176  04dd 1c0005        	addw	x,#OFST+0
 4177  04e0 89            	pushw	x
@@ -3144,13 +3144,13 @@
 4180  04e6 95            	ld	xh,a
 4181  04e7 8d4a024a      	callf	f_SWI2C_ReadByte
 4183  04eb 85            	popw	x
-4184                     ; 541 			if (read_MFC != 0)
+4184                     ; 540 			if (read_MFC != 0)
 4186  04ec 0d05          	tnz	(OFST+0,sp)
 4187  04ee 2714          	jreq	L555
-4188                     ; 543 				IR_DelayNMiliseconds(50);
+4188                     ; 542 				IR_DelayNMiliseconds(50);
 4190  04f0 ae0032        	ldw	x,#50
 4191  04f3 8d000000      	callf	f_IR_DelayNMiliseconds
-4193                     ; 544 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x0A, 0);
+4193                     ; 543 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x0A, 0);
 4195  04f7 4b00          	push	#0
 4196  04f9 ae000a        	ldw	x,#10
 4197  04fc a622          	ld	a,#34
@@ -3158,19 +3158,19 @@
 4199  04ff 8dc602c6      	callf	f_SWI2C_WriteByte
 4201  0503 84            	pop	a
 4202  0504               L555:
-4203                     ; 546 			frc_update_timer = FRC_UPDATE_TIME;
+4203                     ; 545 			frc_update_timer = FRC_UPDATE_TIME;
 4205  0504 ae01f5        	ldw	x,#501
 4206  0507 cf0002        	ldw	L3_frc_update_timer+2,x
 4207  050a ae0000        	ldw	x,#0
 4208  050d cf0000        	ldw	L3_frc_update_timer,x
 4209  0510               L155:
-4210                     ; 550 		if (secret_detect_timer == TIMER_EXPIRED)
+4210                     ; 549 		if (secret_detect_timer == TIMER_EXPIRED)
 4212  0510 ae0008        	ldw	x,#L7_secret_detect_timer
 4213  0513 8d000000      	callf	d_ltor
 4215  0517 ae0900        	ldw	x,#L25
 4216  051a 8d000000      	callf	d_lcmp
 4218  051e 2704aca605a6  	jrne	L755
-4219                     ; 553 			SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
+4219                     ; 552 			SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
 4221  0524 96            	ldw	x,sp
 4222  0525 1c0001        	addw	x,#OFST-4
 4223  0528 89            	pushw	x
@@ -3179,12 +3179,12 @@
 4226  052e 95            	ld	xh,a
 4227  052f 8d4a024a      	callf	f_SWI2C_ReadByte
 4229  0533 85            	popw	x
-4230                     ; 554 			if ((secret_status&0x03) == 1)
+4230                     ; 553 			if ((secret_status&0x03) == 1)
 4232  0534 7b01          	ld	a,(OFST-4,sp)
 4233  0536 a403          	and	a,#3
 4234  0538 a101          	cp	a,#1
 4235  053a 265e          	jrne	L165
-4236                     ; 556 				SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
+4236                     ; 555 				SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
 4238  053c 96            	ldw	x,sp
 4239  053d 1c0002        	addw	x,#OFST-3
 4240  0540 89            	pushw	x
@@ -3194,31 +3194,31 @@
 4244  0548 95            	ld	xh,a
 4245  0549 8d5e025e      	callf	f_SWI2C_ReadBytes
 4247  054d 5b03          	addw	sp,#3
-4248                     ; 557 				secret_key[0] = secret_key_table1[secret_key[0]];
+4248                     ; 556 				secret_key[0] = secret_key_table1[secret_key[0]];
 4250  054f 7b02          	ld	a,(OFST-3,sp)
 4251  0551 5f            	clrw	x
 4252  0552 97            	ld	xl,a
 4253  0553 d60000        	ld	a,(L72_secret_key_table1,x)
 4254  0556 6b02          	ld	(OFST-3,sp),a
-4255                     ; 558 				secret_key[1] = secret_key_table2[secret_key[1]];
+4255                     ; 557 				secret_key[1] = secret_key_table2[secret_key[1]];
 4257  0558 7b03          	ld	a,(OFST-2,sp)
 4258  055a 5f            	clrw	x
 4259  055b 97            	ld	xl,a
 4260  055c d60100        	ld	a,(L13_secret_key_table2,x)
 4261  055f 6b03          	ld	(OFST-2,sp),a
-4262                     ; 559 				secret_key[2] = secret_key_table3[secret_key[2]];
+4262                     ; 558 				secret_key[2] = secret_key_table3[secret_key[2]];
 4264  0561 7b04          	ld	a,(OFST-1,sp)
 4265  0563 5f            	clrw	x
 4266  0564 97            	ld	xl,a
 4267  0565 d60200        	ld	a,(L33_secret_key_table3,x)
 4268  0568 6b04          	ld	(OFST-1,sp),a
-4269                     ; 560 				secret_key[3] = secret_key_table4[secret_key[3]];
+4269                     ; 559 				secret_key[3] = secret_key_table4[secret_key[3]];
 4271  056a 7b05          	ld	a,(OFST+0,sp)
 4272  056c 5f            	clrw	x
 4273  056d 97            	ld	xl,a
 4274  056e d60300        	ld	a,(L53_secret_key_table4,x)
 4275  0571 6b05          	ld	(OFST+0,sp),a
-4276                     ; 561 				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, secret_key);
+4276                     ; 560 				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, secret_key);
 4278  0573 96            	ldw	x,sp
 4279  0574 1c0002        	addw	x,#OFST-3
 4280  0577 89            	pushw	x
@@ -3228,11 +3228,11 @@
 4284  057f 95            	ld	xh,a
 4285  0580 8d3b033b      	callf	f_SWI2C_WriteBytes
 4287  0584 5b03          	addw	sp,#3
-4288                     ; 562 				secret_status = secret_status|0x02;
+4288                     ; 561 				secret_status = secret_status|0x02;
 4290  0586 7b01          	ld	a,(OFST-4,sp)
 4291  0588 aa02          	or	a,#2
 4292  058a 6b01          	ld	(OFST-4,sp),a
-4293                     ; 563 				SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
+4293                     ; 562 				SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
 4295  058c 7b01          	ld	a,(OFST-4,sp)
 4296  058e 88            	push	a
 4297  058f ae0019        	ldw	x,#25
@@ -3241,13 +3241,13 @@
 4300  0595 8dc602c6      	callf	f_SWI2C_WriteByte
 4302  0599 84            	pop	a
 4303  059a               L165:
-4304                     ; 565 			secret_detect_timer = SECRET_DETECT_TIME;
+4304                     ; 564 			secret_detect_timer = SECRET_DETECT_TIME;
 4306  059a ae01f5        	ldw	x,#501
 4307  059d cf000a        	ldw	L7_secret_detect_timer+2,x
 4308  05a0 ae0000        	ldw	x,#0
 4309  05a3 cf0008        	ldw	L7_secret_detect_timer,x
 4310  05a6               L755:
-4311                     ; 568 		if (signal_detect_timer == TIMER_EXPIRED)
+4311                     ; 567 		if (signal_detect_timer == TIMER_EXPIRED)
 4313  05a6 ae000c        	ldw	x,#L11_signal_detect_timer
 4314  05a9 8d000000      	callf	d_ltor
 4316  05ad ae0900        	ldw	x,#L25
@@ -3255,267 +3255,267 @@
 4319  05b4 2704          	jreq	L06
 4320  05b6 ac620662      	jpf	L745
 4321  05ba               L06:
-4322                     ; 571 			u8 current_signal_status = SWI2C_GetSignalStatus();
+4322                     ; 570 			u8 current_signal_status = SWI2C_GetSignalStatus();
 4324  05ba 8db901b9      	callf	L122f_SWI2C_GetSignalStatus
 4326  05be 6b05          	ld	(OFST+0,sp),a
-4327                     ; 573 			signal_detect_timer = SINGNAL_TETECT_TIME;
+4327                     ; 572 			signal_detect_timer = SINGNAL_TETECT_TIME;
 4329  05c0 ae01f5        	ldw	x,#501
 4330  05c3 cf000e        	ldw	L11_signal_detect_timer+2,x
 4331  05c6 ae0000        	ldw	x,#0
 4332  05c9 cf000c        	ldw	L11_signal_detect_timer,x
-4333                     ; 574 			if (current_signal_status != signal_status)
+4333                     ; 573 			if (current_signal_status != signal_status)
 4335  05cc 7b05          	ld	a,(OFST+0,sp)
 4336  05ce c10002        	cp	a,L71_signal_status
 4337  05d1 276f          	jreq	L565
-4338                     ; 576 				singal_change_count++;
+4338                     ; 575 				singal_change_count++;
 4340  05d3 725c0001      	inc	L12_singal_change_count
-4341                     ; 577 				if (singal_change_count > SIGNAL_STABLE_COUNT)
+4341                     ; 576 				if (singal_change_count > SIGNAL_STABLE_COUNT)
 4343  05d7 c60001        	ld	a,L12_singal_change_count
-4344  05da a106          	cp	a,#6
+4344  05da a104          	cp	a,#4
 4345  05dc 2568          	jrult	L575
-4346                     ; 579 					signal_status = current_signal_status;
+4346                     ; 578 					signal_status = current_signal_status;
 4348  05de 7b05          	ld	a,(OFST+0,sp)
 4349  05e0 c70002        	ld	L71_signal_status,a
-4350                     ; 580 					if (signal_status)
+4350                     ; 579 					if (signal_status)
 4352  05e3 725d0002      	tnz	L71_signal_status
 4353  05e7 2726          	jreq	L175
-4354                     ; 583 						GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+4354                     ; 582 						GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 4356  05e9 4b08          	push	#8
 4357  05eb ae500f        	ldw	x,#20495
 4358  05ee 8d000000      	callf	f_GPIO_WriteHigh
 4360  05f2 84            	pop	a
-4361                     ; 584 						SWI2C_ResetFPGA();
+4361                     ; 583 						SWI2C_ResetFPGA();
 4363  05f3 8dc606c6      	callf	f_SWI2C_ResetFPGA
-4365                     ; 585 						SET_VPANEL_ON();
+4365                     ; 584 						SET_VPANEL_ON();
 4367  05f7 4b01          	push	#1
 4368  05f9 ae501e        	ldw	x,#20510
 4369  05fc 8d000000      	callf	f_GPIO_WriteHigh
 4371  0600 84            	pop	a
-4372                     ; 586 						Backlight_on_timer = BACKLIGHT_DELAY_TIME;
+4372                     ; 585 						Backlight_on_timer = BACKLIGHT_DELAY_TIME;
 4374  0601 ae1389        	ldw	x,#5001
 4375  0604 cf0006        	ldw	L5_Backlight_on_timer+2,x
 4376  0607 ae0000        	ldw	x,#0
 4377  060a cf0004        	ldw	L5_Backlight_on_timer,x
 4379  060d 2037          	jra	L575
 4380  060f               L175:
-4381                     ; 590 						Backlight_on_timer = TIMER_STOPPED;
+4381                     ; 589 						Backlight_on_timer = TIMER_STOPPED;
 4383  060f ae0000        	ldw	x,#0
 4384  0612 cf0006        	ldw	L5_Backlight_on_timer+2,x
 4385  0615 ae0000        	ldw	x,#0
 4386  0618 cf0004        	ldw	L5_Backlight_on_timer,x
-4387                     ; 591 						SET_BACKLIGHT_OFF();
+4387                     ; 590 						SET_BACKLIGHT_OFF();
 4389  061b 4b80          	push	#128
 4390  061d ae500a        	ldw	x,#20490
 4391  0620 8d000000      	callf	f_GPIO_WriteHigh
 4393  0624 84            	pop	a
-4394                     ; 592 						IR_DelayNMiliseconds(200);
+4394                     ; 591 						IR_DelayNMiliseconds(200);
 4396  0625 ae00c8        	ldw	x,#200
 4397  0628 8d000000      	callf	f_IR_DelayNMiliseconds
-4399                     ; 593 						SET_VPANEL_OFF();
+4399                     ; 592 						SET_VPANEL_OFF();
 4401  062c 4b01          	push	#1
 4402  062e ae501e        	ldw	x,#20510
 4403  0631 8d000000      	callf	f_GPIO_WriteLow
 4405  0635 84            	pop	a
-4406                     ; 594 						GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+4406                     ; 593 						GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
 4408  0636 4b08          	push	#8
 4409  0638 ae500f        	ldw	x,#20495
 4410  063b 8d000000      	callf	f_GPIO_WriteLow
 4412  063f 84            	pop	a
 4413  0640 2004          	jra	L575
 4414  0642               L565:
-4415                     ; 600 				singal_change_count = 0;
+4415                     ; 599 				singal_change_count = 0;
 4417  0642 725f0001      	clr	L12_singal_change_count
 4418  0646               L575:
-4419                     ; 603 			if (signal_status)
+4419                     ; 602 			if (signal_status)
 4421  0646 725d0002      	tnz	L71_signal_status
 4422  064a 270c          	jreq	L775
-4423                     ; 605 				GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+4423                     ; 604 				GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 4425  064c 4b08          	push	#8
 4426  064e ae500f        	ldw	x,#20495
 4427  0651 8d000000      	callf	f_GPIO_WriteHigh
 4429  0655 84            	pop	a
 4431  0656 200a          	jra	L745
 4432  0658               L775:
-4433                     ; 609 				GPIO_WriteReverse(LED_G_PORT, LED_G_PIN);
+4433                     ; 608 				GPIO_WriteReverse(LED_G_PORT, LED_G_PIN);
 4435  0658 4b08          	push	#8
 4436  065a ae500f        	ldw	x,#20495
 4437  065d 8d000000      	callf	f_GPIO_WriteReverse
 4439  0661 84            	pop	a
 4440  0662               L745:
-4441                     ; 613 }
+4441                     ; 612 }
 4444  0662 5b05          	addw	sp,#5
 4445  0664 87            	retf
-4477                     ; 615 void SWI2C_SystemPowerUp(void)
-4477                     ; 616 {
+4477                     ; 614 void SWI2C_SystemPowerUp(void)
+4477                     ; 615 {
 4478                     	switch	.text
 4479  0665               f_SWI2C_SystemPowerUp:
-4483                     ; 617 	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
+4483                     ; 616 	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 4485  0665 4b20          	push	#32
 4486  0667 ae500a        	ldw	x,#20490
 4487  066a 8d000000      	callf	f_GPIO_WriteLow
 4489  066e 84            	pop	a
-4490                     ; 618 	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+4490                     ; 617 	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
 4492  066f 4b01          	push	#1
 4493  0671 ae5014        	ldw	x,#20500
 4494  0674 8d000000      	callf	f_GPIO_WriteLow
 4496  0678 84            	pop	a
-4497                     ; 619 	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+4497                     ; 618 	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 4499  0679 4b08          	push	#8
 4500  067b ae500f        	ldw	x,#20495
 4501  067e 8d000000      	callf	f_GPIO_WriteHigh
 4503  0682 84            	pop	a
-4504                     ; 620 	IR_DelayNMiliseconds(50);
+4504                     ; 619 	IR_DelayNMiliseconds(50);
 4506  0683 ae0032        	ldw	x,#50
 4507  0686 8d000000      	callf	f_IR_DelayNMiliseconds
-4509                     ; 621 	Power_status = TRUE;
+4509                     ; 620 	Power_status = TRUE;
 4511  068a 35010011      	mov	L51_Power_status,#1
-4512                     ; 622 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
+4512                     ; 621 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
 4514  068e 4b01          	push	#1
 4515  0690 ae5005        	ldw	x,#20485
 4516  0693 8d000000      	callf	f_GPIO_WriteLow
 4518  0697 84            	pop	a
-4519                     ; 624 	IR_DelayNMiliseconds(200);
+4519                     ; 623 	IR_DelayNMiliseconds(200);
 4521  0698 ae00c8        	ldw	x,#200
 4522  069b 8d000000      	callf	f_IR_DelayNMiliseconds
-4524                     ; 625 	GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
+4524                     ; 624 	GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
 4526  069f 4b01          	push	#1
 4527  06a1 ae5005        	ldw	x,#20485
 4528  06a4 8d000000      	callf	f_GPIO_WriteHigh
 4530  06a8 84            	pop	a
-4531                     ; 627 	IR_DelayNMiliseconds(200);
+4531                     ; 626 	IR_DelayNMiliseconds(200);
 4533  06a9 ae00c8        	ldw	x,#200
 4534  06ac 8d000000      	callf	f_IR_DelayNMiliseconds
-4536                     ; 628 	IT6802_fsm_init();
+4536                     ; 627 	IT6802_fsm_init();
 4538  06b0 8d000000      	callf	f_IT6802_fsm_init
-4540                     ; 629 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
+4540                     ; 628 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 4542  06b4 a622          	ld	a,#34
 4543  06b6 8d340234      	callf	f_SWI2C_TestDevice
 4545  06ba c70000        	ld	L52_Have_FRC,a
-4546                     ; 630 	singal_change_count = 0;
+4546                     ; 629 	singal_change_count = 0;
 4548  06bd 725f0001      	clr	L12_singal_change_count
-4549                     ; 631 	signal_status = FALSE;
+4549                     ; 630 	signal_status = FALSE;
 4551  06c1 725f0002      	clr	L71_signal_status
-4552                     ; 632 }
+4552                     ; 631 }
 4555  06c5 87            	retf
-4583                     ; 634 void SWI2C_ResetFPGA(void)
-4583                     ; 635 {
+4583                     ; 633 void SWI2C_ResetFPGA(void)
+4583                     ; 634 {
 4584                     	switch	.text
 4585  06c6               f_SWI2C_ResetFPGA:
-4589                     ; 636 	if (Power_status)
+4589                     ; 635 	if (Power_status)
 4591  06c6 725d0011      	tnz	L51_Power_status
 4592  06ca 272a          	jreq	L326
-4593                     ; 638 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+4593                     ; 637 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 4595  06cc 4b10          	push	#16
 4596  06ce ae500a        	ldw	x,#20490
 4597  06d1 8d000000      	callf	f_GPIO_WriteLow
 4599  06d5 84            	pop	a
-4600                     ; 639 		IR_DelayNMiliseconds(200);
+4600                     ; 638 		IR_DelayNMiliseconds(200);
 4602  06d6 ae00c8        	ldw	x,#200
 4603  06d9 8d000000      	callf	f_IR_DelayNMiliseconds
-4605                     ; 640 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+4605                     ; 639 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 4607  06dd 4b10          	push	#16
 4608  06df ae500a        	ldw	x,#20490
 4609  06e2 8d000000      	callf	f_GPIO_WriteHigh
 4611  06e6 84            	pop	a
-4612                     ; 641 		IR_DelayNMiliseconds(1500);
+4612                     ; 640 		IR_DelayNMiliseconds(1500);
 4614  06e7 ae05dc        	ldw	x,#1500
 4615  06ea 8d000000      	callf	f_IR_DelayNMiliseconds
-4617                     ; 642 		FPGA_Init();	
+4617                     ; 641 		FPGA_Init();	
 4619  06ee 8d300830      	callf	f_FPGA_Init
-4621                     ; 644 		FPGA_WriteWaveTable();
+4621                     ; 643 		FPGA_WriteWaveTable();
 4623  06f2 8ddb01db      	callf	L542f_FPGA_WriteWaveTable
 4625  06f6               L326:
-4626                     ; 647 }
+4626                     ; 646 }
 4629  06f6 87            	retf
-4656                     ; 649 void SWI2C_ResetHDMI(void)
-4656                     ; 650 {
+4656                     ; 648 void SWI2C_ResetHDMI(void)
+4656                     ; 649 {
 4657                     	switch	.text
 4658  06f7               f_SWI2C_ResetHDMI:
-4662                     ; 651 	if (Power_status)
+4662                     ; 650 	if (Power_status)
 4664  06f7 725d0011      	tnz	L51_Power_status
 4665  06fb 273a          	jreq	L536
-4666                     ; 653 		GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);
+4666                     ; 652 		GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);
 4668  06fd 4b01          	push	#1
 4669  06ff ae5014        	ldw	x,#20500
 4670  0702 8d000000      	callf	f_GPIO_WriteHigh
 4672  0706 84            	pop	a
-4673                     ; 654 		GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
+4673                     ; 653 		GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
 4675  0707 4b01          	push	#1
 4676  0709 ae5005        	ldw	x,#20485
 4677  070c 8d000000      	callf	f_GPIO_WriteLow
 4679  0710 84            	pop	a
-4680                     ; 655 		IR_DelayNMiliseconds(200);
+4680                     ; 654 		IR_DelayNMiliseconds(200);
 4682  0711 ae00c8        	ldw	x,#200
 4683  0714 8d000000      	callf	f_IR_DelayNMiliseconds
-4685                     ; 656 		GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
+4685                     ; 655 		GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
 4687  0718 4b01          	push	#1
 4688  071a ae5005        	ldw	x,#20485
 4689  071d 8d000000      	callf	f_GPIO_WriteHigh
 4691  0721 84            	pop	a
-4692                     ; 657 		IR_DelayNMiliseconds(200);
+4692                     ; 656 		IR_DelayNMiliseconds(200);
 4694  0722 ae00c8        	ldw	x,#200
 4695  0725 8d000000      	callf	f_IR_DelayNMiliseconds
-4697                     ; 658 		IT6802_fsm_init();
+4697                     ; 657 		IT6802_fsm_init();
 4699  0729 8d000000      	callf	f_IT6802_fsm_init
-4701                     ; 659 		GPIO_WriteLow(LED_R_PORT, LED_R_PIN);
+4701                     ; 658 		GPIO_WriteLow(LED_R_PORT, LED_R_PIN);
 4703  072d 4b01          	push	#1
 4704  072f ae5014        	ldw	x,#20500
 4705  0732 8d000000      	callf	f_GPIO_WriteLow
 4707  0736 84            	pop	a
 4708  0737               L536:
-4709                     ; 661 }
+4709                     ; 660 }
 4712  0737 87            	retf
-4741                     ; 663 void SWI2C_SystemPowerDown(void)
-4741                     ; 664 {
+4741                     ; 662 void SWI2C_SystemPowerDown(void)
+4741                     ; 663 {
 4742                     	switch	.text
 4743  0738               f_SWI2C_SystemPowerDown:
-4747                     ; 665 	SET_BACKLIGHT_OFF();
+4747                     ; 664 	SET_BACKLIGHT_OFF();
 4749  0738 4b80          	push	#128
 4750  073a ae500a        	ldw	x,#20490
 4751  073d 8d000000      	callf	f_GPIO_WriteHigh
 4753  0741 84            	pop	a
-4754                     ; 666 	IR_DelayNMiliseconds(200);
+4754                     ; 665 	IR_DelayNMiliseconds(200);
 4756  0742 ae00c8        	ldw	x,#200
 4757  0745 8d000000      	callf	f_IR_DelayNMiliseconds
-4759                     ; 667 	SET_VPANEL_OFF();
+4759                     ; 666 	SET_VPANEL_OFF();
 4761  0749 4b01          	push	#1
 4762  074b ae501e        	ldw	x,#20510
 4763  074e 8d000000      	callf	f_GPIO_WriteLow
 4765  0752 84            	pop	a
-4766                     ; 668 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
+4766                     ; 667 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 4768  0753 4b20          	push	#32
 4769  0755 ae500a        	ldw	x,#20490
 4770  0758 8d000000      	callf	f_GPIO_WriteHigh
 4772  075c 84            	pop	a
-4773                     ; 669 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+4773                     ; 668 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 4775  075d 4b01          	push	#1
 4776  075f ae5014        	ldw	x,#20500
 4777  0762 8d000000      	callf	f_GPIO_WriteHigh
 4779  0766 84            	pop	a
-4780                     ; 670 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+4780                     ; 669 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
 4782  0767 4b08          	push	#8
 4783  0769 ae500f        	ldw	x,#20495
 4784  076c 8d000000      	callf	f_GPIO_WriteLow
 4786  0770 84            	pop	a
-4787                     ; 671 	Backlight_on_timer = TIMER_STOPPED;
+4787                     ; 670 	Backlight_on_timer = TIMER_STOPPED;
 4789  0771 ae0000        	ldw	x,#0
 4790  0774 cf0006        	ldw	L5_Backlight_on_timer+2,x
 4791  0777 ae0000        	ldw	x,#0
 4792  077a cf0004        	ldw	L5_Backlight_on_timer,x
-4793                     ; 672 	Power_status = FALSE;
+4793                     ; 671 	Power_status = FALSE;
 4795  077d 725f0011      	clr	L51_Power_status
-4796                     ; 673 	I2C_stop = FALSE;
+4796                     ; 672 	I2C_stop = FALSE;
 4798  0781 725f0012      	clr	L32_I2C_stop
-4799                     ; 674 }
+4799                     ; 673 }
 4802  0785 87            	retf
-4829                     ; 676 void SWI2C_ToggleI2CMode(void)
-4829                     ; 677 {
+4829                     ; 675 void SWI2C_ToggleI2CMode(void)
+4829                     ; 676 {
 4830                     	switch	.text
 4831  0786               f_SWI2C_ToggleI2CMode:
-4835                     ; 678 	if (Power_status)
+4835                     ; 677 	if (Power_status)
 4837  0786 725d0011      	tnz	L51_Power_status
 4838  078a 273e          	jreq	L756
-4839                     ; 680 		I2C_stop = !I2C_stop;
+4839                     ; 679 		I2C_stop = !I2C_stop;
 4841  078c 725d0012      	tnz	L32_I2C_stop
 4842  0790 2604          	jrne	L47
 4843  0792 a601          	ld	a,#1
@@ -3524,74 +3524,74 @@
 4846  0796 4f            	clr	a
 4847  0797               L67:
 4848  0797 c70012        	ld	L32_I2C_stop,a
-4849                     ; 681 		if (I2C_stop)
+4849                     ; 680 		if (I2C_stop)
 4851  079a 725d0012      	tnz	L32_I2C_stop
 4852  079e 2716          	jreq	L166
-4853                     ; 683 			GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+4853                     ; 682 			GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 4855  07a0 4b01          	push	#1
 4856  07a2 ae5014        	ldw	x,#20500
 4857  07a5 8d000000      	callf	f_GPIO_WriteHigh
 4859  07a9 84            	pop	a
-4860                     ; 684 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+4860                     ; 683 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 4862  07aa 4b08          	push	#8
 4863  07ac ae500f        	ldw	x,#20495
 4864  07af 8d000000      	callf	f_GPIO_WriteHigh
 4866  07b3 84            	pop	a
 4868  07b4 2014          	jra	L756
 4869  07b6               L166:
-4870                     ; 688 			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+4870                     ; 687 			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
 4872  07b6 4b01          	push	#1
 4873  07b8 ae5014        	ldw	x,#20500
 4874  07bb 8d000000      	callf	f_GPIO_WriteLow
 4876  07bf 84            	pop	a
-4877                     ; 689 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+4877                     ; 688 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 4879  07c0 4b08          	push	#8
 4880  07c2 ae500f        	ldw	x,#20495
 4881  07c5 8d000000      	callf	f_GPIO_WriteHigh
 4883  07c9 84            	pop	a
 4884  07ca               L756:
-4885                     ; 692 }
+4885                     ; 691 }
 4888  07ca 87            	retf
-4913                     ; 694 void SWI2C_ProcessPower(void)
-4913                     ; 695 {
+4913                     ; 693 void SWI2C_ProcessPower(void)
+4913                     ; 694 {
 4914                     	switch	.text
 4915  07cb               f_SWI2C_ProcessPower:
-4919                     ; 696 	if (Power_status)
+4919                     ; 695 	if (Power_status)
 4921  07cb 725d0011      	tnz	L51_Power_status
 4922  07cf 2706          	jreq	L576
-4923                     ; 698 		SWI2C_SystemPowerDown();
+4923                     ; 697 		SWI2C_SystemPowerDown();
 4925  07d1 8d380738      	callf	f_SWI2C_SystemPowerDown
 4928  07d5 2004          	jra	L776
 4929  07d7               L576:
-4930                     ; 702 		SWI2C_SystemPowerUp();
+4930                     ; 701 		SWI2C_SystemPowerUp();
 4932  07d7 8d650665      	callf	f_SWI2C_SystemPowerUp
 4934  07db               L776:
-4935                     ; 704 }
+4935                     ; 703 }
 4938  07db 87            	retf
 4940                     	switch	.data
 4941  0013               L107_Set3DOn:
 4942  0013 00            	dc.b	0
-4995                     ; 708 static void SWI2C_Set3DOnOff(u8 OnOff)
-4995                     ; 709 {
+4995                     ; 707 static void SWI2C_Set3DOnOff(u8 OnOff)
+4995                     ; 708 {
 4996                     	switch	.text
 4997  07dc               L307f_SWI2C_Set3DOnOff:
 4999  07dc 5203          	subw	sp,#3
 5000       00000003      OFST:	set	3
-5003                     ; 711 	if (OnOff)
+5003                     ; 710 	if (OnOff)
 5005  07de 4d            	tnz	a
 5006  07df 2706          	jreq	L727
-5007                     ; 713 		reg_value = 0x80;
+5007                     ; 712 		reg_value = 0x80;
 5009  07e1 a680          	ld	a,#128
 5010  07e3 6b03          	ld	(OFST+0,sp),a
 5012  07e5 2002          	jra	L137
 5013  07e7               L727:
-5014                     ; 717 		reg_value = 0x0;
+5014                     ; 716 		reg_value = 0x0;
 5016  07e7 0f03          	clr	(OFST+0,sp)
 5017  07e9               L137:
-5018                     ; 719 	for (retry = 0; retry < 3; retry++)
+5018                     ; 718 	for (retry = 0; retry < 3; retry++)
 5020  07e9 0f02          	clr	(OFST-1,sp)
 5021  07eb               L337:
-5022                     ; 722 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
+5022                     ; 721 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
 5024  07eb 7b03          	ld	a,(OFST+0,sp)
 5025  07ed 88            	push	a
 5026  07ee ae0057        	ldw	x,#87
@@ -3599,7 +3599,7 @@
 5028  07f3 95            	ld	xh,a
 5029  07f4 8dc602c6      	callf	f_SWI2C_WriteByte
 5031  07f8 84            	pop	a
-5032                     ; 723 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
+5032                     ; 722 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
 5034  07f9 96            	ldw	x,sp
 5035  07fa 1c0001        	addw	x,#OFST-2
 5036  07fd 89            	pushw	x
@@ -3608,25 +3608,25 @@
 5039  0803 95            	ld	xh,a
 5040  0804 8d4a024a      	callf	f_SWI2C_ReadByte
 5042  0808 85            	popw	x
-5043                     ; 724 		if (value == reg_value)
+5043                     ; 723 		if (value == reg_value)
 5045  0809 7b01          	ld	a,(OFST-2,sp)
 5046  080b 1103          	cp	a,(OFST+0,sp)
 5047  080d 2708          	jreq	L737
-5048                     ; 726 			break;
-5050                     ; 719 	for (retry = 0; retry < 3; retry++)
+5048                     ; 725 			break;
+5050                     ; 718 	for (retry = 0; retry < 3; retry++)
 5052  080f 0c02          	inc	(OFST-1,sp)
 5055  0811 7b02          	ld	a,(OFST-1,sp)
 5056  0813 a103          	cp	a,#3
 5057  0815 25d4          	jrult	L337
 5058  0817               L737:
-5059                     ; 729 }
+5059                     ; 728 }
 5062  0817 5b03          	addw	sp,#3
 5063  0819 87            	retf
-5088                     ; 731 void SWI2C_Toggle3DOnOff(void)
-5088                     ; 732 {	
+5088                     ; 730 void SWI2C_Toggle3DOnOff(void)
+5088                     ; 731 {	
 5089                     	switch	.text
 5090  081a               f_SWI2C_Toggle3DOnOff:
-5094                     ; 733 	Set3DOn = !Set3DOn;
+5094                     ; 732 	Set3DOn = !Set3DOn;
 5096  081a 725d0013      	tnz	L107_Set3DOn
 5097  081e 2604          	jrne	L601
 5098  0820 a601          	ld	a,#1
@@ -3635,22 +3635,22 @@
 5101  0824 4f            	clr	a
 5102  0825               L011:
 5103  0825 c70013        	ld	L107_Set3DOn,a
-5104                     ; 734 	SWI2C_Set3DOnOff(Set3DOn);
+5104                     ; 733 	SWI2C_Set3DOnOff(Set3DOn);
 5106  0828 c60013        	ld	a,L107_Set3DOn
 5107  082b 8ddc07dc      	callf	L307f_SWI2C_Set3DOnOff
-5109                     ; 735 }
+5109                     ; 734 }
 5112  082f 87            	retf
-5149                     ; 740 void FPGA_Init(void)
-5149                     ; 741  {	
+5149                     ; 739 void FPGA_Init(void)
+5149                     ; 740  {	
 5150                     	switch	.text
 5151  0830               f_FPGA_Init:
 5153  0830 88            	push	a
 5154       00000001      OFST:	set	1
-5157                     ; 743 	for (i = 0; i < table_size; i++)
+5157                     ; 742 	for (i = 0; i < table_size; i++)
 5159  0831 0f01          	clr	(OFST+0,sp)
 5161  0833 202a          	jra	L377
 5162  0835               L767:
-5163                     ; 745 		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], FLASH_ReadByte(EEPROM_START_ADDRESS + 1 + i));
+5163                     ; 744 		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], FLASH_ReadByte(EEPROM_START_ADDRESS + 1 + i));
 5165  0835 7b01          	ld	a,(OFST+0,sp)
 5166  0837 5f            	clrw	x
 5167  0838 97            	ld	xl,a
@@ -3672,13 +3672,13 @@
 5185  0857 95            	ld	xh,a
 5186  0858 8dc602c6      	callf	f_SWI2C_WriteByte
 5188  085c 84            	pop	a
-5189                     ; 743 	for (i = 0; i < table_size; i++)
+5189                     ; 742 	for (i = 0; i < table_size; i++)
 5191  085d 0c01          	inc	(OFST+0,sp)
 5192  085f               L377:
 5195  085f 7b01          	ld	a,(OFST+0,sp)
 5196  0861 c10000        	cp	a,_table_size
 5197  0864 25cf          	jrult	L767
-5198                     ; 747 	if (FLASH_ReadByte(EEPROM_START_ADDRESS + 1))
+5198                     ; 746 	if (FLASH_ReadByte(EEPROM_START_ADDRESS + 1))
 5200  0866 ae4001        	ldw	x,#16385
 5201  0869 89            	pushw	x
 5202  086a ae0000        	ldw	x,#0
@@ -3687,36 +3687,36 @@
 5206  0872 5b04          	addw	sp,#4
 5207  0874 4d            	tnz	a
 5208  0875 2704          	jreq	L777
-5209                     ; 749 		Set3DOn = TRUE;
+5209                     ; 748 		Set3DOn = TRUE;
 5211  0877 35010013      	mov	L107_Set3DOn,#1
 5212  087b               L777:
-5213                     ; 751 	SWI2C_Set3DOnOff(Set3DOn);	
+5213                     ; 750 	SWI2C_Set3DOnOff(Set3DOn);	
 5215  087b c60013        	ld	a,L107_Set3DOn
 5216  087e 8ddc07dc      	callf	L307f_SWI2C_Set3DOnOff
-5218                     ; 752 }
+5218                     ; 751 }
 5221  0882 84            	pop	a
 5222  0883 87            	retf
-5255                     ; 754 void HDMI_HotPlug(u8 value)
-5255                     ; 755 {
+5255                     ; 753 void HDMI_HotPlug(u8 value)
+5255                     ; 754 {
 5256                     	switch	.text
 5257  0884               f_HDMI_HotPlug:
-5261                     ; 756 	if (value)
+5261                     ; 755 	if (value)
 5263  0884 4d            	tnz	a
 5264  0885 270c          	jreq	L5101
-5265                     ; 758 		GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+5265                     ; 757 		GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 5267  0887 4b40          	push	#64
 5268  0889 ae5005        	ldw	x,#20485
 5269  088c 8d000000      	callf	f_GPIO_WriteHigh
 5271  0890 84            	pop	a
 5273  0891 200a          	jra	L7101
 5274  0893               L5101:
-5275                     ; 762 		GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+5275                     ; 761 		GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 5277  0893 4b40          	push	#64
 5278  0895 ae5005        	ldw	x,#20485
 5279  0898 8d000000      	callf	f_GPIO_WriteLow
 5281  089c 84            	pop	a
 5282  089d               L7101:
-5283                     ; 764 }
+5283                     ; 763 }
 5286  089d 87            	retf
 5288                     	switch	.const
 5289  0904               L1201_deep_value:
@@ -3738,16 +3738,16 @@
 5305  0913 a8            	dc.b	168
 5306  0914 30            	dc.b	48
 5307  0915 a0            	dc.b	160
-5340                     ; 776 void SWI2C_Set_deep(u8 deep)
-5340                     ; 777 {
+5340                     ; 775 void SWI2C_Set_deep(u8 deep)
+5340                     ; 776 {
 5341                     	switch	.text
 5342  089e               f_SWI2C_Set_deep:
 5344  089e 88            	push	a
 5345       00000000      OFST:	set	0
-5348                     ; 778 	if (deep == 0)
+5348                     ; 777 	if (deep == 0)
 5350  089f 4d            	tnz	a
 5351  08a0 2650          	jrne	L7301
-5352                     ; 780 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, FLASH_ReadByte(0x4000 + REG_0x59 + 1));
+5352                     ; 779 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, FLASH_ReadByte(0x4000 + REG_0x59 + 1));
 5354  08a2 ae400b        	ldw	x,#16395
 5355  08a5 89            	pushw	x
 5356  08a6 ae0000        	ldw	x,#0
@@ -3760,7 +3760,7 @@
 5364  08b6 95            	ld	xh,a
 5365  08b7 8dc602c6      	callf	f_SWI2C_WriteByte
 5367  08bb 84            	pop	a
-5368                     ; 781 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, FLASH_ReadByte(0x4000 + REG_0x5C + 1));
+5368                     ; 780 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, FLASH_ReadByte(0x4000 + REG_0x5C + 1));
 5370  08bc ae400d        	ldw	x,#16397
 5371  08bf 89            	pushw	x
 5372  08c0 ae0000        	ldw	x,#0
@@ -3773,7 +3773,7 @@
 5380  08d0 95            	ld	xh,a
 5381  08d1 8dc602c6      	callf	f_SWI2C_WriteByte
 5383  08d5 84            	pop	a
-5384                     ; 782 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, FLASH_ReadByte(0x4000 + REG_0x5A + 1));
+5384                     ; 781 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, FLASH_ReadByte(0x4000 + REG_0x5A + 1));
 5386  08d6 ae400c        	ldw	x,#16396
 5387  08d9 89            	pushw	x
 5388  08da ae0000        	ldw	x,#0
@@ -3788,7 +3788,7 @@
 5399  08ef 84            	pop	a
 5401  08f0 203f          	jra	L1401
 5402  08f2               L7301:
-5403                     ; 786 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, deep_value[deep][0]);
+5403                     ; 785 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, deep_value[deep][0]);
 5405  08f2 7b01          	ld	a,(OFST+1,sp)
 5406  08f4 97            	ld	xl,a
 5407  08f5 a603          	ld	a,#3
@@ -3800,7 +3800,7 @@
 5413  0901 95            	ld	xh,a
 5414  0902 8dc602c6      	callf	f_SWI2C_WriteByte
 5416  0906 84            	pop	a
-5417                     ; 787 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, deep_value[deep][1]);
+5417                     ; 786 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, deep_value[deep][1]);
 5419  0907 7b01          	ld	a,(OFST+1,sp)
 5420  0909 97            	ld	xl,a
 5421  090a a603          	ld	a,#3
@@ -3812,7 +3812,7 @@
 5427  0916 95            	ld	xh,a
 5428  0917 8dc602c6      	callf	f_SWI2C_WriteByte
 5430  091b 84            	pop	a
-5431                     ; 788 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, deep_value[deep][2]);
+5431                     ; 787 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, deep_value[deep][2]);
 5433  091c 7b01          	ld	a,(OFST+1,sp)
 5434  091e 97            	ld	xl,a
 5435  091f a603          	ld	a,#3
@@ -3825,61 +3825,61 @@
 5442  092c 8dc602c6      	callf	f_SWI2C_WriteByte
 5444  0930 84            	pop	a
 5445  0931               L1401:
-5446                     ; 790 }
+5446                     ; 789 }
 5449  0931 84            	pop	a
 5450  0932 87            	retf
 5476                     	switch	.const
 5477  0916               L221:
 5478  0916 00000002      	dc.l	2
-5479                     ; 792 void SWI2C_UpdateTimer(void)
-5479                     ; 793 {
+5479                     ; 791 void SWI2C_UpdateTimer(void)
+5479                     ; 792 {
 5480                     	switch	.text
 5481  0933               f_SWI2C_UpdateTimer:
-5485                     ; 794 	if (frc_update_timer > TIMER_EXPIRED)
+5485                     ; 793 	if (frc_update_timer > TIMER_EXPIRED)
 5487  0933 ae0000        	ldw	x,#L3_frc_update_timer
 5488  0936 8d000000      	callf	d_ltor
 5490  093a ae0916        	ldw	x,#L221
 5491  093d 8d000000      	callf	d_lcmp
 5493  0941 2509          	jrult	L3501
-5494                     ; 796 		frc_update_timer--;
+5494                     ; 795 		frc_update_timer--;
 5496  0943 ae0000        	ldw	x,#L3_frc_update_timer
 5497  0946 a601          	ld	a,#1
 5498  0948 8d000000      	callf	d_lgsbc
 5500  094c               L3501:
-5501                     ; 799 	if (Backlight_on_timer > TIMER_EXPIRED)
+5501                     ; 798 	if (Backlight_on_timer > TIMER_EXPIRED)
 5503  094c ae0004        	ldw	x,#L5_Backlight_on_timer
 5504  094f 8d000000      	callf	d_ltor
 5506  0953 ae0916        	ldw	x,#L221
 5507  0956 8d000000      	callf	d_lcmp
 5509  095a 2509          	jrult	L5501
-5510                     ; 801 		Backlight_on_timer--;
+5510                     ; 800 		Backlight_on_timer--;
 5512  095c ae0004        	ldw	x,#L5_Backlight_on_timer
 5513  095f a601          	ld	a,#1
 5514  0961 8d000000      	callf	d_lgsbc
 5516  0965               L5501:
-5517                     ; 804 	if (secret_detect_timer > TIMER_EXPIRED)
+5517                     ; 803 	if (secret_detect_timer > TIMER_EXPIRED)
 5519  0965 ae0008        	ldw	x,#L7_secret_detect_timer
 5520  0968 8d000000      	callf	d_ltor
 5522  096c ae0916        	ldw	x,#L221
 5523  096f 8d000000      	callf	d_lcmp
 5525  0973 2509          	jrult	L7501
-5526                     ; 806 		secret_detect_timer--;
+5526                     ; 805 		secret_detect_timer--;
 5528  0975 ae0008        	ldw	x,#L7_secret_detect_timer
 5529  0978 a601          	ld	a,#1
 5530  097a 8d000000      	callf	d_lgsbc
 5532  097e               L7501:
-5533                     ; 809 	if (signal_detect_timer > TIMER_EXPIRED)
+5533                     ; 808 	if (signal_detect_timer > TIMER_EXPIRED)
 5535  097e ae000c        	ldw	x,#L11_signal_detect_timer
 5536  0981 8d000000      	callf	d_ltor
 5538  0985 ae0916        	ldw	x,#L221
 5539  0988 8d000000      	callf	d_lcmp
 5541  098c 2509          	jrult	L1601
-5542                     ; 811 		signal_detect_timer--;
+5542                     ; 810 		signal_detect_timer--;
 5544  098e ae000c        	ldw	x,#L11_signal_detect_timer
 5545  0991 a601          	ld	a,#1
 5546  0993 8d000000      	callf	d_lgsbc
 5548  0997               L1601:
-5549                     ; 813 }
+5549                     ; 812 }
 5552  0997 87            	retf
 5707                     	xref	_table_size
 5708                     	xref	_address_table
