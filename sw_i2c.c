@@ -48,10 +48,11 @@
 
 #define FRC_UPDATE_TIME			(500 + 1)
 #define SECRET_DETECT_TIME		(500 + 1)
-#define SINGNAL_TETECT_TIME		(500 + 1) 
+#define SINGNAL_TETECT_TIME		(150 + 1) 
 #define BACKLIGHT_DELAY_TIME	(5000 + 1)
 
-#define SIGNAL_STABLE_COUNT		3
+#define SIGNAL_STABLE_COUNT		5
+#define NO_SIGNAL_COUNT			2
 #define IIC_ACK_TIMEOUT			50
 
 #define SET_VPANEL_ON()			GPIO_WriteHigh(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN)
@@ -558,7 +559,7 @@ void SWI2C_Update(void)
 				secret_key[2] = secret_key_table3[secret_key[2]];
 				secret_key[3] = secret_key_table4[secret_key[3]];
 				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, secret_key);
-				secret_status = secret_status|0x02;
+				secret_status = secret_status|0x07;
 				SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
 			}
 			secret_detect_timer = SECRET_DETECT_TIME;
@@ -567,31 +568,28 @@ void SWI2C_Update(void)
 		if (signal_detect_timer == TIMER_EXPIRED)
 		{
 			
-			u8 current_signal_status = SWI2C_GetSignalStatus();
-
+			u8 current_signal_status;
+			
 			signal_detect_timer = SINGNAL_TETECT_TIME;
+			current_signal_status = SWI2C_GetSignalStatus();
 			if (current_signal_status != signal_status)
 			{
 				singal_change_count++;
-				if (singal_change_count > SIGNAL_STABLE_COUNT)
+				if (current_signal_status && singal_change_count > SIGNAL_STABLE_COUNT)
 				{
-					signal_status = current_signal_status;
-					if (signal_status)
-					{
-						//SET_VPANEL_ON();
-						GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-						SWI2C_ResetFPGA();
-						SET_VPANEL_ON();
-						Backlight_on_timer = BACKLIGHT_DELAY_TIME;
-					}
-					else
-					{
-						Backlight_on_timer = TIMER_STOPPED;
-						SET_BACKLIGHT_OFF();
-						IR_DelayNMiliseconds(200);
-						SET_VPANEL_OFF();
-						GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
-					}
+					signal_status = TRUE;
+					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+					SWI2C_ResetFPGA();
+					SET_VPANEL_ON();
+					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
+				}
+				else if (!current_signal_status && singal_change_count > NO_SIGNAL_COUNT)
+				{
+					signal_status = FALSE;
+					Backlight_on_timer = TIMER_STOPPED;
+					SET_BACKLIGHT_OFF();
+					IR_DelayNMiliseconds(200);
+					SET_VPANEL_OFF();
 				}
 			}
 			else
@@ -638,10 +636,10 @@ void SWI2C_ResetFPGA(void)
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(1500);
-		FPGA_Init();	
 #if PANEL_65INCH
 		FPGA_WriteWaveTable();
 #endif
+		FPGA_Init();
 	}
 }
 /*==========================================================================*/
