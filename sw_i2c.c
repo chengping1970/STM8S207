@@ -549,18 +549,19 @@ void SWI2C_Update(void)
 #if FPGA_KEY_VERIFY
 		if (secret_detect_timer == TIMER_EXPIRED)
 		{
-			u8 secret_key[4], secret_status;
+			u8 secret_key[4], convert_key[4], secret_status;
 			SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
 			if ((secret_status&0x03) == 1)
 			{
 				SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
-				secret_key[0] = secret_key_table1[secret_key[0]];
-				secret_key[1] = secret_key_table2[secret_key[1]];
-				secret_key[2] = secret_key_table3[secret_key[2]];
-				secret_key[3] = secret_key_table4[secret_key[3]];
-				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, secret_key);
+				convert_key[0] = secret_key_table1[secret_key[0]];
+				convert_key[1] = secret_key_table2[secret_key[1]];
+				convert_key[2] = secret_key_table3[secret_key[2]];
+				convert_key[3] = secret_key_table4[secret_key[3]];
+				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, convert_key);
 				secret_status = secret_status|0x07;
 				SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
+				//SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
 			}
 			secret_detect_timer = SECRET_DETECT_TIME;
 		}
@@ -745,6 +746,7 @@ void FPGA_Init(void)
 	{
 		Set3DOn = TRUE;
 	}
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
 	SWI2C_Set3DOnOff(Set3DOn);	
 }
 /*==========================================================================*/

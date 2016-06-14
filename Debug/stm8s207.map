@@ -1,5 +1,5 @@
 
-Map of Debug\stm8s207.sm8 from link file Debug\stm8s207.lkf - Mon Jun 13 11:17:34 2016
+Map of Debug\stm8s207.sm8 from link file Debug\stm8s207.lkf - Tue Jun 14 00:32:56 2016
 
 
                                --------
@@ -7,7 +7,7 @@ Map of Debug\stm8s207.sm8 from link file Debug\stm8s207.lkf - Mon Jun 13 11:17:3
                                --------
 
 start 00008080 end 0000b844 length 14276 segment .const
-start 0000b903 end 000127ba length 28343 segment .text
+start 0000b903 end 000127c7 length 28356 segment .text
 start 00004000 end 00004000 length     0 segment .eeprom
 start 00000000 end 00000000 length     0 segment .bsct
 start 00000000 end 0000000a length    10 segment .ubsct
@@ -17,7 +17,7 @@ start 00000100 end 000001b7 length   183 segment .data, initialized
 start 0000b84c end 0000b903 length   183 segment .data, from
 start 000001b7 end 0000048a length   723 segment .bss
 start 00000000 end 00000e0a length  3594 segment .info.
-start 00000000 end 0000f454 length 62548 segment .debug
+start 00000000 end 0000f479 length 62585 segment .debug
 start 00008000 end 00008080 length   128 segment .const
 start 0000b844 end 0000b84c length     8 segment .init
 
@@ -116,41 +116,41 @@ start 0000e0bf end 0000e4c6 length  1031 section .debug
 start 000005e2 end 00000654 length   114 section .info.
 
 Debug\sw_i2c.o:
-start 000113e2 end 00011d7c length  2458 section .text
+start 000113e2 end 00011d89 length  2471 section .text
 start 000001a3 end 000001b7 length    20 section .data
 start 00000487 end 0000048a length     3 section .bss
-start 0000e4c6 end 0000f2e9 length  3619 section .debug
+start 0000e4c6 end 0000f30e length  3656 section .debug
 start 00000654 end 000006c2 length   110 section .info.
 start 0000aef8 end 0000b812 length  2330 section .const
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)printf.o:
-start 00011d7c end 00011d8d length    17 section .text
+start 00011d89 end 00011d9a length    17 section .text
 start 000006c2 end 00000736 length   116 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o:
-start 00011d8d end 00012306 length  1401 section .text
+start 00011d9a end 00012313 length  1401 section .text
 start 00000736 end 000007aa length   116 section .info.
 start 0000b812 end 0000b81f length    13 section .const
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o:
-start 00012306 end 0001241d length   279 section .text
+start 00012313 end 0001242a length   279 section .text
 start 000007aa end 0000081c length   114 section .info.
 start 0000b81f end 0000b844 length    37 section .const
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)idiv1.o:
-start 0001241d end 00012428 length    11 section .text
+start 0001242a end 00012435 length    11 section .text
 start 0000081c end 00000848 length    44 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)ildiv1.o:
-start 00012428 end 00012446 length    30 section .text
+start 00012435 end 00012453 length    30 section .text
 start 00000848 end 00000875 length    45 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)strlen1.o:
-start 00012446 end 00012452 length    12 section .text
+start 00012453 end 0001245f length    12 section .text
 start 00000875 end 000008a3 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)toup1.o:
-start 00012452 end 0001245d length    11 section .text
+start 0001245f end 0001246a length    11 section .text
 start 000008a3 end 000008cf length    44 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lreg.o:
@@ -166,96 +166,96 @@ start 00000007 end 0000000a length     3 section .ubsct
 start 0000092b end 00000959 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ldiv.o:
-start 0001245d end 0001254a length   237 section .text
+start 0001246a end 00012557 length   237 section .text
 start 00000959 end 00000987 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ftol.o:
-start 0001254a end 000125ad length    99 section .text
+start 00012557 end 000125ba length    99 section .text
 start 00000987 end 000009b5 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)idiv.o:
-start 000125ad end 000125cb length    30 section .text
+start 000125ba end 000125d8 length    30 section .text
 start 000009b5 end 000009e3 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)imul.o:
-start 000125cb end 000125ec length    33 section .text
+start 000125d8 end 000125f9 length    33 section .text
 start 000009e3 end 00000a11 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)itolx.o:
-start 000125ec end 000125fa length    14 section .text
+start 000125f9 end 00012607 length    14 section .text
 start 00000a11 end 00000a40 length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)jtab.o:
-start 000125fa end 00012627 length    45 section .text
+start 00012607 end 00012634 length    45 section .text
 start 00000a40 end 00000a6e length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lcmp.o:
-start 00012627 end 00012647 length    32 section .text
+start 00012634 end 00012654 length    32 section .text
 start 00000a6e end 00000a9c length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgadc.o:
-start 00012647 end 00012657 length    16 section .text
+start 00012654 end 00012664 length    16 section .text
 start 00000a9c end 00000acb length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgneg.o:
-start 00012657 end 0001266a length    19 section .text
+start 00012664 end 00012677 length    19 section .text
 start 00000acb end 00000afa length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgsbc.o:
-start 0001266a end 00012680 length    22 section .text
+start 00012677 end 0001268d length    22 section .text
 start 00000afa end 00000b29 length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)llsh.o:
-start 00012680 end 0001268f length    15 section .text
+start 0001268d end 0001269c length    15 section .text
 start 00000b29 end 00000b57 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lneg.o:
-start 0001268f end 000126a4 length    21 section .text
+start 0001269c end 000126b1 length    21 section .text
 start 00000b57 end 00000b85 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lsub.o:
-start 000126a4 end 000126bc length    24 section .text
+start 000126b1 end 000126c9 length    24 section .text
 start 00000b85 end 00000bb3 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ltor.o:
-start 000126bc end 000126ce length    18 section .text
+start 000126c9 end 000126db length    18 section .text
 start 00000bb3 end 00000be1 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ludiv.o:
-start 000126ce end 000126e3 length    21 section .text
+start 000126db end 000126f0 length    21 section .text
 start 00000be1 end 00000c10 length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lursh.o:
-start 000126e3 end 000126f2 length    15 section .text
+start 000126f0 end 000126ff length    15 section .text
 start 00000c10 end 00000c3f length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lzmp.o:
-start 000126f2 end 00012704 length    18 section .text
+start 000126ff end 00012711 length    18 section .text
 start 00000c3f end 00000c6d length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)rtol.o:
-start 00012704 end 00012716 length    18 section .text
+start 00012711 end 00012723 length    18 section .text
 start 00000c6d end 00000c9b length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivx.o:
-start 00012716 end 00012741 length    43 section .text
+start 00012723 end 0001274e length    43 section .text
 start 00000c9b end 00000cca length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivy.o:
-start 00012741 end 00012773 length    50 section .text
+start 0001274e end 00012780 length    50 section .text
 start 00000cca end 00000cf9 length    47 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)smul.o:
-start 00012773 end 000127b2 length    63 section .text
+start 00012780 end 000127bf length    63 section .text
 start 00000cf9 end 00000d27 length    46 section .info.
 
 (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)utolx.o:
-start 000127b2 end 000127b9 length     7 section .text
+start 000127bf end 000127c6 length     7 section .text
 start 00000d27 end 00000d56 length    47 section .info.
 
 Debug\stm8_interrupt_vector.o:
-start 000127b9 end 000127ba length     1 section .text
-start 0000f2e9 end 0000f454 length   363 section .debug
+start 000127c6 end 000127c7 length     1 section .text
+start 0000f30e end 0000f479 length   363 section .debug
 start 00000d56 end 00000dd3 length   125 section .info.
 start 00008000 end 00008080 length   128 section .const
 
@@ -374,7 +374,7 @@ f_show_vid_info                               110   (8)
 
 Debug\main.o:
 f_flash_init                                   15   (3)
-f_main                                     >  158   (2)
+f_main                                     >  162   (2)
 
 Debug\stm8_interrupt_vector.o:
 f_NonHandledInterrupt                      >    5   (5)
@@ -549,9 +549,9 @@ Debug\sw_i2c.o:
 L122f_SWI2C_GetSignalStatus                    29   (3)
 L17f__SWI2C_Start                               7   (2)
 L301f__SWI2C_Stop                               7   (2)
-L307f_SWI2C_Set3DOnOff                         31   (5)
 L511f__SWI2C_SendByte                          10   (4)
 L542f_FPGA_WriteWaveTable                      27   (4)
+L707f_SWI2C_Set3DOnOff                         31   (5)
 L73f__Delay_5us                                 3   (3)
 L751f__SWI2C_ReceiveByte                       12   (6)
 f_FPGA_Init                                    34   (3)
@@ -568,7 +568,7 @@ f_SWI2C_SystemPowerUp                         137   (2)
 f_SWI2C_TestDevice                             14   (4)
 f_SWI2C_Toggle3DOnOff                          33   (2)
 f_SWI2C_ToggleI2CMode                           7   (2)
-f_SWI2C_Update                                156   (7)
+f_SWI2C_Update                                160   (11)
 f_SWI2C_UpdateTimer                             5   (2)
 f_SWI2C_Write2Byte                         >   17   (7)
 f_SWI2C_WriteByte                              23   (5)
@@ -618,7 +618,7 @@ d_smody                                         3   (3)
 d_smul                                          7   (7)
 d_uitolx                                        3   (3)
 
-Stack size: 180
+Stack size: 184
 
 
                               ---------
@@ -1127,7 +1127,7 @@ Stack size: 180
           |    |    | 
           |    | 
  337      |    + f_SWI2C_Toggle3DOnOff: (2)
- 338      |    |    + L307f_SWI2C_Set3DOnOff: (5)
+ 338      |    |    + L707f_SWI2C_Set3DOnOff: (5)
  339      |    |    |    + f_SWI2C_ReadByte: (6)
  340      |    |    |    |    + f_SWI2C_ReadBytes --> 3
           |    |    |    | 
@@ -1148,7 +1148,7 @@ Stack size: 180
  351      |    + f_TIM1_TimeBaseInit: (8)
           | 
  352      + f_SWI2C_SystemPowerUp --> 324
- 353      + f_SWI2C_Update: (7)
+ 353      + f_SWI2C_Update: (11)
  354      |    + L122f_SWI2C_GetSignalStatus: (3)
  355      |    |    + f_SWI2C_ReadByte --> 339
           |    | 
@@ -1368,7 +1368,7 @@ Stack size: 180
  524      |    |    |    + f_SWI2C_WriteByte --> 335
           |    |    | 
  525      |    |    + f_FPGA_Init: (3)
- 526      |    |    |    + L307f_SWI2C_Set3DOnOff --> 338
+ 526      |    |    |    + L707f_SWI2C_Set3DOnOff --> 338
  527      |    |    |    + f_FLASH_ReadByte --> 334
  528      |    |    |    + f_SWI2C_WriteByte --> 335
           |    |    | 
@@ -1470,109 +1470,109 @@ Stack size: 180
 
  587   L303f_v3d_unsupport2nd --> 417
 
- 588   L307f_SWI2C_Set3DOnOff --> 338
+ 588   L311f_hdmirx_Var_init --> 121
 
- 589   L311f_hdmirx_Var_init --> 121
+ 589   L312f_hdmirx_INT_5V_Pwr_Chg --> 474
 
- 590   L312f_hdmirx_INT_5V_Pwr_Chg --> 474
+ 590   L313f_EDIDRAMInitial --> 87
 
- 591   L313f_EDIDRAMInitial --> 87
+ 591   L31f__putbuf --> 28
 
- 592   L31f__putbuf --> 28
+ 592   L321f_WaitingForSCDT --> 366
 
- 593   L321f_WaitingForSCDT --> 366
+ 593   L322f_hdmirx_INT_P1_Deskew --> 482
 
- 594   L322f_hdmirx_INT_P1_Deskew --> 482
+ 594   L323f_RCPinitQ --> 122
 
- 595   L323f_RCPinitQ --> 122
+ 595   L331f_SetVideoInputFormatWithInfoFrame --> 160
 
- 596   L331f_SetVideoInputFormatWithInfoFrame --> 160
+ 596   L332f_parse_rcpkey --> 432
 
- 597   L332f_parse_rcpkey --> 432
+ 597   L333f_RCPManager --> 376
 
- 598   L333f_RCPManager --> 376
+ 598   L33f__Compare_Count --> 73
 
- 599   L33f__Compare_Count --> 73
+ 599   L341f_SetNewInfoVideoOutput --> 158
 
- 600   L341f_SetNewInfoVideoOutput --> 158
+ 600   L343f_it6802ShowErrorCount --> 390
 
- 601   L343f_it6802ShowErrorCount --> 390
+ 601   L351f_IT6802VideoOutputConfigure --> 138
 
- 602   L351f_IT6802VideoOutputConfigure --> 138
+ 602   L352f_cbus_send_mscmsg --> 379
 
- 603   L352f_cbus_send_mscmsg --> 379
+ 603   L361f_hdmirx_ResetAudio --> 511
 
- 604   L361f_hdmirx_ResetAudio --> 511
+ 604   L362f_set_mhlsts --> 422
 
- 605   L362f_set_mhlsts --> 422
+ 605   L36f__convert_IR --> 317
 
- 606   L36f__convert_IR --> 317
+ 606   L36f_hdmirxrd --> 2
 
- 607   L36f_hdmirxrd --> 2
+ 607   L371f_getHDMIRXInputAudio --> 513
 
- 608   L371f_getHDMIRXInputAudio --> 513
+ 608   L372f_v3d_burst2nd --> 425
 
- 609   L372f_v3d_burst2nd --> 425
+ 609   L37f_mhlrxrd --> 115
 
- 610   L37f_mhlrxrd --> 115
+ 610   L3f_TI1_Config --> 228
 
- 611   L3f_TI1_Config --> 228
+ 611   L501f_get_it6802_dev_data --> 54
 
- 612   L501f_get_it6802_dev_data --> 54
+ 612   L502f_IT6802VideoOutputEnable --> 172
 
- 613   L502f_IT6802VideoOutputEnable --> 172
+ 613   L503f_UpdateEDIDRAM --> 97
 
- 614   L503f_UpdateEDIDRAM --> 97
+ 614   L511f_IT6802_Rst --> 112
 
- 615   L511f_IT6802_Rst --> 112
+ 615   L511f__SWI2C_SendByte --> 12
 
- 616   L511f__SWI2C_SendByte --> 12
+ 616   L512f_hdmirx_INT_P0_ECC --> 486
 
- 617   L512f_hdmirx_INT_P0_ECC --> 486
+ 617   L513f_Find_Phyaddress_Location --> 101
 
- 618   L513f_Find_Phyaddress_Location --> 101
+ 618   L521f_CheckAVMute --> 363
 
- 619   L521f_CheckAVMute --> 363
+ 619   L522f_hdmirx_INT_HDMIMode_Chg --> 489
 
- 620   L522f_hdmirx_INT_HDMIMode_Chg --> 489
+ 620   L523f_RCPKeyPop --> 378
 
- 621   L523f_RCPKeyPop --> 378
+ 621   L531f_SetColorimetryByInfoFrame --> 165
 
- 622   L531f_SetColorimetryByInfoFrame --> 165
+ 622   L532f_mhl_parse_RCPkey --> 436
 
- 623   L532f_mhl_parse_RCPkey --> 436
+ 623   L533f_IT6802MHLInterruptHandler --> 394
 
- 624   L533f_IT6802MHLInterruptHandler --> 394
+ 624   L541f_SetVideoInputFormatWithoutInfoFrame --> 149
 
- 625   L541f_SetVideoInputFormatWithoutInfoFrame --> 149
+ 625   L542f_FPGA_WriteWaveTable --> 523
 
- 626   L542f_FPGA_WriteWaveTable --> 523
+ 626   L542f_mhl_read_mscmsg --> 431
 
- 627   L542f_mhl_read_mscmsg --> 431
+ 627   L551f_SetVideoOutputColorFormat --> 152
 
- 628   L551f_SetVideoOutputColorFormat --> 152
+ 628   L552f_parse_devcap --> 456
 
- 629   L552f_parse_devcap --> 456
+ 629   L561f_hdmirx_SetHWMuteClrMode --> 515
 
- 630   L561f_hdmirx_SetHWMuteClrMode --> 515
+ 630   L562f_write_burst --> 401
 
- 631   L562f_write_burst --> 401
+ 631   L56f_hdmirxwr --> 41
 
- 632   L56f_hdmirxwr --> 41
+ 632   L571f_IT6802SwitchAudioState --> 175
 
- 633   L571f_IT6802SwitchAudioState --> 175
+ 633   L572f_v3d_burst3rd --> 447
 
- 634   L572f_v3d_burst3rd --> 447
+ 634   L57f_mhlrxwr --> 118
 
- 635   L57f_mhlrxwr --> 118
+ 635   L5f_TI2_Config --> 229
 
- 636   L5f_TI2_Config --> 229
+ 636   L701f_hdimrx_write_init --> 123
 
- 637   L701f_hdimrx_write_init --> 123
+ 637   L702f_IT6802SwitchVideoState --> 132
 
- 638   L702f_IT6802SwitchVideoState --> 132
+ 638   L703f_EnableEDIDupdata --> 103
 
- 639   L703f_EnableEDIDupdata --> 103
+ 639   L707f_SWI2C_Set3DOnOff --> 338
 
  640   L711f_chgbank --> 38
 
@@ -1904,45 +1904,45 @@ c_y                               00000007   defined in (c:\Program Files (x86)\
                                                      Debug\uart.o Debug\ir.o
                                                      Debug\it680x.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivy.o
-d_divsl                           0001245d   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ldiv.o section .text
+d_divsl                           0001246a   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ldiv.o section .text
                                              *** not used ***
-d_divul                           00012476   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ldiv.o section .text
+d_divul                           00012483   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ldiv.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)ildiv1.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ludiv.o
-d_ftoi                            0001254a   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ftol.o section .text
+d_ftoi                            00012557   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ftol.o section .text
                                              used in Debug\it680x.o
-d_ftol                            00012551   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ftol.o section .text
-d_idiv                            000125ad   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)idiv.o section .text
+d_ftol                            0001255e   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ftol.o section .text
+d_idiv                            000125ba   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)idiv.o section .text
                                              used in Debug\it680x.o
-d_imul                            000125cb   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)imul.o section .text
+d_imul                            000125d8   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)imul.o section .text
                                              used in Debug\it680x.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
-d_itolx                           000125ec   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)itolx.o section .text
+d_itolx                           000125f9   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)itolx.o section .text
                                              used in Debug\main.o Debug\sw_i2c.o
-d_jctab                           000125fa   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)jtab.o section .text
+d_jctab                           00012607   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)jtab.o section .text
                                              used in Debug\it680x.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
-d_jstab                           000125fc   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)jtab.o section .text
+d_jstab                           00012609   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)jtab.o section .text
                                              *** not used ***
-d_lcmp                            00012627   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lcmp.o section .text
+d_lcmp                            00012634   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lcmp.o section .text
                                              used in Debug\uart.o Debug\ir.o
                                                      Debug\sw_i2c.o
-d_lgadc                           00012647   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgadc.o section .text
+d_lgadc                           00012654   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgadc.o section .text
                                              used in Debug\uart.o Debug\ir.o
-d_lgneg                           00012657   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgneg.o section .text
+d_lgneg                           00012664   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgneg.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ldiv.o
-d_lgsbc                           0001266a   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgsbc.o section .text
+d_lgsbc                           00012677   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lgsbc.o section .text
                                              used in Debug\ir.o Debug\sw_i2c.o
-d_llsh                            00012680   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)llsh.o section .text
+d_llsh                            0001268d   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)llsh.o section .text
                                              used in Debug\stm8s_uart3.o
                                                      Debug\stm8s_uart1.o
-d_lneg                            0001268f   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lneg.o section .text
+d_lneg                            0001269c   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lneg.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ldiv.o
-d_lsub                            000126a4   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lsub.o section .text
+d_lsub                            000126b1   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lsub.o section .text
                                              used in Debug\stm8s_uart3.o
                                                      Debug\stm8s_uart1.o
-d_ltor                            000126bc   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ltor.o section .text
+d_ltor                            000126c9   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ltor.o section .text
                                              used in Debug\stm8s_uart3.o
                                                      Debug\uart.o
                                                      Debug\stm8s_uart1.o
@@ -1951,34 +1951,34 @@ d_ltor                            000126bc   defined in (c:\Program Files (x86)\
                                                      Debug\sw_i2c.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)ildiv1.o
-d_ludv                            000126ce   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ludiv.o section .text
+d_ludv                            000126db   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)ludiv.o section .text
                                              used in Debug\stm8s_uart3.o
                                                      Debug\stm8s_uart1.o
                                                      Debug\stm8s_clk.o
-d_lursh                           000126e3   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lursh.o section .text
+d_lursh                           000126f0   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lursh.o section .text
                                              used in Debug\stm8s_uart3.o
                                                      Debug\stm8s_uart1.o
-d_lzmp                            000126f2   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lzmp.o section .text
+d_lzmp                            000126ff   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)lzmp.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o
-d_rtol                            00012704   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)rtol.o section .text
+d_rtol                            00012711   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)rtol.o section .text
                                              used in Debug\stm8s_uart3.o
                                                      Debug\stm8s_uart1.o
                                                      Debug\ir.o Debug\stm8s_clk.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o
                                                      (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)ildiv1.o
-d_sdivx                           0001271c   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivx.o section .text
+d_sdivx                           00012729   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivx.o section .text
                                              *** not used ***
-d_sdivy                           00012747   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivy.o section .text
+d_sdivy                           00012754   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivy.o section .text
                                              *** not used ***
-d_smodx                           00012716   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivx.o section .text
+d_smodx                           00012723   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivx.o section .text
                                              used in Debug\it680x.o
-d_smody                           00012741   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivy.o section .text
+d_smody                           0001274e   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)sdivy.o section .text
                                              used in Debug\it680x.o
-d_smul                            00012773   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)smul.o section .text
+d_smul                            00012780   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)smul.o section .text
                                              used in Debug\stm8s_uart3.o
                                                      Debug\stm8s_uart1.o
-d_uitolx                          000127b2   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)utolx.o section .text
+d_uitolx                          000127bf   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libm.sm8)utolx.o section .text
                                              used in Debug\ir.o
 f_ADC2_ClearFlag                  0000baed   defined in Debug\stm8s_adc2.o section .text
                                              *** not used ***
@@ -2044,7 +2044,7 @@ f_GPIO_WriteLow                   00010a66   defined in Debug\stm8s_gpio.o secti
                                              used in Debug\sw_i2c.o
 f_GPIO_WriteReverse               00010a6e   defined in Debug\stm8s_gpio.o section .text
                                              used in Debug\sw_i2c.o
-f_HDMI_HotPlug                    00011c68   defined in Debug\sw_i2c.o section .text
+f_HDMI_HotPlug                    00011c75   defined in Debug\sw_i2c.o section .text
                                              used in Debug\it680x.o
 f_IR_DelayNMiliseconds            0000c98e   defined in Debug\ir.o section .text
                                              used in Debug\uart.o Debug\it680x.o
@@ -2059,7 +2059,7 @@ f_IT6802_fsm                      0000fde9   defined in Debug\it680x.o section .
                                              used in Debug\sw_i2c.o
 f_IT6802_fsm_init                 0000ccda   defined in Debug\it680x.o section .text
                                              used in Debug\sw_i2c.o
-f_NonHandledInterrupt             000127b9   defined in Debug\stm8_interrupt_vector.o section .text
+f_NonHandledInterrupt             000127c6   defined in Debug\stm8_interrupt_vector.o section .text
 f_RCPKeyPush                      0000f23c   defined in Debug\it680x.o section .text
                                              *** not used ***
 f_SWI2C_Init                      00011777   defined in Debug\sw_i2c.o section .text
@@ -2072,7 +2072,7 @@ f_SWI2C_ReadBytes                 00011640   defined in Debug\sw_i2c.o section .
 f_SWI2C_ResetFPGA                 00011aaa   defined in Debug\sw_i2c.o section .text
 f_SWI2C_ResetHDMI                 00011adb   defined in Debug\sw_i2c.o section .text
                                              *** not used ***
-f_SWI2C_Set_deep                  00011c82   defined in Debug\sw_i2c.o section .text
+f_SWI2C_Set_deep                  00011c8f   defined in Debug\sw_i2c.o section .text
                                              used in Debug\ir.o
 f_SWI2C_SystemPowerDown           00011b1c   defined in Debug\sw_i2c.o section .text
 f_SWI2C_SystemPowerUp             00011a49   defined in Debug\sw_i2c.o section .text
@@ -2084,7 +2084,7 @@ f_SWI2C_ToggleI2CMode             00011b6a   defined in Debug\sw_i2c.o section .
                                              used in Debug\ir.o
 f_SWI2C_Update                    00011843   defined in Debug\sw_i2c.o section .text
                                              used in Debug\main.o
-f_SWI2C_UpdateTimer               00011d17   defined in Debug\sw_i2c.o section .text
+f_SWI2C_UpdateTimer               00011d24   defined in Debug\sw_i2c.o section .text
                                              used in Debug\ir.o
 f_SWI2C_Write2Byte                000116be   defined in Debug\sw_i2c.o section .text
                                              *** not used ***
@@ -2315,17 +2315,17 @@ f_UART_PutChar                    0000bfce   defined in Debug\uart.o section .te
 f_UART_Send                       0000bfdd   defined in Debug\uart.o section .text
 f_UART_Update                     0000c046   defined in Debug\uart.o section .text
                                              used in Debug\main.o
-f__itob                           00012306   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o section .text
+f__itob                           00012313   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
-f__ltob                           00012381   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o section .text
+f__ltob                           0001238e   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
-f__print                          00011e8b   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o section .text
+f__print                          00011e98   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)printf.o
 f__stext                          0000b903   defined in c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\crtsi.sm8 section .text
                                              used in Debug\stm8_interrupt_vector.o
-f__udiv                           0001241d   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)idiv1.o section .text
+f__udiv                           0001242a   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)idiv1.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o
-f__uldiv                          00012428   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)ildiv1.o section .text
+f__uldiv                          00012435   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)ildiv1.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)itob.o
 f_exit                            0000b94d   defined in c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\crtsi.sm8 section .text
 f_flash_init                      00010735   defined in Debug\main.o section .text
@@ -2333,12 +2333,12 @@ f_get_vid_info                    0000fe9c   defined in Debug\it680x.o section .
 f_it6802PortSelect                0000d689   defined in Debug\it680x.o section .text
 f_main                            00010787   defined in Debug\main.o section .text
                                              used in c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\crtsi.sm8
-f_printf                          00011d7c   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)printf.o section .text
+f_printf                          00011d89   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)printf.o section .text
                                              used in Debug\it680x.o
 f_putchar                         0000c2bc   defined in Debug\uart.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
 f_show_vid_info                   00010003   defined in Debug\it680x.o section .text
-f_strlen                          00012446   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)strlen1.o section .text
+f_strlen                          00012453   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)strlen1.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
-f_toupper                         00012452   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)toup1.o section .text
+f_toupper                         0001245f   defined in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)toup1.o section .text
                                              used in (c:\Program Files (x86)\COSMIC\CXSTM8_32K\Lib\libisl.sm8)cprint.o
