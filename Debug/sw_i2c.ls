@@ -3020,8 +3020,8 @@
 3932  0401 ae5005        	ldw	x,#20485
 3933  0404 8d000000      	callf	f_GPIO_Init
 3935  0408 85            	popw	x
-3936                     ; 507 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
-3938  0409 4be0          	push	#224
+3936                     ; 507 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+3938  0409 4bf0          	push	#240
 3939  040b 4b80          	push	#128
 3940  040d ae500a        	ldw	x,#20490
 3941  0410 8d000000      	callf	f_GPIO_Init
