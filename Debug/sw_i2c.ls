@@ -3290,7 +3290,7 @@
 4377  05f9 8d000000      	callf	f_GPIO_WriteHigh
 4379  05fd 84            	pop	a
 4380                     ; 585 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
-4382  05fe ae1389        	ldw	x,#5001
+4382  05fe ae07d1        	ldw	x,#2001
 4383  0601 cf0006        	ldw	L5_Backlight_on_timer+2,x
 4384  0604 ae0000        	ldw	x,#0
 4385  0607 cf0004        	ldw	L5_Backlight_on_timer,x

@@ -81,10 +81,11 @@ void flash_init(void)
 	if (FLASH_ReadByte(EEPROM_START_ADDRESS) != INIT_FLAG)
 	{
 		u8 i;
-		for (i = 0; i < sizeof(register_default_value); i++)
+		for (i = 1; i < sizeof(register_default_value); i++)
 		{
 			FLASH_ProgramByte(EEPROM_START_ADDRESS + i,register_default_value[i]);
 		}
+		FLASH_ProgramByte(EEPROM_START_ADDRESS, INIT_FLAG);
 	}
 }
 
