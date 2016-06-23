@@ -25,6 +25,7 @@ REG_0x0D
 };
 
 #define PANEL_65INCH			1
+#define WRITE_WAVE_TABLE		1
 #define EEPROM_START_ADDRESS 	0x4000
 
 extern void SWI2C_Init(void);

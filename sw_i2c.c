@@ -273,7 +273,7 @@ static u8 SWI2C_GetSignalStatus(void)
 	}
 }
 /*==========================================================================*/
-#if PANEL_65INCH
+#if WRITE_WAVE_TABLE
 static const u8 wave_table[] =
 {
 0x00 ,0x00 ,0x00 ,0x00 ,0x08 ,0x01 ,0x00 ,0x00 ,0x00 ,0x07 ,0x02 ,0x00 ,0x00 ,0x00 ,0x06 ,0x03 
@@ -637,7 +637,7 @@ void SWI2C_ResetFPGA(void)
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(1500);
-#if PANEL_65INCH
+#if WRITE_WAVE_TABLE
 		FPGA_WriteWaveTable();
 #endif
 		FPGA_Init();
