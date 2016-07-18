@@ -57,6 +57,11 @@ KEY_RIGHT,
 KEY_RESET_HDMI,
 KEY_RESET_FPGA,
 KEY_DEBUG,
+
+KEY_TEST0,
+KEY_TEST1,
+KEY_TEST2,
+KEY_TEST3,
 KEY_DUMMY = 0xFF
 }IR_KEY_ENUM;
 
@@ -117,6 +122,12 @@ static u8 _convert_IR(void)
 			case 0xC1: 		return KEY_DEBUG;
 			case 0xC4:		return KEY_RESET_HDMI;
 			case 0x58:		return KEY_RESET_FPGA;
+			#if TEST_WEAVING_TABLE
+			case 0x50:		return KEY_TEST0;
+			case 0x51:		return KEY_TEST1;
+			case 0x52:		return KEY_TEST2;
+			case 0x53:		return KEY_TEST3;
+			#endif
 			default:
 				return KEY_DUMMY;
 		}
@@ -138,6 +149,12 @@ static u8 _convert_IR(void)
 			case 0x01: 		return KEY_DEBUG;		
 			case 0x08:		return KEY_RESET_HDMI;
 			case 0x1F:		return KEY_RESET_FPGA;
+			#if TEST_WEAVING_TABLE
+			case 0x5A:		return KEY_TEST0;
+			case 0x52:		return KEY_TEST1;
+			case 0x5D:		return KEY_TEST2;
+			case 0x5C:		return KEY_TEST3;
+			#endif
 			default:
 				return KEY_DUMMY;
 		}
@@ -219,12 +236,24 @@ void IR_Update(void)
 				case KEY_POWER:
 					SWI2C_ProcessPower();
 					break;
-				#if 0
 				case KEY_RESET_HDMI:
 					SWI2C_ResetHDMI();
 					break;
 				case KEY_RESET_FPGA:
 					SWI2C_ResetFPGA();
+					break;
+				#if TEST_WEAVING_TABLE
+				case KEY_TEST0:
+					SWI2C_WriteWeavingTable(0);
+					break;
+				case KEY_TEST1:
+					SWI2C_WriteWeavingTable(1);
+					break;
+				case KEY_TEST2:
+					SWI2C_WriteWeavingTable(2);
+					break;
+				case KEY_TEST3:
+					SWI2C_WriteWeavingTable(3);
 					break;
 				#endif
 				default:

@@ -24,8 +24,10 @@ REG_0x5C,
 REG_0x0D
 };
 
-#define PANEL_65INCH			1
-#define WRITE_WAVE_TABLE		1
+#define INIT_VERTICAL_PANEL		1
+#define WRITE_WEAVING_TABLE		1
+#define TEST_WEAVING_TABLE		1
+#define FPGA_KEY_VERIFY			1
 #define EEPROM_START_ADDRESS 	0x4000
 
 extern void SWI2C_Init(void);
@@ -43,6 +45,8 @@ extern u8 SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value);
 extern u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data);
 extern u8 SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data);
 extern u8 SWI2C_TestDevice(u8 addr);
+
+extern void SWI2C_WriteWeavingTable(u8 index);
 
 extern void FPGA_Init(void);
 extern void HDMI_HotPlug(u8 value);
