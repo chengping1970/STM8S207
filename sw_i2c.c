@@ -260,15 +260,32 @@ static u8 _SWI2C_ReceiveByte(u8 send_ack)
 static u8 SWI2C_GetSignalStatus(void)
 {
 	u8 p0_status;
+	#if CHECK_SIGNAL_RESOLUTION
+	u8 val;
+	u16 HActive, VActive;
 	SWI2C_ReadByte(0x90, 0x0A, &p0_status);
+	SWI2C_ReadByte(0x90, 0x9F, &val);
+	HActive = val&0x3F;
+	HActive = HActive<<8;
+	SWI2C_ReadByte(0x90, 0x9E, &val);
+	HActive += val;
+	SWI2C_ReadByte(0x90, 0xA4, &val);
+	VActive = val&0xF0;
+	VActive = VActive<<4;
+	SWI2C_ReadByte(0x90, 0xA5, &val);
+	VActive += val;
+	#endif
 	if ((p0_status&0x0C) == 0x0C)
 	{
-		return 1;
+		#if CHECK_SIGNAL_RESOLUTION
+		if (HActive == 3840 && VActive == 2160)
+		#endif
+		{
+			return 1;
+		}
 	}
-	else
-	{
-		return 0;
-	}
+	
+	return 0;
 }
 /*==========================================================================*/
 #if WRITE_WEAVING_TABLE

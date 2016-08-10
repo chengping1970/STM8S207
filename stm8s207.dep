@@ -95,7 +95,7 @@ ExternDep= stm8s_tim4.c  "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h
 ExternDep= stm8s_tim4.c  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h" stm8s_tim4.h stm8s.h  stm8s_conf.h stm8s_clk.h stm8s_gpio.h
 
 [Root.Source Files.sw_i2c.c.Config.0]
-ExternDep= sw_i2c.c  "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h" stm8s.h stm8s_conf.h  stm8s_clk.h stm8s_gpio.h stm8s_exti.h stm8s_tim1.h stm8s_flash.h ir.h  sw_i2c.h it680x.h Mhlrx.h Mhlrx_reg.h
+ExternDep= sw_i2c.c  "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h" stm8s.h stm8s_conf.h  stm8s_clk.h stm8s_gpio.h stm8s_exti.h stm8s_tim1.h stm8s_flash.h ir.h  sw_i2c.h it680x.h Mhlrx.h Mhlrx_reg.h weaving_default.txt weaving_pc.txt  weaving_select.txt weaving_old.txt
 
 [Root.Source Files.sw_i2c.c.Config.1]
 ExternDep= sw_i2c.c  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h" stm8s.h stm8s_conf.h  stm8s_clk.h stm8s_gpio.h stm8s_exti.h stm8s_tim1.h stm8s_flash.h ir.h  sw_i2c.h it680x.h Mhlrx.h Mhlrx_reg.h
