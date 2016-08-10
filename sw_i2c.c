@@ -271,26 +271,71 @@ static u8 SWI2C_GetSignalStatus(void)
 	}
 }
 /*==========================================================================*/
-#if WRITE_WEAVING_TABLE
-static const u8 weaving_table[] =
+static const u16 weaving_table[] =
 {
-#include "weaving_default.txt"
+0x8018
+,0x9017
+,0x9017
+,0x9016
+,0x9015
+,0x9014
+,0x912C
+,0x912B
+,0x912B
+,0x912A
+,0x9129
+,0x9128
+,0x9240
+,0x923F
+,0x923F
+,0x923E
+,0x923D
+,0x923C
+,0x9354
+,0x9353
+,0x9353
+,0x9352
+,0x9351
+,0x9350
+,0x9468
+,0x9467
+,0x9467
+,0x9466
+,0x9465
+,0x9464
+,0x957C
+,0x957B
+,0x957B
+,0x957A
+,0x9579
+,0x9578
+,0x9690
+,0x968F
+,0x968F
+,0x968E
+,0x968D
+,0x968C
+,0x97A4
+,0x97A3
+,0x97A3
+,0x97A2
+,0x97A1
+,0xA7A0
+,0x102E
+,0x200C
+,0x3004
+,0x4008
+,0x502C
 };
 static void FPGA_WriteWeavingTable(void)
 {
 	u16 i;
 	
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
-	for (i = 0; i < sizeof(weaving_table); i++)
+	for (i = 0; i < sizeof(weaving_table)/2; i++)
 	{
-		SWI2C_WriteByte(FPGA_ADDRESS, 0xC7, weaving_table[i]);
+		SWI2C_Write2Byte(FPGA_ADDRESS, 0xC6, weaving_table[i]);
 	}
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
 }
-#endif
 /*==========================================================================*/
 #if TEST_WEAVING_TABLE
 static const u8 test_weaving_table[4][] =
@@ -593,9 +638,7 @@ void SWI2C_ResetFPGA(void)
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(1500);
-#if WRITE_WEAVING_TABLE
 		FPGA_WriteWeavingTable();
-#endif
 		FPGA_Init();
 	}
 }
@@ -664,11 +707,11 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 	u8 reg_value, retry;
 	if (OnOff)
 	{
-		reg_value = 0x80;
+		reg_value = 0x40;
 	}
 	else
 	{
-		reg_value = 0x0;
+		reg_value = 0x80;
 	}
 	for (retry = 0; retry < 3; retry++)
 	{
