@@ -746,6 +746,8 @@ void FPGA_Init(void)
 		Set3DOn = TRUE;
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
 	SWI2C_Set3DOnOff(Set3DOn);	
 }
 /*==========================================================================*/
