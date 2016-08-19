@@ -24,7 +24,8 @@ typedef enum
 	DATA_COMMAND_WRITE_BYTE,
 	DATA_COMMAND_READ_BYTE,
 	DATA_COMMAND_WRITE_BANK,
-	DATA_COMMAND_READ_BANK
+	DATA_COMMAND_READ_BANK,
+	DATA_COMMAND_COMMAND
 }EXTERN_COMMAND_ENUM;
 
 #define MULTI_BYTE_RW		1
@@ -253,6 +254,8 @@ void UART_Update(void)
 					}
 					UART_Send(uart_rxtx_data, 256 + 7);
 				}
+				break;
+			case DATA_COMMAND_COMMAND:
 				break;
 			default:
 				break;

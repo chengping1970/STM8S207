@@ -6,1554 +6,9236 @@
   17  0000 00000001      	dc.l	1
   18  0004               L5_Backlight_on_timer:
   19  0004 00000000      	dc.l	0
-  20  0008               L7_signal_detect_timer:
+  20  0008               L7_secret_detect_timer:
   21  0008 00000001      	dc.l	1
-  22  000c               L11_LVDS_mode:
-  23  000c 00            	dc.b	0
-  24  000d               L31_Power_status:
-  25  000d 00            	dc.b	0
-  26  000e               L12_I2C_stop:
-  27  000e 00            	dc.b	0
-  65                     ; 156 static void _Delay_5us(void)
-  65                     ; 157 {
-  66                     	switch	.text
-  67  0000               L52f__Delay_5us:
-  69  0000 88            	push	a
-  70       00000001      OFST:	set	1
-  73                     ; 159    	for (i = 0;i < 10;i++);
-  75  0001 0f01          	clr	(OFST+0,sp)
-  76  0003               L15:
-  80  0003 0c01          	inc	(OFST+0,sp)
-  83  0005 7b01          	ld	a,(OFST+0,sp)
-  84  0007 a10a          	cp	a,#10
-  85  0009 25f8          	jrult	L15
-  86                     ; 160 }
-  89  000b 84            	pop	a
-  90  000c 87            	retf
- 115                     ; 162 static void _SWI2C_Start(void)
- 115                     ; 163 {
- 116                     	switch	.text
- 117  000d               L75f__SWI2C_Start:
- 121                     ; 164 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
- 123  000d 4b10          	push	#16
- 124  000f ae5005        	ldw	x,#20485
- 125  0012 8d000000      	callf	f_GPIO_WriteHigh
- 127  0016 84            	pop	a
- 128                     ; 165 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
- 130  0017 4b20          	push	#32
- 131  0019 ae5005        	ldw	x,#20485
- 132  001c 8d000000      	callf	f_GPIO_WriteHigh
- 134  0020 84            	pop	a
- 135                     ; 166 	_Delay_5us();
- 137  0021 8d000000      	callf	L52f__Delay_5us
- 139                     ; 167 	GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
- 141  0025 4b20          	push	#32
- 142  0027 ae5005        	ldw	x,#20485
- 143  002a 8d000000      	callf	f_GPIO_WriteLow
- 145  002e 84            	pop	a
- 146                     ; 168 	_Delay_5us();
- 148  002f 8d000000      	callf	L52f__Delay_5us
- 150                     ; 169 	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
- 152  0033 4b10          	push	#16
- 153  0035 ae5005        	ldw	x,#20485
- 154  0038 8d000000      	callf	f_GPIO_WriteLow
- 156  003c 84            	pop	a
- 157                     ; 170 }
- 160  003d 87            	retf
- 185                     ; 172 static void _SWI2C_Stop(void)
- 185                     ; 173 {
- 186                     	switch	.text
- 187  003e               L17f__SWI2C_Stop:
- 191                     ; 174 	GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
- 193  003e 4b20          	push	#32
- 194  0040 ae5005        	ldw	x,#20485
- 195  0043 8d000000      	callf	f_GPIO_WriteLow
- 197  0047 84            	pop	a
- 198                     ; 175 	_Delay_5us();
- 200  0048 8d000000      	callf	L52f__Delay_5us
- 202                     ; 176 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
- 204  004c 4b10          	push	#16
- 205  004e ae5005        	ldw	x,#20485
- 206  0051 8d000000      	callf	f_GPIO_WriteHigh
- 208  0055 84            	pop	a
- 209                     ; 177 	_Delay_5us();
- 211  0056 8d000000      	callf	L52f__Delay_5us
- 213                     ; 178 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
- 215  005a 4b20          	push	#32
- 216  005c ae5005        	ldw	x,#20485
- 217  005f 8d000000      	callf	f_GPIO_WriteHigh
- 219  0063 84            	pop	a
- 220                     ; 179 }
- 223  0064 87            	retf
- 266                     ; 181 static u8 _SWI2C_SendByte(u8 value)
- 266                     ; 182 {
- 267                     	switch	.text
- 268  0065               L301f__SWI2C_SendByte:
- 270  0065 88            	push	a
- 271  0066 88            	push	a
- 272       00000001      OFST:	set	1
- 275                     ; 185 	for (count = 0;count < 8;count++)
- 277  0067 0f01          	clr	(OFST+0,sp)
- 278  0069               L321:
- 279                     ; 187 		if (value&0x80)
- 281  0069 7b02          	ld	a,(OFST+1,sp)
- 282  006b a580          	bcp	a,#128
- 283  006d 270c          	jreq	L131
- 284                     ; 189 			GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
- 286  006f 4b20          	push	#32
- 287  0071 ae5005        	ldw	x,#20485
- 288  0074 8d000000      	callf	f_GPIO_WriteHigh
- 290  0078 84            	pop	a
- 292  0079 200a          	jra	L331
- 293  007b               L131:
- 294                     ; 193 			GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
- 296  007b 4b20          	push	#32
- 297  007d ae5005        	ldw	x,#20485
- 298  0080 8d000000      	callf	f_GPIO_WriteLow
- 300  0084 84            	pop	a
- 301  0085               L331:
- 302                     ; 195 		_Delay_5us();
- 304  0085 8d000000      	callf	L52f__Delay_5us
- 306                     ; 196 		GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
- 308  0089 4b10          	push	#16
- 309  008b ae5005        	ldw	x,#20485
- 310  008e 8d000000      	callf	f_GPIO_WriteHigh
- 312  0092 84            	pop	a
- 313                     ; 197 		_Delay_5us();
- 315  0093 8d000000      	callf	L52f__Delay_5us
- 317                     ; 198 		GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
- 319  0097 4b10          	push	#16
- 320  0099 ae5005        	ldw	x,#20485
- 321  009c 8d000000      	callf	f_GPIO_WriteLow
- 323  00a0 84            	pop	a
- 324                     ; 199 		value = value<<1;
- 326  00a1 0802          	sll	(OFST+1,sp)
- 327                     ; 185 	for (count = 0;count < 8;count++)
- 329  00a3 0c01          	inc	(OFST+0,sp)
- 332  00a5 7b01          	ld	a,(OFST+0,sp)
- 333  00a7 a108          	cp	a,#8
- 334  00a9 25be          	jrult	L321
- 335                     ; 201 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
- 337  00ab 4b20          	push	#32
- 338  00ad ae5005        	ldw	x,#20485
- 339  00b0 8d000000      	callf	f_GPIO_WriteHigh
- 341  00b4 84            	pop	a
- 342                     ; 202 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_IN_FL_NO_IT);
- 344  00b5 4b00          	push	#0
- 345  00b7 4b20          	push	#32
- 346  00b9 ae5005        	ldw	x,#20485
- 347  00bc 8d000000      	callf	f_GPIO_Init
- 349  00c0 85            	popw	x
- 350                     ; 203 	_Delay_5us();
- 352  00c1 8d000000      	callf	L52f__Delay_5us
- 354                     ; 204 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
- 356  00c5 4b10          	push	#16
- 357  00c7 ae5005        	ldw	x,#20485
- 358  00ca 8d000000      	callf	f_GPIO_WriteHigh
- 360  00ce 84            	pop	a
- 361                     ; 205 	for (count = 0;count < IIC_ACK_TIMEOUT;count++)
- 363  00cf 0f01          	clr	(OFST+0,sp)
- 364  00d1               L531:
- 365                     ; 207 		if (GPIO_ReadInputPin(IIC_SDA_PORT, IIC_SDA_PIN) == 0)
- 367  00d1 4b20          	push	#32
- 368  00d3 ae5005        	ldw	x,#20485
- 369  00d6 8d000000      	callf	f_GPIO_ReadInputPin
- 371  00da 5b01          	addw	sp,#1
- 372  00dc 4d            	tnz	a
- 373  00dd 261a          	jrne	L341
- 374                     ; 209 			GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
- 376  00df 4b10          	push	#16
- 377  00e1 ae5005        	ldw	x,#20485
- 378  00e4 8d000000      	callf	f_GPIO_WriteLow
- 380  00e8 84            	pop	a
- 381                     ; 210 			GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_LOW_FAST);
- 383  00e9 4ba0          	push	#160
- 384  00eb 4b20          	push	#32
- 385  00ed ae5005        	ldw	x,#20485
- 386  00f0 8d000000      	callf	f_GPIO_Init
- 388  00f4 85            	popw	x
- 389                     ; 211 			return IIC_OK;
- 391  00f5 a601          	ld	a,#1
- 393  00f7 201f          	jra	L41
- 394  00f9               L341:
- 395                     ; 205 	for (count = 0;count < IIC_ACK_TIMEOUT;count++)
- 397  00f9 0c01          	inc	(OFST+0,sp)
- 400  00fb 7b01          	ld	a,(OFST+0,sp)
- 401  00fd a132          	cp	a,#50
- 402  00ff 25d0          	jrult	L531
- 403                     ; 214 	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
- 405  0101 4b10          	push	#16
- 406  0103 ae5005        	ldw	x,#20485
- 407  0106 8d000000      	callf	f_GPIO_WriteLow
- 409  010a 84            	pop	a
- 410                     ; 215 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
- 412  010b 4bb0          	push	#176
- 413  010d 4b20          	push	#32
- 414  010f ae5005        	ldw	x,#20485
- 415  0112 8d000000      	callf	f_GPIO_Init
- 417  0116 85            	popw	x
- 418                     ; 217 	return IIC_FAIL;
- 420  0117 4f            	clr	a
- 422  0118               L41:
- 424  0118 85            	popw	x
- 425  0119 87            	retf
- 482                     ; 221 static u8 _SWI2C_ReceiveByte(u8 send_ack)
- 482                     ; 222 {
- 483                     	switch	.text
- 484  011a               L541f__SWI2C_ReceiveByte:
- 486  011a 88            	push	a
- 487  011b 5203          	subw	sp,#3
- 488       00000003      OFST:	set	3
- 491                     ; 223 	u8 count, read, value = 0;
- 493  011d 0f02          	clr	(OFST-1,sp)
- 494                     ; 225 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_IN_FL_NO_IT);
- 496  011f 4b00          	push	#0
- 497  0121 4b20          	push	#32
- 498  0123 ae5005        	ldw	x,#20485
- 499  0126 8d000000      	callf	f_GPIO_Init
- 501  012a 85            	popw	x
- 502                     ; 226 	for (count = 0;count < 8;count++)
- 504  012b 0f01          	clr	(OFST-2,sp)
- 505  012d               L171:
- 506                     ; 228 		_Delay_5us();
- 508  012d 8d000000      	callf	L52f__Delay_5us
- 510                     ; 229 		GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
- 512  0131 4b10          	push	#16
- 513  0133 ae5005        	ldw	x,#20485
- 514  0136 8d000000      	callf	f_GPIO_WriteHigh
- 516  013a 84            	pop	a
- 517                     ; 230 		if (GPIO_ReadInputPin(IIC_SDA_PORT, IIC_SDA_PIN))
- 519  013b 4b20          	push	#32
- 520  013d ae5005        	ldw	x,#20485
- 521  0140 8d000000      	callf	f_GPIO_ReadInputPin
- 523  0144 5b01          	addw	sp,#1
- 524  0146 4d            	tnz	a
- 525  0147 2706          	jreq	L771
- 526                     ; 232 			read = 1;
- 528  0149 a601          	ld	a,#1
- 529  014b 6b03          	ld	(OFST+0,sp),a
- 531  014d 2002          	jra	L102
- 532  014f               L771:
- 533                     ; 236 			read = 0;
- 535  014f 0f03          	clr	(OFST+0,sp)
- 536  0151               L102:
- 537                     ; 238 		value = (value<<1)|read;
- 539  0151 7b02          	ld	a,(OFST-1,sp)
- 540  0153 48            	sll	a
- 541  0154 1a03          	or	a,(OFST+0,sp)
- 542  0156 6b02          	ld	(OFST-1,sp),a
- 543                     ; 239 		_Delay_5us();
- 545  0158 8d000000      	callf	L52f__Delay_5us
- 547                     ; 240 		GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
- 549  015c 4b10          	push	#16
- 550  015e ae5005        	ldw	x,#20485
- 551  0161 8d000000      	callf	f_GPIO_WriteLow
- 553  0165 84            	pop	a
- 554                     ; 226 	for (count = 0;count < 8;count++)
- 556  0166 0c01          	inc	(OFST-2,sp)
- 559  0168 7b01          	ld	a,(OFST-2,sp)
- 560  016a a108          	cp	a,#8
- 561  016c 25bf          	jrult	L171
- 562                     ; 242 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
- 564  016e 4bb0          	push	#176
- 565  0170 4b20          	push	#32
- 566  0172 ae5005        	ldw	x,#20485
- 567  0175 8d000000      	callf	f_GPIO_Init
- 569  0179 85            	popw	x
- 570                     ; 243 	if (send_ack)
- 572  017a 0d04          	tnz	(OFST+1,sp)
- 573  017c 270c          	jreq	L302
- 574                     ; 245 		GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
- 576  017e 4b20          	push	#32
- 577  0180 ae5005        	ldw	x,#20485
- 578  0183 8d000000      	callf	f_GPIO_WriteLow
- 580  0187 84            	pop	a
- 582  0188 200a          	jra	L502
- 583  018a               L302:
- 584                     ; 249 		GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
- 586  018a 4b20          	push	#32
- 587  018c ae5005        	ldw	x,#20485
- 588  018f 8d000000      	callf	f_GPIO_WriteHigh
- 590  0193 84            	pop	a
- 591  0194               L502:
- 592                     ; 251 	_Delay_5us();
- 594  0194 8d000000      	callf	L52f__Delay_5us
- 596                     ; 252 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
- 598  0198 4b10          	push	#16
- 599  019a ae5005        	ldw	x,#20485
- 600  019d 8d000000      	callf	f_GPIO_WriteHigh
- 602  01a1 84            	pop	a
- 603                     ; 253 	_Delay_5us();
- 605  01a2 8d000000      	callf	L52f__Delay_5us
- 607                     ; 254 	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
- 609  01a6 4b10          	push	#16
- 610  01a8 ae5005        	ldw	x,#20485
- 611  01ab 8d000000      	callf	f_GPIO_WriteLow
- 613  01af 84            	pop	a
- 614                     ; 255 	_Delay_5us();
- 616  01b0 8d000000      	callf	L52f__Delay_5us
- 618                     ; 257 	return	value;		
- 620  01b4 7b02          	ld	a,(OFST-1,sp)
- 623  01b6 5b04          	addw	sp,#4
- 624  01b8 87            	retf
- 678                     ; 260 static u8 SWI2C_GetSignalStatus(void)
- 678                     ; 261 {
- 679                     	switch	.text
- 680  01b9               L702f_SWI2C_GetSignalStatus:
- 682  01b9 5208          	subw	sp,#8
- 683       00000008      OFST:	set	8
- 686                     ; 266 	SWI2C_ReadByte(0x90, 0x0A, &p0_status);
- 688  01bb 96            	ldw	x,sp
- 689  01bc 1c0003        	addw	x,#OFST-5
- 690  01bf 89            	pushw	x
- 691  01c0 ae000a        	ldw	x,#10
- 692  01c3 a690          	ld	a,#144
- 693  01c5 95            	ld	xh,a
- 694  01c6 8d780278      	callf	f_SWI2C_ReadByte
- 696  01ca 85            	popw	x
- 697                     ; 267 	SWI2C_ReadByte(0x90, 0x9F, &val);
- 699  01cb 96            	ldw	x,sp
- 700  01cc 1c0008        	addw	x,#OFST+0
- 701  01cf 89            	pushw	x
- 702  01d0 ae009f        	ldw	x,#159
- 703  01d3 a690          	ld	a,#144
- 704  01d5 95            	ld	xh,a
- 705  01d6 8d780278      	callf	f_SWI2C_ReadByte
- 707  01da 85            	popw	x
- 708                     ; 268 	HActive = val&0x3F;
- 710  01db 7b08          	ld	a,(OFST+0,sp)
- 711  01dd a43f          	and	a,#63
- 712  01df 5f            	clrw	x
- 713  01e0 97            	ld	xl,a
- 714  01e1 1f04          	ldw	(OFST-4,sp),x
- 715                     ; 269 	HActive = HActive<<8;
- 717  01e3 7b05          	ld	a,(OFST-3,sp)
- 718  01e5 6b04          	ld	(OFST-4,sp),a
- 719  01e7 0f05          	clr	(OFST-3,sp)
- 720                     ; 270 	SWI2C_ReadByte(0x90, 0x9E, &val);
- 722  01e9 96            	ldw	x,sp
- 723  01ea 1c0008        	addw	x,#OFST+0
- 724  01ed 89            	pushw	x
- 725  01ee ae009e        	ldw	x,#158
- 726  01f1 a690          	ld	a,#144
- 727  01f3 95            	ld	xh,a
- 728  01f4 8d780278      	callf	f_SWI2C_ReadByte
- 730  01f8 85            	popw	x
- 731                     ; 271 	HActive += val;
- 733  01f9 7b08          	ld	a,(OFST+0,sp)
- 734  01fb 5f            	clrw	x
- 735  01fc 97            	ld	xl,a
- 736  01fd 1f01          	ldw	(OFST-7,sp),x
- 737  01ff 1e04          	ldw	x,(OFST-4,sp)
- 738  0201 72fb01        	addw	x,(OFST-7,sp)
- 739  0204 1f04          	ldw	(OFST-4,sp),x
- 740                     ; 272 	SWI2C_ReadByte(0x90, 0xA4, &val);
- 742  0206 96            	ldw	x,sp
- 743  0207 1c0008        	addw	x,#OFST+0
- 744  020a 89            	pushw	x
- 745  020b ae00a4        	ldw	x,#164
- 746  020e a690          	ld	a,#144
- 747  0210 95            	ld	xh,a
- 748  0211 8d780278      	callf	f_SWI2C_ReadByte
- 750  0215 85            	popw	x
- 751                     ; 273 	VActive = val&0xF0;
- 753  0216 7b08          	ld	a,(OFST+0,sp)
- 754  0218 a4f0          	and	a,#240
- 755  021a 5f            	clrw	x
- 756  021b 97            	ld	xl,a
- 757  021c 1f06          	ldw	(OFST-2,sp),x
- 758                     ; 274 	VActive = VActive<<4;
- 760  021e a604          	ld	a,#4
- 761  0220               L22:
- 762  0220 0807          	sll	(OFST-1,sp)
- 763  0222 0906          	rlc	(OFST-2,sp)
- 764  0224 4a            	dec	a
- 765  0225 26f9          	jrne	L22
- 766                     ; 275 	SWI2C_ReadByte(0x90, 0xA5, &val);
- 768  0227 96            	ldw	x,sp
- 769  0228 1c0008        	addw	x,#OFST+0
- 770  022b 89            	pushw	x
- 771  022c ae00a5        	ldw	x,#165
- 772  022f a690          	ld	a,#144
- 773  0231 95            	ld	xh,a
- 774  0232 8d780278      	callf	f_SWI2C_ReadByte
- 776  0236 85            	popw	x
- 777                     ; 276 	VActive += val;
- 779  0237 7b08          	ld	a,(OFST+0,sp)
- 780  0239 5f            	clrw	x
- 781  023a 97            	ld	xl,a
- 782  023b 1f01          	ldw	(OFST-7,sp),x
- 783  023d 1e06          	ldw	x,(OFST-2,sp)
- 784  023f 72fb01        	addw	x,(OFST-7,sp)
- 785  0242 1f06          	ldw	(OFST-2,sp),x
- 786                     ; 278 	if ((p0_status&0x0C) == 0x0C)
- 788  0244 7b03          	ld	a,(OFST-5,sp)
- 789  0246 a40c          	and	a,#12
- 790  0248 a10c          	cp	a,#12
- 791  024a 2612          	jrne	L332
- 792                     ; 281 		if (HActive == 3840 && VActive == 2160)
- 794  024c 1e04          	ldw	x,(OFST-4,sp)
- 795  024e a30f00        	cpw	x,#3840
- 796  0251 260b          	jrne	L332
- 798  0253 1e06          	ldw	x,(OFST-2,sp)
- 799  0255 a30870        	cpw	x,#2160
- 800  0258 2604          	jrne	L332
- 801                     ; 284 			return 1;
- 803  025a a601          	ld	a,#1
- 805  025c 2001          	jra	L42
- 806  025e               L332:
- 807                     ; 288 	return 0;
- 809  025e 4f            	clr	a
- 811  025f               L42:
- 813  025f 5b08          	addw	sp,#8
- 814  0261 87            	retf
- 855                     ; 345 u8 SWI2C_TestDevice(u8 addr)
- 855                     ; 346 {
- 856                     	switch	.text
- 857  0262               f_SWI2C_TestDevice:
- 859  0262 88            	push	a
- 860  0263 88            	push	a
- 861       00000001      OFST:	set	1
- 864                     ; 348 	_SWI2C_Start();
- 866  0264 8d0d000d      	callf	L75f__SWI2C_Start
- 868                     ; 349 	result = _SWI2C_SendByte(addr);
- 870  0268 7b02          	ld	a,(OFST+1,sp)
- 871  026a 8d650065      	callf	L301f__SWI2C_SendByte
- 873  026e 6b01          	ld	(OFST+0,sp),a
- 874                     ; 350 	_SWI2C_Stop();
- 876  0270 8d3e003e      	callf	L17f__SWI2C_Stop
- 878                     ; 352 	return result;
- 880  0274 7b01          	ld	a,(OFST+0,sp)
- 883  0276 85            	popw	x
- 884  0277 87            	retf
- 933                     ; 355 u8 SWI2C_ReadByte(u8 addr, u8 subaddr, u8 * pValue)
- 933                     ; 356 {
- 934                     	switch	.text
- 935  0278               f_SWI2C_ReadByte:
- 937  0278 89            	pushw	x
- 938       00000000      OFST:	set	0
- 941                     ; 357 	return SWI2C_ReadBytes(addr, subaddr, 1, pValue);
- 943  0279 1e06          	ldw	x,(OFST+6,sp)
- 944  027b 89            	pushw	x
- 945  027c 4b01          	push	#1
- 946  027e 7b05          	ld	a,(OFST+5,sp)
- 947  0280 97            	ld	xl,a
- 948  0281 7b04          	ld	a,(OFST+4,sp)
- 949  0283 95            	ld	xh,a
- 950  0284 8d8c028c      	callf	f_SWI2C_ReadBytes
- 952  0288 5b03          	addw	sp,#3
- 955  028a 85            	popw	x
- 956  028b 87            	retf
-1022                     ; 360 u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
-1022                     ; 361 {	
-1023                     	switch	.text
-1024  028c               f_SWI2C_ReadBytes:
-1026  028c 89            	pushw	x
-1027  028d 88            	push	a
-1028       00000001      OFST:	set	1
-1031                     ; 363 	_SWI2C_Start();
-1033  028e 8d0d000d      	callf	L75f__SWI2C_Start
-1035                     ; 364 	result = _SWI2C_SendByte(addr);
-1037  0292 7b02          	ld	a,(OFST+1,sp)
-1038  0294 8d650065      	callf	L301f__SWI2C_SendByte
-1040  0298 6b01          	ld	(OFST+0,sp),a
-1041                     ; 365 	if (result == IIC_FAIL)
-1043  029a 0d01          	tnz	(OFST+0,sp)
-1044  029c 2608          	jrne	L523
-1045                     ; 367 		_SWI2C_Stop();
-1047  029e 8d3e003e      	callf	L17f__SWI2C_Stop
-1049                     ; 368 		return result;
-1051  02a2 7b01          	ld	a,(OFST+0,sp)
-1053  02a4 2012          	jra	L43
-1054  02a6               L523:
-1055                     ; 370 	result = _SWI2C_SendByte(subaddr);
-1057  02a6 7b03          	ld	a,(OFST+2,sp)
-1058  02a8 8d650065      	callf	L301f__SWI2C_SendByte
-1060  02ac 6b01          	ld	(OFST+0,sp),a
-1061                     ; 371 	if (result == IIC_FAIL)
-1063  02ae 0d01          	tnz	(OFST+0,sp)
-1064  02b0 2609          	jrne	L723
-1065                     ; 373 		_SWI2C_Stop();
-1067  02b2 8d3e003e      	callf	L17f__SWI2C_Stop
-1069                     ; 374 		return result;
-1071  02b6 7b01          	ld	a,(OFST+0,sp)
-1073  02b8               L43:
-1075  02b8 5b03          	addw	sp,#3
-1076  02ba 87            	retf
-1077  02bb               L723:
-1078                     ; 376 	_SWI2C_Start();
-1080  02bb 8d0d000d      	callf	L75f__SWI2C_Start
-1082                     ; 377 	result = _SWI2C_SendByte(addr|0x01);
-1084  02bf 7b02          	ld	a,(OFST+1,sp)
-1085  02c1 aa01          	or	a,#1
-1086  02c3 8d650065      	callf	L301f__SWI2C_SendByte
-1088  02c7 6b01          	ld	(OFST+0,sp),a
-1089                     ; 378 	if (result == IIC_FAIL)
-1091  02c9 0d01          	tnz	(OFST+0,sp)
-1092  02cb 2618          	jrne	L533
-1093                     ; 380 		_SWI2C_Stop();
-1095  02cd 8d3e003e      	callf	L17f__SWI2C_Stop
-1097                     ; 381 		return result;
-1099  02d1 7b01          	ld	a,(OFST+0,sp)
-1101  02d3 20e3          	jra	L43
-1102  02d5               L333:
-1103                     ; 385 		*p_data = _SWI2C_ReceiveByte(number);
-1105  02d5 7b07          	ld	a,(OFST+6,sp)
-1106  02d7 8d1a011a      	callf	L541f__SWI2C_ReceiveByte
-1108  02db 1e08          	ldw	x,(OFST+7,sp)
-1109  02dd f7            	ld	(x),a
-1110                     ; 386 		p_data++;
-1112  02de 1e08          	ldw	x,(OFST+7,sp)
-1113  02e0 1c0001        	addw	x,#1
-1114  02e3 1f08          	ldw	(OFST+7,sp),x
-1115  02e5               L533:
-1116                     ; 383 	while (number--)
-1118  02e5 7b07          	ld	a,(OFST+6,sp)
-1119  02e7 0a07          	dec	(OFST+6,sp)
-1120  02e9 4d            	tnz	a
-1121  02ea 26e9          	jrne	L333
-1122                     ; 388 	_SWI2C_Stop();
-1124  02ec 8d3e003e      	callf	L17f__SWI2C_Stop
-1126                     ; 390 	return IIC_OK;
-1128  02f0 a601          	ld	a,#1
-1130  02f2 20c4          	jra	L43
-1176                     ; 393 u8 SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value)
-1176                     ; 394 {	
-1177                     	switch	.text
-1178  02f4               f_SWI2C_WriteByte:
-1180  02f4 89            	pushw	x
-1181       00000000      OFST:	set	0
-1184                     ; 395 	return SWI2C_WriteBytes(addr, subaddr, 1, &value);
-1186  02f5 96            	ldw	x,sp
-1187  02f6 1c0006        	addw	x,#OFST+6
-1188  02f9 89            	pushw	x
-1189  02fa 4b01          	push	#1
-1190  02fc 7b05          	ld	a,(OFST+5,sp)
-1191  02fe 97            	ld	xl,a
-1192  02ff 7b04          	ld	a,(OFST+4,sp)
-1193  0301 95            	ld	xh,a
-1194  0302 8d690369      	callf	f_SWI2C_WriteBytes
-1196  0306 5b03          	addw	sp,#3
-1199  0308 85            	popw	x
-1200  0309 87            	retf
-1255                     ; 398 u8 SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data) 
-1255                     ; 399 {
-1256                     	switch	.text
-1257  030a               f_SWI2C_Write2Byte:
-1259  030a 89            	pushw	x
-1260  030b 88            	push	a
-1261       00000001      OFST:	set	1
-1264                     ; 401 	_SWI2C_Start();                              
-1266  030c 8d0d000d      	callf	L75f__SWI2C_Start
-1268                     ; 402 	result = _SWI2C_SendByte(addr);  
-1270  0310 7b02          	ld	a,(OFST+1,sp)
-1271  0312 8d650065      	callf	L301f__SWI2C_SendByte
-1273  0316 6b01          	ld	(OFST+0,sp),a
-1274                     ; 403 	if (result == IIC_FAIL)
-1276  0318 0d01          	tnz	(OFST+0,sp)
-1277  031a 2608          	jrne	L304
-1278                     ; 405 		_SWI2C_Stop();
-1280  031c 8d3e003e      	callf	L17f__SWI2C_Stop
-1282                     ; 406 		return result;
-1284  0320 7b01          	ld	a,(OFST+0,sp)
-1286  0322 2012          	jra	L24
-1287  0324               L304:
-1288                     ; 408 	result = _SWI2C_SendByte(subaddr);     
-1290  0324 7b03          	ld	a,(OFST+2,sp)
-1291  0326 8d650065      	callf	L301f__SWI2C_SendByte
-1293  032a 6b01          	ld	(OFST+0,sp),a
-1294                     ; 409 	if (result == IIC_FAIL)
-1296  032c 0d01          	tnz	(OFST+0,sp)
-1297  032e 2609          	jrne	L504
-1298                     ; 411 		_SWI2C_Stop();
-1300  0330 8d3e003e      	callf	L17f__SWI2C_Stop
-1302                     ; 412 		return result;
-1304  0334 7b01          	ld	a,(OFST+0,sp)
-1306  0336               L24:
-1308  0336 5b03          	addw	sp,#3
-1309  0338 87            	retf
-1310  0339               L504:
-1311                     ; 414 	result = _SWI2C_SendByte(data>>8);     
-1313  0339 7b07          	ld	a,(OFST+6,sp)
-1314  033b 8d650065      	callf	L301f__SWI2C_SendByte
-1316  033f 6b01          	ld	(OFST+0,sp),a
-1317                     ; 415 	if (result == IIC_FAIL)
-1319  0341 0d01          	tnz	(OFST+0,sp)
-1320  0343 2608          	jrne	L704
-1321                     ; 417 		_SWI2C_Stop();
-1323  0345 8d3e003e      	callf	L17f__SWI2C_Stop
-1325                     ; 418 		return result;
-1327  0349 7b01          	ld	a,(OFST+0,sp)
-1329  034b 20e9          	jra	L24
-1330  034d               L704:
-1331                     ; 420 	result = _SWI2C_SendByte(data);   
-1333  034d 7b08          	ld	a,(OFST+7,sp)
-1334  034f 8d650065      	callf	L301f__SWI2C_SendByte
-1336  0353 6b01          	ld	(OFST+0,sp),a
-1337                     ; 421 	if (result == IIC_FAIL)
-1339  0355 0d01          	tnz	(OFST+0,sp)
-1340  0357 2608          	jrne	L114
-1341                     ; 423 		_SWI2C_Stop();
-1343  0359 8d3e003e      	callf	L17f__SWI2C_Stop
-1345                     ; 424 		return result;
-1347  035d 7b01          	ld	a,(OFST+0,sp)
-1349  035f 20d5          	jra	L24
-1350  0361               L114:
-1351                     ; 426 	_SWI2C_Stop();    
-1353  0361 8d3e003e      	callf	L17f__SWI2C_Stop
-1355                     ; 427 	return IIC_OK;
-1357  0365 a601          	ld	a,#1
-1359  0367 20cd          	jra	L24
-1424                     ; 430 u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
-1424                     ; 431 {
-1425                     	switch	.text
-1426  0369               f_SWI2C_WriteBytes:
-1428  0369 89            	pushw	x
-1429  036a 88            	push	a
-1430       00000001      OFST:	set	1
-1433                     ; 433 	_SWI2C_Start();
-1435  036b 8d0d000d      	callf	L75f__SWI2C_Start
-1437                     ; 434 	result = _SWI2C_SendByte(addr);
-1439  036f 7b02          	ld	a,(OFST+1,sp)
-1440  0371 8d650065      	callf	L301f__SWI2C_SendByte
-1442  0375 6b01          	ld	(OFST+0,sp),a
-1443                     ; 435 	if (result == IIC_FAIL)
-1445  0377 0d01          	tnz	(OFST+0,sp)
-1446  0379 2608          	jrne	L144
-1447                     ; 437 		_SWI2C_Stop();
-1449  037b 8d3e003e      	callf	L17f__SWI2C_Stop
-1451                     ; 438 		return result;
-1453  037f 7b01          	ld	a,(OFST+0,sp)
-1455  0381 2012          	jra	L64
-1456  0383               L144:
-1457                     ; 440 	result = _SWI2C_SendByte(subaddr);
-1459  0383 7b03          	ld	a,(OFST+2,sp)
-1460  0385 8d650065      	callf	L301f__SWI2C_SendByte
-1462  0389 6b01          	ld	(OFST+0,sp),a
-1463                     ; 441 	if (result == IIC_FAIL)
-1465  038b 0d01          	tnz	(OFST+0,sp)
-1466  038d 2625          	jrne	L744
-1467                     ; 443 		_SWI2C_Stop();
-1469  038f 8d3e003e      	callf	L17f__SWI2C_Stop
-1471                     ; 444 		return result;
-1473  0393 7b01          	ld	a,(OFST+0,sp)
-1475  0395               L64:
-1477  0395 5b03          	addw	sp,#3
-1478  0397 87            	retf
-1479  0398               L544:
-1480                     ; 448 		result = _SWI2C_SendByte(*p_data);
-1482  0398 1e08          	ldw	x,(OFST+7,sp)
-1483  039a f6            	ld	a,(x)
-1484  039b 8d650065      	callf	L301f__SWI2C_SendByte
-1486  039f 6b01          	ld	(OFST+0,sp),a
-1487                     ; 449 		if (result == IIC_FAIL)
-1489  03a1 0d01          	tnz	(OFST+0,sp)
-1490  03a3 2608          	jrne	L354
-1491                     ; 451 		_SWI2C_Stop();
-1493  03a5 8d3e003e      	callf	L17f__SWI2C_Stop
-1495                     ; 452 		return result;
-1497  03a9 7b01          	ld	a,(OFST+0,sp)
-1499  03ab 20e8          	jra	L64
-1500  03ad               L354:
-1501                     ; 454 		p_data++;
-1503  03ad 1e08          	ldw	x,(OFST+7,sp)
-1504  03af 1c0001        	addw	x,#1
-1505  03b2 1f08          	ldw	(OFST+7,sp),x
-1506  03b4               L744:
-1507                     ; 446 	while (number--)
-1509  03b4 7b07          	ld	a,(OFST+6,sp)
-1510  03b6 0a07          	dec	(OFST+6,sp)
-1511  03b8 4d            	tnz	a
-1512  03b9 26dd          	jrne	L544
-1513                     ; 456 	_SWI2C_Stop();
-1515  03bb 8d3e003e      	callf	L17f__SWI2C_Stop
-1517                     ; 457 	return IIC_OK;
-1519  03bf a601          	ld	a,#1
-1521  03c1 20d2          	jra	L64
-1549                     ; 460 void SWI2C_Init(void)
-1549                     ; 461 {
-1550                     	switch	.text
-1551  03c3               f_SWI2C_Init:
-1555                     ; 462 	GPIO_Init(IIC_SCL_PORT, IIC_SCL_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
-1557  03c3 4bb0          	push	#176
-1558  03c5 4b10          	push	#16
-1559  03c7 ae5005        	ldw	x,#20485
-1560  03ca 8d000000      	callf	f_GPIO_Init
-1562  03ce 85            	popw	x
-1563                     ; 463 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
-1565  03cf 4bb0          	push	#176
-1566  03d1 4b20          	push	#32
-1567  03d3 ae5005        	ldw	x,#20485
-1568  03d6 8d000000      	callf	f_GPIO_Init
-1570  03da 85            	popw	x
-1571                     ; 464 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
-1573  03db 4b10          	push	#16
-1574  03dd ae5005        	ldw	x,#20485
-1575  03e0 8d000000      	callf	f_GPIO_WriteHigh
-1577  03e4 84            	pop	a
-1578                     ; 465 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
-1580  03e5 4b20          	push	#32
-1581  03e7 ae5005        	ldw	x,#20485
-1582  03ea 8d000000      	callf	f_GPIO_WriteHigh
-1584  03ee 84            	pop	a
-1585                     ; 467 	GPIO_Init(POWER_ONOFF_PORT, POWER_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-1587  03ef 4bf0          	push	#240
-1588  03f1 4b20          	push	#32
-1589  03f3 ae500a        	ldw	x,#20490
-1590  03f6 8d000000      	callf	f_GPIO_Init
-1592  03fa 85            	popw	x
-1593                     ; 469 	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-1595  03fb 4bf0          	push	#240
-1596  03fd 4b10          	push	#16
-1597  03ff ae500a        	ldw	x,#20490
-1598  0402 8d000000      	callf	f_GPIO_Init
-1600  0406 85            	popw	x
-1601                     ; 470 	GPIO_Init(IT680X_RESET_PORT, IT680X_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-1603  0407 4bf0          	push	#240
-1604  0409 4b01          	push	#1
-1605  040b ae5005        	ldw	x,#20485
-1606  040e 8d000000      	callf	f_GPIO_Init
-1608  0412 85            	popw	x
-1609                     ; 472 	GPIO_Init(LED_R_PORT, LED_R_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	
-1611  0413 4bf0          	push	#240
-1612  0415 4b01          	push	#1
-1613  0417 ae5014        	ldw	x,#20500
-1614  041a 8d000000      	callf	f_GPIO_Init
-1616  041e 85            	popw	x
-1617                     ; 473 	GPIO_Init(LED_G_PORT, LED_G_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
-1619  041f 4be0          	push	#224
-1620  0421 4b08          	push	#8
-1621  0423 ae500f        	ldw	x,#20495
-1622  0426 8d000000      	callf	f_GPIO_Init
-1624  042a 85            	popw	x
-1625                     ; 475 	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-1627  042b 4bf0          	push	#240
-1628  042d 4b40          	push	#64
-1629  042f ae5005        	ldw	x,#20485
-1630  0432 8d000000      	callf	f_GPIO_Init
-1632  0436 85            	popw	x
-1633                     ; 477 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-1635  0437 4bf0          	push	#240
-1636  0439 4b80          	push	#128
-1637  043b ae500a        	ldw	x,#20490
-1638  043e 8d000000      	callf	f_GPIO_Init
-1640  0442 85            	popw	x
-1641                     ; 478 	GPIO_Init(BACKLIGHT_PWM_PORT, BACKLIGHT_PWM_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-1643  0443 4bf0          	push	#240
-1644  0445 4b40          	push	#64
-1645  0447 ae500a        	ldw	x,#20490
-1646  044a 8d000000      	callf	f_GPIO_Init
-1648  044e 85            	popw	x
-1649                     ; 479 	GPIO_Init(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
-1651  044f 4be0          	push	#224
-1652  0451 4b01          	push	#1
-1653  0453 ae501e        	ldw	x,#20510
-1654  0456 8d000000      	callf	f_GPIO_Init
-1656  045a 85            	popw	x
-1657                     ; 481 	TIM1_TimeBaseInit(0, TIM1_COUNTERMODE_UP, 4095, 0);
-1659  045b 4b00          	push	#0
-1660  045d ae0fff        	ldw	x,#4095
-1661  0460 89            	pushw	x
-1662  0461 4b00          	push	#0
-1663  0463 5f            	clrw	x
-1664  0464 8d000000      	callf	f_TIM1_TimeBaseInit
-1666  0468 5b04          	addw	sp,#4
-1667                     ; 482 	TIM1_OC1Init(TIM1_OCMODE_PWM2, TIM1_OUTPUTSTATE_ENABLE, TIM1_OUTPUTNSTATE_DISABLE,
-1667                     ; 483 	           0, TIM1_OCPOLARITY_LOW, TIM1_OCNPOLARITY_HIGH, TIM1_OCIDLESTATE_SET,
-1667                     ; 484 	           TIM1_OCNIDLESTATE_RESET);
-1669  046a 4b00          	push	#0
-1670  046c 4b55          	push	#85
-1671  046e 4b00          	push	#0
-1672  0470 4b22          	push	#34
-1673  0472 5f            	clrw	x
-1674  0473 89            	pushw	x
-1675  0474 4b00          	push	#0
-1676  0476 ae0011        	ldw	x,#17
-1677  0479 a670          	ld	a,#112
-1678  047b 95            	ld	xh,a
-1679  047c 8d000000      	callf	f_TIM1_OC1Init
-1681  0480 5b07          	addw	sp,#7
-1682                     ; 485 	TIM1_Cmd(ENABLE);
-1684  0482 a601          	ld	a,#1
-1685  0484 8d000000      	callf	f_TIM1_Cmd
-1687                     ; 486 	TIM1_CtrlPWMOutputs(ENABLE);
-1689  0488 a601          	ld	a,#1
-1690  048a 8d000000      	callf	f_TIM1_CtrlPWMOutputs
-1692                     ; 487 }
-1695  048e 87            	retf
-1759                     .const:	section	.text
-1760  0000               L45:
-1761  0000 00000001      	dc.l	1
-1762                     ; 489 void SWI2C_Update(void)
-1762                     ; 490 {	
-1763                     	switch	.text
-1764  048f               f_SWI2C_Update:
-1766  048f 89            	pushw	x
-1767       00000002      OFST:	set	2
-1770                     ; 491 	if (Backlight_on_timer == TIMER_EXPIRED)
-1772  0490 ae0004        	ldw	x,#L5_Backlight_on_timer
-1773  0493 8d000000      	callf	d_ltor
-1775  0497 ae0000        	ldw	x,#L45
-1776  049a 8d000000      	callf	d_lcmp
-1778  049e 2616          	jrne	L505
-1779                     ; 493 		SET_BACKLIGHT_ON();
-1781  04a0 4b80          	push	#128
-1782  04a2 ae500a        	ldw	x,#20490
-1783  04a5 8d000000      	callf	f_GPIO_WriteLow
-1785  04a9 84            	pop	a
-1786                     ; 494 		Backlight_on_timer = TIMER_STOPPED;
-1788  04aa ae0000        	ldw	x,#0
-1789  04ad cf0006        	ldw	L5_Backlight_on_timer+2,x
-1790  04b0 ae0000        	ldw	x,#0
-1791  04b3 cf0004        	ldw	L5_Backlight_on_timer,x
-1792  04b6               L505:
-1793                     ; 498 	if (Power_status && !I2C_stop)
-1795  04b6 725d000d      	tnz	L31_Power_status
-1796  04ba 2604          	jrne	L65
-1797  04bc acfb05fb      	jpf	L705
-1798  04c0               L65:
-1800  04c0 725d000e      	tnz	L12_I2C_stop
-1801  04c4 2704          	jreq	L06
-1802  04c6 acfb05fb      	jpf	L705
-1803  04ca               L06:
-1804                     ; 500 		IT6802_fsm();
-1806  04ca 8d000000      	callf	f_IT6802_fsm
-1808                     ; 502 		if (frc_update_timer == TIMER_EXPIRED && Have_FRC)
-1810  04ce ae0000        	ldw	x,#L3_frc_update_timer
-1811  04d1 8d000000      	callf	d_ltor
-1813  04d5 ae0000        	ldw	x,#L45
-1814  04d8 8d000000      	callf	d_lcmp
-1816  04dc 265f          	jrne	L115
-1818  04de 725d0000      	tnz	L32_Have_FRC
-1819  04e2 2759          	jreq	L115
-1820                     ; 505 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x18, &read_LVDS_mode);
-1822  04e4 96            	ldw	x,sp
-1823  04e5 1c0001        	addw	x,#OFST-1
-1824  04e8 89            	pushw	x
-1825  04e9 ae0018        	ldw	x,#24
-1826  04ec a622          	ld	a,#34
-1827  04ee 95            	ld	xh,a
-1828  04ef 8d780278      	callf	f_SWI2C_ReadByte
-1830  04f3 85            	popw	x
-1831                     ; 506 			if (read_LVDS_mode != LVDS_mode)
-1833  04f4 7b01          	ld	a,(OFST-1,sp)
-1834  04f6 c1000c        	cp	a,L11_LVDS_mode
-1835  04f9 270e          	jreq	L315
-1836                     ; 508 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x18, LVDS_mode);
-1838  04fb 3b000c        	push	L11_LVDS_mode
-1839  04fe ae0018        	ldw	x,#24
-1840  0501 a622          	ld	a,#34
-1841  0503 95            	ld	xh,a
-1842  0504 8df402f4      	callf	f_SWI2C_WriteByte
-1844  0508 84            	pop	a
-1845  0509               L315:
-1846                     ; 510 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x0A, &read_MFC);
-1848  0509 96            	ldw	x,sp
-1849  050a 1c0002        	addw	x,#OFST+0
-1850  050d 89            	pushw	x
-1851  050e ae000a        	ldw	x,#10
-1852  0511 a622          	ld	a,#34
-1853  0513 95            	ld	xh,a
-1854  0514 8d780278      	callf	f_SWI2C_ReadByte
-1856  0518 85            	popw	x
-1857                     ; 511 			if (read_MFC != 0)
-1859  0519 0d02          	tnz	(OFST+0,sp)
-1860  051b 2714          	jreq	L515
-1861                     ; 513 				IR_DelayNMiliseconds(50);
-1863  051d ae0032        	ldw	x,#50
-1864  0520 8d000000      	callf	f_IR_DelayNMiliseconds
-1866                     ; 514 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x0A, 0);
-1868  0524 4b00          	push	#0
-1869  0526 ae000a        	ldw	x,#10
-1870  0529 a622          	ld	a,#34
-1871  052b 95            	ld	xh,a
-1872  052c 8df402f4      	callf	f_SWI2C_WriteByte
-1874  0530 84            	pop	a
-1875  0531               L515:
-1876                     ; 516 			frc_update_timer = FRC_UPDATE_TIME;
-1878  0531 ae01f5        	ldw	x,#501
-1879  0534 cf0002        	ldw	L3_frc_update_timer+2,x
-1880  0537 ae0000        	ldw	x,#0
-1881  053a cf0000        	ldw	L3_frc_update_timer,x
-1882  053d               L115:
-1883                     ; 539 		if (signal_detect_timer == TIMER_EXPIRED)
-1885  053d ae0008        	ldw	x,#L7_signal_detect_timer
-1886  0540 8d000000      	callf	d_ltor
-1888  0544 ae0000        	ldw	x,#L45
-1889  0547 8d000000      	callf	d_lcmp
-1891  054b 2704          	jreq	L26
-1892  054d acfb05fb      	jpf	L705
-1893  0551               L26:
-1894                     ; 544 			signal_detect_timer = SINGNAL_TETECT_TIME;
-1896  0551 ae0097        	ldw	x,#151
-1897  0554 cf000a        	ldw	L7_signal_detect_timer+2,x
-1898  0557 ae0000        	ldw	x,#0
-1899  055a cf0008        	ldw	L7_signal_detect_timer,x
-1900                     ; 545 			current_signal_status = SWI2C_GetSignalStatus();
-1902  055d 8db901b9      	callf	L702f_SWI2C_GetSignalStatus
-1904  0561 6b02          	ld	(OFST+0,sp),a
-1905                     ; 546 			if (current_signal_status != signal_status)
-1907  0563 7b02          	ld	a,(OFST+0,sp)
-1908  0565 c10002        	cp	a,L51_signal_status
-1909  0568 2771          	jreq	L125
-1910                     ; 548 				singal_change_count++;
-1912  056a 725c0001      	inc	L71_singal_change_count
-1913                     ; 549 				if (current_signal_status && singal_change_count > SIGNAL_STABLE_COUNT)
-1915  056e 0d02          	tnz	(OFST+0,sp)
-1916  0570 2731          	jreq	L325
-1918  0572 c60001        	ld	a,L71_singal_change_count
-1919  0575 a106          	cp	a,#6
-1920  0577 252a          	jrult	L325
-1921                     ; 551 					signal_status = TRUE;
-1923  0579 35010002      	mov	L51_signal_status,#1
-1924                     ; 552 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-1926  057d 4b08          	push	#8
-1927  057f ae500f        	ldw	x,#20495
-1928  0582 8d000000      	callf	f_GPIO_WriteHigh
-1930  0586 84            	pop	a
-1931                     ; 556 					SWI2C_ResetFPGA();
-1933  0587 8d5e065e      	callf	f_SWI2C_ResetFPGA
-1935                     ; 557 					SET_VPANEL_ON();
-1937  058b 4b01          	push	#1
-1938  058d ae501e        	ldw	x,#20510
-1939  0590 8d000000      	callf	f_GPIO_WriteHigh
-1941  0594 84            	pop	a
-1942                     ; 558 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
-1944  0595 ae1771        	ldw	x,#6001
-1945  0598 cf0006        	ldw	L5_Backlight_on_timer+2,x
-1946  059b ae0000        	ldw	x,#0
-1947  059e cf0004        	ldw	L5_Backlight_on_timer,x
-1949  05a1 203c          	jra	L135
-1950  05a3               L325:
-1951                     ; 560 				else if (!current_signal_status && singal_change_count > NO_SIGNAL_COUNT)
-1953  05a3 0d02          	tnz	(OFST+0,sp)
-1954  05a5 2638          	jrne	L135
-1956  05a7 c60001        	ld	a,L71_singal_change_count
-1957  05aa a103          	cp	a,#3
-1958  05ac 2531          	jrult	L135
-1959                     ; 562 					signal_status = FALSE;
-1961  05ae 725f0002      	clr	L51_signal_status
-1962                     ; 563 					Backlight_on_timer = TIMER_STOPPED;
-1964  05b2 ae0000        	ldw	x,#0
-1965  05b5 cf0006        	ldw	L5_Backlight_on_timer+2,x
-1966  05b8 ae0000        	ldw	x,#0
-1967  05bb cf0004        	ldw	L5_Backlight_on_timer,x
-1968                     ; 564 					SET_BACKLIGHT_OFF();
-1970  05be 4b80          	push	#128
-1971  05c0 ae500a        	ldw	x,#20490
-1972  05c3 8d000000      	callf	f_GPIO_WriteHigh
-1974  05c7 84            	pop	a
-1975                     ; 565 					IR_DelayNMiliseconds(200);
-1977  05c8 ae00c8        	ldw	x,#200
-1978  05cb 8d000000      	callf	f_IR_DelayNMiliseconds
-1980                     ; 566 					SET_VPANEL_OFF();
-1982  05cf 4b01          	push	#1
-1983  05d1 ae501e        	ldw	x,#20510
-1984  05d4 8d000000      	callf	f_GPIO_WriteLow
-1986  05d8 84            	pop	a
-1987  05d9 2004          	jra	L135
-1988  05db               L125:
-1989                     ; 571 				singal_change_count = 0;
-1991  05db 725f0001      	clr	L71_singal_change_count
-1992  05df               L135:
-1993                     ; 574 			if (signal_status)
-1995  05df 725d0002      	tnz	L51_signal_status
-1996  05e3 270c          	jreq	L335
-1997                     ; 576 				GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-1999  05e5 4b08          	push	#8
-2000  05e7 ae500f        	ldw	x,#20495
-2001  05ea 8d000000      	callf	f_GPIO_WriteHigh
-2003  05ee 84            	pop	a
-2005  05ef 200a          	jra	L705
-2006  05f1               L335:
-2007                     ; 580 				GPIO_WriteReverse(LED_G_PORT, LED_G_PIN);
-2009  05f1 4b08          	push	#8
-2010  05f3 ae500f        	ldw	x,#20495
-2011  05f6 8d000000      	callf	f_GPIO_WriteReverse
-2013  05fa 84            	pop	a
-2014  05fb               L705:
-2015                     ; 584 }
-2018  05fb 85            	popw	x
-2019  05fc 87            	retf
-2051                     ; 586 void SWI2C_SystemPowerUp(void)
-2051                     ; 587 {
-2052                     	switch	.text
-2053  05fd               f_SWI2C_SystemPowerUp:
-2057                     ; 588 	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
-2059  05fd 4b20          	push	#32
-2060  05ff ae500a        	ldw	x,#20490
-2061  0602 8d000000      	callf	f_GPIO_WriteLow
-2063  0606 84            	pop	a
-2064                     ; 589 	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-2066  0607 4b01          	push	#1
-2067  0609 ae5014        	ldw	x,#20500
-2068  060c 8d000000      	callf	f_GPIO_WriteLow
-2070  0610 84            	pop	a
-2071                     ; 590 	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-2073  0611 4b08          	push	#8
-2074  0613 ae500f        	ldw	x,#20495
-2075  0616 8d000000      	callf	f_GPIO_WriteHigh
-2077  061a 84            	pop	a
-2078                     ; 591 	IR_DelayNMiliseconds(50);
-2080  061b ae0032        	ldw	x,#50
-2081  061e 8d000000      	callf	f_IR_DelayNMiliseconds
-2083                     ; 592 	Power_status = TRUE;
-2085  0622 3501000d      	mov	L31_Power_status,#1
-2086                     ; 593 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
-2088  0626 4b01          	push	#1
-2089  0628 ae5005        	ldw	x,#20485
-2090  062b 8d000000      	callf	f_GPIO_WriteLow
-2092  062f 84            	pop	a
-2093                     ; 595 	IR_DelayNMiliseconds(200);
-2095  0630 ae00c8        	ldw	x,#200
-2096  0633 8d000000      	callf	f_IR_DelayNMiliseconds
-2098                     ; 596 	GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
-2100  0637 4b01          	push	#1
-2101  0639 ae5005        	ldw	x,#20485
-2102  063c 8d000000      	callf	f_GPIO_WriteHigh
-2104  0640 84            	pop	a
-2105                     ; 598 	IR_DelayNMiliseconds(200);
-2107  0641 ae00c8        	ldw	x,#200
-2108  0644 8d000000      	callf	f_IR_DelayNMiliseconds
-2110                     ; 599 	IT6802_fsm_init();
-2112  0648 8d000000      	callf	f_IT6802_fsm_init
-2114                     ; 600 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
-2116  064c a622          	ld	a,#34
-2117  064e 8d620262      	callf	f_SWI2C_TestDevice
-2119  0652 c70000        	ld	L32_Have_FRC,a
-2120                     ; 601 	singal_change_count = 0;
-2122  0655 725f0001      	clr	L71_singal_change_count
-2123                     ; 602 	signal_status = FALSE;
-2125  0659 725f0002      	clr	L51_signal_status
-2126                     ; 603 }
-2129  065d 87            	retf
-2156                     ; 605 void SWI2C_ResetFPGA(void)
-2156                     ; 606 {
-2157                     	switch	.text
-2158  065e               f_SWI2C_ResetFPGA:
-2162                     ; 607 	if (Power_status)
-2164  065e 725d000d      	tnz	L31_Power_status
-2165  0662 2726          	jreq	L755
-2166                     ; 609 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
-2168  0664 4b10          	push	#16
-2169  0666 ae500a        	ldw	x,#20490
-2170  0669 8d000000      	callf	f_GPIO_WriteLow
-2172  066d 84            	pop	a
-2173                     ; 610 		IR_DelayNMiliseconds(200);
-2175  066e ae00c8        	ldw	x,#200
-2176  0671 8d000000      	callf	f_IR_DelayNMiliseconds
-2178                     ; 611 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
-2180  0675 4b10          	push	#16
-2181  0677 ae500a        	ldw	x,#20490
-2182  067a 8d000000      	callf	f_GPIO_WriteHigh
-2184  067e 84            	pop	a
-2185                     ; 612 		IR_DelayNMiliseconds(1500);
-2187  067f ae05dc        	ldw	x,#1500
-2188  0682 8d000000      	callf	f_IR_DelayNMiliseconds
-2190                     ; 616 		FPGA_Init();
-2192  0686 8dcd07cd      	callf	f_FPGA_Init
-2194  068a               L755:
-2195                     ; 618 }
-2198  068a 87            	retf
-2225                     ; 620 void SWI2C_ResetHDMI(void)
-2225                     ; 621 {
-2226                     	switch	.text
-2227  068b               f_SWI2C_ResetHDMI:
-2231                     ; 622 	if (Power_status)
-2233  068b 725d000d      	tnz	L31_Power_status
-2234  068f 2743          	jreq	L175
-2235                     ; 624 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
-2237  0691 4b10          	push	#16
-2238  0693 ae500a        	ldw	x,#20490
-2239  0696 8d000000      	callf	f_GPIO_WriteLow
-2241  069a 84            	pop	a
-2242                     ; 625 		IR_DelayNMiliseconds(200);
-2244  069b ae00c8        	ldw	x,#200
-2245  069e 8d000000      	callf	f_IR_DelayNMiliseconds
-2247                     ; 626 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
-2249  06a2 4b10          	push	#16
-2250  06a4 ae500a        	ldw	x,#20490
-2251  06a7 8d000000      	callf	f_GPIO_WriteHigh
-2253  06ab 84            	pop	a
-2254                     ; 627 		IR_DelayNMiliseconds(500);
-2256  06ac ae01f4        	ldw	x,#500
-2257  06af 8d000000      	callf	f_IR_DelayNMiliseconds
-2259                     ; 628 		SWI2C_WriteByte(0x90, 0x14, 0xFF);
-2261  06b3 4bff          	push	#255
-2262  06b5 ae0014        	ldw	x,#20
-2263  06b8 a690          	ld	a,#144
-2264  06ba 95            	ld	xh,a
-2265  06bb 8df402f4      	callf	f_SWI2C_WriteByte
-2267  06bf 84            	pop	a
-2268                     ; 629 		IR_DelayNMiliseconds(1000);
-2270  06c0 ae03e8        	ldw	x,#1000
-2271  06c3 8d000000      	callf	f_IR_DelayNMiliseconds
-2273                     ; 630 		SWI2C_WriteByte(0x90, 0x14, 0x0);
-2275  06c7 4b00          	push	#0
-2276  06c9 ae0014        	ldw	x,#20
-2277  06cc a690          	ld	a,#144
-2278  06ce 95            	ld	xh,a
-2279  06cf 8df402f4      	callf	f_SWI2C_WriteByte
-2281  06d3 84            	pop	a
-2282  06d4               L175:
-2283                     ; 632 }
-2286  06d4 87            	retf
-2315                     ; 634 void SWI2C_SystemPowerDown(void)
-2315                     ; 635 {
-2316                     	switch	.text
-2317  06d5               f_SWI2C_SystemPowerDown:
-2321                     ; 636 	SET_BACKLIGHT_OFF();
-2323  06d5 4b80          	push	#128
-2324  06d7 ae500a        	ldw	x,#20490
-2325  06da 8d000000      	callf	f_GPIO_WriteHigh
-2327  06de 84            	pop	a
-2328                     ; 637 	IR_DelayNMiliseconds(200);
-2330  06df ae00c8        	ldw	x,#200
-2331  06e2 8d000000      	callf	f_IR_DelayNMiliseconds
-2333                     ; 638 	SET_VPANEL_OFF();
-2335  06e6 4b01          	push	#1
-2336  06e8 ae501e        	ldw	x,#20510
-2337  06eb 8d000000      	callf	f_GPIO_WriteLow
-2339  06ef 84            	pop	a
-2340                     ; 639 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
-2342  06f0 4b20          	push	#32
-2343  06f2 ae500a        	ldw	x,#20490
-2344  06f5 8d000000      	callf	f_GPIO_WriteHigh
-2346  06f9 84            	pop	a
-2347                     ; 640 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
-2349  06fa 4b01          	push	#1
-2350  06fc ae5014        	ldw	x,#20500
-2351  06ff 8d000000      	callf	f_GPIO_WriteHigh
-2353  0703 84            	pop	a
-2354                     ; 641 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
-2356  0704 4b08          	push	#8
-2357  0706 ae500f        	ldw	x,#20495
-2358  0709 8d000000      	callf	f_GPIO_WriteLow
-2360  070d 84            	pop	a
-2361                     ; 642 	Backlight_on_timer = TIMER_STOPPED;
-2363  070e ae0000        	ldw	x,#0
-2364  0711 cf0006        	ldw	L5_Backlight_on_timer+2,x
-2365  0714 ae0000        	ldw	x,#0
-2366  0717 cf0004        	ldw	L5_Backlight_on_timer,x
-2367                     ; 643 	Power_status = FALSE;
-2369  071a 725f000d      	clr	L31_Power_status
-2370                     ; 644 	I2C_stop = FALSE;
-2372  071e 725f000e      	clr	L12_I2C_stop
-2373                     ; 645 }
-2376  0722 87            	retf
-2403                     ; 647 void SWI2C_ToggleI2CMode(void)
-2403                     ; 648 {
-2404                     	switch	.text
-2405  0723               f_SWI2C_ToggleI2CMode:
-2409                     ; 649 	if (Power_status)
-2411  0723 725d000d      	tnz	L31_Power_status
-2412  0727 273e          	jreq	L316
-2413                     ; 651 		I2C_stop = !I2C_stop;
-2415  0729 725d000e      	tnz	L12_I2C_stop
-2416  072d 2604          	jrne	L67
-2417  072f a601          	ld	a,#1
-2418  0731 2001          	jra	L001
-2419  0733               L67:
-2420  0733 4f            	clr	a
-2421  0734               L001:
-2422  0734 c7000e        	ld	L12_I2C_stop,a
-2423                     ; 652 		if (I2C_stop)
-2425  0737 725d000e      	tnz	L12_I2C_stop
-2426  073b 2716          	jreq	L516
-2427                     ; 654 			GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
-2429  073d 4b01          	push	#1
-2430  073f ae5014        	ldw	x,#20500
-2431  0742 8d000000      	callf	f_GPIO_WriteHigh
-2433  0746 84            	pop	a
-2434                     ; 655 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-2436  0747 4b08          	push	#8
-2437  0749 ae500f        	ldw	x,#20495
-2438  074c 8d000000      	callf	f_GPIO_WriteHigh
-2440  0750 84            	pop	a
-2442  0751 2014          	jra	L316
-2443  0753               L516:
-2444                     ; 659 			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-2446  0753 4b01          	push	#1
-2447  0755 ae5014        	ldw	x,#20500
-2448  0758 8d000000      	callf	f_GPIO_WriteLow
-2450  075c 84            	pop	a
-2451                     ; 660 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-2453  075d 4b08          	push	#8
-2454  075f ae500f        	ldw	x,#20495
-2455  0762 8d000000      	callf	f_GPIO_WriteHigh
-2457  0766 84            	pop	a
-2458  0767               L316:
-2459                     ; 663 }
-2462  0767 87            	retf
-2487                     ; 665 void SWI2C_ProcessPower(void)
-2487                     ; 666 {
-2488                     	switch	.text
-2489  0768               f_SWI2C_ProcessPower:
-2493                     ; 667 	if (Power_status)
-2495  0768 725d000d      	tnz	L31_Power_status
-2496  076c 2706          	jreq	L136
-2497                     ; 669 		SWI2C_SystemPowerDown();
-2499  076e 8dd506d5      	callf	f_SWI2C_SystemPowerDown
-2502  0772 2004          	jra	L336
-2503  0774               L136:
-2504                     ; 673 		SWI2C_SystemPowerUp();
-2506  0774 8dfd05fd      	callf	f_SWI2C_SystemPowerUp
-2508  0778               L336:
-2509                     ; 675 }
-2512  0778 87            	retf
-2514                     	switch	.data
-2515  000f               L536_Set3DOn:
-2516  000f 00            	dc.b	0
-2569                     ; 679 static void SWI2C_Set3DOnOff(u8 OnOff)
-2569                     ; 680 {
-2570                     	switch	.text
-2571  0779               L736f_SWI2C_Set3DOnOff:
-2573  0779 5203          	subw	sp,#3
-2574       00000003      OFST:	set	3
-2577                     ; 682 	if (OnOff)
-2579  077b 4d            	tnz	a
-2580  077c 2706          	jreq	L366
-2581                     ; 684 		reg_value = 0x80;
-2583  077e a680          	ld	a,#128
-2584  0780 6b03          	ld	(OFST+0,sp),a
-2586  0782 2002          	jra	L566
-2587  0784               L366:
-2588                     ; 688 		reg_value = 0x0;
-2590  0784 0f03          	clr	(OFST+0,sp)
-2591  0786               L566:
-2592                     ; 690 	for (retry = 0; retry < 3; retry++)
-2594  0786 0f02          	clr	(OFST-1,sp)
-2595  0788               L766:
-2596                     ; 693 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
-2598  0788 7b03          	ld	a,(OFST+0,sp)
-2599  078a 88            	push	a
-2600  078b ae0057        	ldw	x,#87
-2601  078e a6ba          	ld	a,#186
-2602  0790 95            	ld	xh,a
-2603  0791 8df402f4      	callf	f_SWI2C_WriteByte
-2605  0795 84            	pop	a
-2606                     ; 694 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
-2608  0796 96            	ldw	x,sp
-2609  0797 1c0001        	addw	x,#OFST-2
-2610  079a 89            	pushw	x
-2611  079b ae0057        	ldw	x,#87
-2612  079e a6ba          	ld	a,#186
-2613  07a0 95            	ld	xh,a
-2614  07a1 8d780278      	callf	f_SWI2C_ReadByte
-2616  07a5 85            	popw	x
-2617                     ; 695 		if (value == reg_value)
-2619  07a6 7b01          	ld	a,(OFST-2,sp)
-2620  07a8 1103          	cp	a,(OFST+0,sp)
-2621  07aa 2708          	jreq	L376
-2622                     ; 697 			break;
-2624                     ; 690 	for (retry = 0; retry < 3; retry++)
-2626  07ac 0c02          	inc	(OFST-1,sp)
-2629  07ae 7b02          	ld	a,(OFST-1,sp)
-2630  07b0 a103          	cp	a,#3
-2631  07b2 25d4          	jrult	L766
-2632  07b4               L376:
-2633                     ; 700 }
-2636  07b4 5b03          	addw	sp,#3
-2637  07b6 87            	retf
-2662                     ; 702 void SWI2C_Toggle3DOnOff(void)
-2662                     ; 703 {	
-2663                     	switch	.text
-2664  07b7               f_SWI2C_Toggle3DOnOff:
-2668                     ; 704 	Set3DOn = !Set3DOn;
-2670  07b7 725d000f      	tnz	L536_Set3DOn
-2671  07bb 2604          	jrne	L011
-2672  07bd a601          	ld	a,#1
-2673  07bf 2001          	jra	L211
-2674  07c1               L011:
-2675  07c1 4f            	clr	a
-2676  07c2               L211:
-2677  07c2 c7000f        	ld	L536_Set3DOn,a
-2678                     ; 705 	SWI2C_Set3DOnOff(Set3DOn);
-2680  07c5 c6000f        	ld	a,L536_Set3DOn
-2681  07c8 8d790779      	callf	L736f_SWI2C_Set3DOnOff
-2683                     ; 706 }
-2686  07cc 87            	retf
-2723                     ; 711 void FPGA_Init(void)
-2723                     ; 712  {	
-2724                     	switch	.text
-2725  07cd               f_FPGA_Init:
-2727  07cd 88            	push	a
-2728       00000001      OFST:	set	1
-2731                     ; 714 	for (i = 0; i < table_size; i++)
-2733  07ce 0f01          	clr	(OFST+0,sp)
-2735  07d0 202a          	jra	L727
-2736  07d2               L327:
-2737                     ; 716 		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], FLASH_ReadByte(EEPROM_START_ADDRESS + 1 + i));
-2739  07d2 7b01          	ld	a,(OFST+0,sp)
-2740  07d4 5f            	clrw	x
-2741  07d5 97            	ld	xl,a
-2742  07d6 1c4001        	addw	x,#16385
-2743  07d9 8d000000      	callf	d_itolx
-2745  07dd be02          	ldw	x,c_lreg+2
-2746  07df 89            	pushw	x
-2747  07e0 be00          	ldw	x,c_lreg
-2748  07e2 89            	pushw	x
-2749  07e3 8d000000      	callf	f_FLASH_ReadByte
-2751  07e7 5b04          	addw	sp,#4
-2752  07e9 88            	push	a
-2753  07ea 7b02          	ld	a,(OFST+1,sp)
-2754  07ec 5f            	clrw	x
-2755  07ed 97            	ld	xl,a
-2756  07ee d60000        	ld	a,(_address_table,x)
-2757  07f1 97            	ld	xl,a
-2758  07f2 a6ba          	ld	a,#186
-2759  07f4 95            	ld	xh,a
-2760  07f5 8df402f4      	callf	f_SWI2C_WriteByte
-2762  07f9 84            	pop	a
-2763                     ; 714 	for (i = 0; i < table_size; i++)
-2765  07fa 0c01          	inc	(OFST+0,sp)
-2766  07fc               L727:
-2769  07fc 7b01          	ld	a,(OFST+0,sp)
-2770  07fe c10000        	cp	a,_table_size
-2771  0801 25cf          	jrult	L327
-2772                     ; 718 	if (FLASH_ReadByte(EEPROM_START_ADDRESS + 1))
-2774  0803 ae4001        	ldw	x,#16385
-2775  0806 89            	pushw	x
-2776  0807 ae0000        	ldw	x,#0
-2777  080a 89            	pushw	x
-2778  080b 8d000000      	callf	f_FLASH_ReadByte
-2780  080f 5b04          	addw	sp,#4
-2781  0811 4d            	tnz	a
-2782  0812 2704          	jreq	L337
-2783                     ; 720 		Set3DOn = TRUE;
-2785  0814 3501000f      	mov	L536_Set3DOn,#1
-2786  0818               L337:
-2787                     ; 722 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
-2789  0818 4b04          	push	#4
-2790  081a ae0019        	ldw	x,#25
-2791  081d a6ba          	ld	a,#186
-2792  081f 95            	ld	xh,a
-2793  0820 8df402f4      	callf	f_SWI2C_WriteByte
-2795  0824 84            	pop	a
-2796                     ; 723 	SWI2C_Set3DOnOff(Set3DOn);	
-2798  0825 c6000f        	ld	a,L536_Set3DOn
-2799  0828 8d790779      	callf	L736f_SWI2C_Set3DOnOff
-2801                     ; 724 }
-2804  082c 84            	pop	a
-2805  082d 87            	retf
-2838                     ; 726 void HDMI_HotPlug(u8 value)
-2838                     ; 727 {
-2839                     	switch	.text
-2840  082e               f_HDMI_HotPlug:
-2844                     ; 728 	if (value)
-2846  082e 4d            	tnz	a
-2847  082f 270c          	jreq	L157
-2848                     ; 730 		GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
-2850  0831 4b40          	push	#64
-2851  0833 ae5005        	ldw	x,#20485
-2852  0836 8d000000      	callf	f_GPIO_WriteHigh
-2854  083a 84            	pop	a
-2856  083b 200a          	jra	L357
-2857  083d               L157:
-2858                     ; 734 		GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
-2860  083d 4b40          	push	#64
-2861  083f ae5005        	ldw	x,#20485
-2862  0842 8d000000      	callf	f_GPIO_WriteLow
-2864  0846 84            	pop	a
-2865  0847               L357:
-2866                     ; 736 }
-2869  0847 87            	retf
-2871                     	switch	.const
-2872  0004               L557_deep_value:
-2873  0004 30            	dc.b	48
-2874  0005 80            	dc.b	128
-2875  0006 60            	dc.b	96
-2876  0007 50            	dc.b	80
-2877  0008 70            	dc.b	112
-2878  0009 70            	dc.b	112
-2879  000a 70            	dc.b	112
-2880  000b 60            	dc.b	96
-2881  000c 80            	dc.b	128
-2882  000d 90            	dc.b	144
-2883  000e 50            	dc.b	80
-2884  000f 90            	dc.b	144
-2885  0010 a0            	dc.b	160
-2886  0011 40            	dc.b	64
-2887  0012 a0            	dc.b	160
-2888  0013 a8            	dc.b	168
-2889  0014 30            	dc.b	48
-2890  0015 a0            	dc.b	160
-2923                     ; 748 void SWI2C_Set_deep(u8 deep)
-2923                     ; 749 {
-2924                     	switch	.text
-2925  0848               f_SWI2C_Set_deep:
-2927  0848 88            	push	a
-2928       00000000      OFST:	set	0
-2931                     ; 750 	if (deep == 0)
-2933  0849 4d            	tnz	a
-2934  084a 2650          	jrne	L377
-2935                     ; 752 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, FLASH_ReadByte(0x4000 + REG_0x59 + 1));
-2937  084c ae400b        	ldw	x,#16395
-2938  084f 89            	pushw	x
-2939  0850 ae0000        	ldw	x,#0
-2940  0853 89            	pushw	x
-2941  0854 8d000000      	callf	f_FLASH_ReadByte
-2943  0858 5b04          	addw	sp,#4
-2944  085a 88            	push	a
-2945  085b ae0059        	ldw	x,#89
-2946  085e a6ba          	ld	a,#186
-2947  0860 95            	ld	xh,a
-2948  0861 8df402f4      	callf	f_SWI2C_WriteByte
-2950  0865 84            	pop	a
-2951                     ; 753 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, FLASH_ReadByte(0x4000 + REG_0x5C + 1));
-2953  0866 ae400d        	ldw	x,#16397
-2954  0869 89            	pushw	x
-2955  086a ae0000        	ldw	x,#0
-2956  086d 89            	pushw	x
-2957  086e 8d000000      	callf	f_FLASH_ReadByte
-2959  0872 5b04          	addw	sp,#4
-2960  0874 88            	push	a
-2961  0875 ae005c        	ldw	x,#92
-2962  0878 a6ba          	ld	a,#186
-2963  087a 95            	ld	xh,a
-2964  087b 8df402f4      	callf	f_SWI2C_WriteByte
-2966  087f 84            	pop	a
-2967                     ; 754 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, FLASH_ReadByte(0x4000 + REG_0x5A + 1));
-2969  0880 ae400c        	ldw	x,#16396
-2970  0883 89            	pushw	x
-2971  0884 ae0000        	ldw	x,#0
-2972  0887 89            	pushw	x
-2973  0888 8d000000      	callf	f_FLASH_ReadByte
-2975  088c 5b04          	addw	sp,#4
-2976  088e 88            	push	a
-2977  088f ae005a        	ldw	x,#90
-2978  0892 a6ba          	ld	a,#186
-2979  0894 95            	ld	xh,a
-2980  0895 8df402f4      	callf	f_SWI2C_WriteByte
-2982  0899 84            	pop	a
-2984  089a 203f          	jra	L577
-2985  089c               L377:
-2986                     ; 758 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, deep_value[deep][0]);
-2988  089c 7b01          	ld	a,(OFST+1,sp)
-2989  089e 97            	ld	xl,a
-2990  089f a603          	ld	a,#3
-2991  08a1 42            	mul	x,a
-2992  08a2 d60004        	ld	a,(L557_deep_value,x)
-2993  08a5 88            	push	a
-2994  08a6 ae0059        	ldw	x,#89
-2995  08a9 a6ba          	ld	a,#186
-2996  08ab 95            	ld	xh,a
-2997  08ac 8df402f4      	callf	f_SWI2C_WriteByte
-2999  08b0 84            	pop	a
-3000                     ; 759 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, deep_value[deep][1]);
-3002  08b1 7b01          	ld	a,(OFST+1,sp)
-3003  08b3 97            	ld	xl,a
-3004  08b4 a603          	ld	a,#3
-3005  08b6 42            	mul	x,a
-3006  08b7 d60005        	ld	a,(L557_deep_value+1,x)
-3007  08ba 88            	push	a
-3008  08bb ae005c        	ldw	x,#92
-3009  08be a6ba          	ld	a,#186
-3010  08c0 95            	ld	xh,a
-3011  08c1 8df402f4      	callf	f_SWI2C_WriteByte
-3013  08c5 84            	pop	a
-3014                     ; 760 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, deep_value[deep][2]);
-3016  08c6 7b01          	ld	a,(OFST+1,sp)
-3017  08c8 97            	ld	xl,a
-3018  08c9 a603          	ld	a,#3
-3019  08cb 42            	mul	x,a
-3020  08cc d60006        	ld	a,(L557_deep_value+2,x)
-3021  08cf 88            	push	a
-3022  08d0 ae005a        	ldw	x,#90
-3023  08d3 a6ba          	ld	a,#186
-3024  08d5 95            	ld	xh,a
-3025  08d6 8df402f4      	callf	f_SWI2C_WriteByte
-3027  08da 84            	pop	a
-3028  08db               L577:
-3029                     ; 762 }
-3032  08db 84            	pop	a
-3033  08dc 87            	retf
-3058                     	switch	.const
-3059  0016               L421:
-3060  0016 00000002      	dc.l	2
-3061                     ; 764 void SWI2C_UpdateTimer(void)
-3061                     ; 765 {
-3062                     	switch	.text
-3063  08dd               f_SWI2C_UpdateTimer:
-3067                     ; 766 	if (frc_update_timer > TIMER_EXPIRED)
-3069  08dd ae0000        	ldw	x,#L3_frc_update_timer
-3070  08e0 8d000000      	callf	d_ltor
-3072  08e4 ae0016        	ldw	x,#L421
-3073  08e7 8d000000      	callf	d_lcmp
-3075  08eb 2509          	jrult	L7001
-3076                     ; 768 		frc_update_timer--;
-3078  08ed ae0000        	ldw	x,#L3_frc_update_timer
-3079  08f0 a601          	ld	a,#1
-3080  08f2 8d000000      	callf	d_lgsbc
-3082  08f6               L7001:
-3083                     ; 771 	if (Backlight_on_timer > TIMER_EXPIRED)
-3085  08f6 ae0004        	ldw	x,#L5_Backlight_on_timer
-3086  08f9 8d000000      	callf	d_ltor
-3088  08fd ae0016        	ldw	x,#L421
-3089  0900 8d000000      	callf	d_lcmp
-3091  0904 2509          	jrult	L1101
-3092                     ; 773 		Backlight_on_timer--;
-3094  0906 ae0004        	ldw	x,#L5_Backlight_on_timer
-3095  0909 a601          	ld	a,#1
-3096  090b 8d000000      	callf	d_lgsbc
-3098  090f               L1101:
-3099                     ; 781 	if (signal_detect_timer > TIMER_EXPIRED)
-3101  090f ae0008        	ldw	x,#L7_signal_detect_timer
-3102  0912 8d000000      	callf	d_ltor
-3104  0916 ae0016        	ldw	x,#L421
-3105  0919 8d000000      	callf	d_lcmp
-3107  091d 2509          	jrult	L3101
-3108                     ; 783 		signal_detect_timer--;
-3110  091f ae0008        	ldw	x,#L7_signal_detect_timer
-3111  0922 a601          	ld	a,#1
-3112  0924 8d000000      	callf	d_lgsbc
-3114  0928               L3101:
-3115                     ; 785 }
-3118  0928 87            	retf
-3215                     	xref	_table_size
-3216                     	xref	_address_table
-3217                     	switch	.bss
-3218  0000               L32_Have_FRC:
-3219  0000 00            	ds.b	1
-3220  0001               L71_singal_change_count:
-3221  0001 00            	ds.b	1
-3222  0002               L51_signal_status:
-3223  0002 00            	ds.b	1
-3224                     	xref	f_IT6802_fsm
-3225                     	xref	f_IT6802_fsm_init
-3226                     	xdef	f_SWI2C_UpdateTimer
-3227                     	xdef	f_SWI2C_Set_deep
-3228                     	xdef	f_SWI2C_Toggle3DOnOff
-3229                     	xdef	f_HDMI_HotPlug
-3230                     	xdef	f_FPGA_Init
-3231                     	xdef	f_SWI2C_TestDevice
-3232                     	xdef	f_SWI2C_Write2Byte
-3233                     	xdef	f_SWI2C_WriteBytes
-3234                     	xdef	f_SWI2C_WriteByte
-3235                     	xdef	f_SWI2C_ReadBytes
-3236                     	xdef	f_SWI2C_ReadByte
-3237                     	xdef	f_SWI2C_ResetHDMI
-3238                     	xdef	f_SWI2C_ResetFPGA
-3239                     	xdef	f_SWI2C_ToggleI2CMode
-3240                     	xdef	f_SWI2C_ProcessPower
-3241                     	xdef	f_SWI2C_SystemPowerDown
-3242                     	xdef	f_SWI2C_SystemPowerUp
-3243                     	xdef	f_SWI2C_Update
-3244                     	xdef	f_SWI2C_Init
-3245                     	xref	f_IR_DelayNMiliseconds
-3246                     	xref	f_FLASH_ReadByte
-3247                     	xref	f_TIM1_CtrlPWMOutputs
-3248                     	xref	f_TIM1_Cmd
-3249                     	xref	f_TIM1_OC1Init
-3250                     	xref	f_TIM1_TimeBaseInit
-3251                     	xref	f_GPIO_ReadInputPin
-3252                     	xref	f_GPIO_WriteReverse
-3253                     	xref	f_GPIO_WriteLow
-3254                     	xref	f_GPIO_WriteHigh
-3255                     	xref	f_GPIO_Init
-3256                     	xref.b	c_lreg
-3276                     	xref	d_lgsbc
-3277                     	xref	d_itolx
-3278                     	xref	d_lcmp
-3279                     	xref	d_ltor
-3280                     	end
+  22  000c               L11_signal_detect_timer:
+  23  000c 00000001      	dc.l	1
+  24  0010               L31_LVDS_mode:
+  25  0010 00            	dc.b	0
+  26  0011               L51_Power_status:
+  27  0011 00            	dc.b	0
+  28  0012               L32_I2C_stop:
+  29  0012 00            	dc.b	0
+  30                     .const:	section	.text
+  31  0000               L72_secret_key_table1:
+  32  0000 02            	dc.b	2
+  33  0001 a1            	dc.b	161
+  34  0002 7e            	dc.b	126
+  35  0003 7d            	dc.b	125
+  36  0004 1e            	dc.b	30
+  37  0005 1a            	dc.b	26
+  38  0006 2b            	dc.b	43
+  39  0007 24            	dc.b	36
+  40  0008 a4            	dc.b	164
+  41  0009 3c            	dc.b	60
+  42  000a a0            	dc.b	160
+  43  000b 6e            	dc.b	110
+  44  000c 23            	dc.b	35
+  45  000d a9            	dc.b	169
+  46  000e bf            	dc.b	191
+  47  000f 5d            	dc.b	93
+  48  0010 4d            	dc.b	77
+  49  0011 4f            	dc.b	79
+  50  0012 ac            	dc.b	172
+  51  0013 a5            	dc.b	165
+  52  0014 f7            	dc.b	247
+  53  0015 04            	dc.b	4
+  54  0016 2a            	dc.b	42
+  55  0017 e4            	dc.b	228
+  56  0018 64            	dc.b	100
+  57  0019 a2            	dc.b	162
+  58  001a ec            	dc.b	236
+  59  001b fd            	dc.b	253
+  60  001c 53            	dc.b	83
+  61  001d 4a            	dc.b	74
+  62  001e 5c            	dc.b	92
+  63  001f c5            	dc.b	197
+  64  0020 bb            	dc.b	187
+  65  0021 6a            	dc.b	106
+  66  0022 dc            	dc.b	220
+  67  0023 03            	dc.b	3
+  68  0024 e5            	dc.b	229
+  69  0025 ca            	dc.b	202
+  70  0026 bd            	dc.b	189
+  71  0027 2d            	dc.b	45
+  72  0028 0b            	dc.b	11
+  73  0029 d5            	dc.b	213
+  74  002a 29            	dc.b	41
+  75  002b bc            	dc.b	188
+  76  002c b0            	dc.b	176
+  77  002d 34            	dc.b	52
+  78  002e 9a            	dc.b	154
+  79  002f c3            	dc.b	195
+  80  0030 a7            	dc.b	167
+  81  0031 f3            	dc.b	243
+  82  0032 61            	dc.b	97
+  83  0033 70            	dc.b	112
+  84  0034 95            	dc.b	149
+  85  0035 da            	dc.b	218
+  86  0036 33            	dc.b	51
+  87  0037 21            	dc.b	33
+  88  0038 45            	dc.b	69
+  89  0039 ba            	dc.b	186
+  90  003a 2e            	dc.b	46
+  91  003b 9d            	dc.b	157
+  92  003c 67            	dc.b	103
+  93  003d 5a            	dc.b	90
+  94  003e 9c            	dc.b	156
+  95  003f 48            	dc.b	72
+  96  0040 8f            	dc.b	143
+  97  0041 0f            	dc.b	15
+  98  0042 6c            	dc.b	108
+  99  0043 e9            	dc.b	233
+ 100  0044 de            	dc.b	222
+ 101  0045 1c            	dc.b	28
+ 102  0046 c8            	dc.b	200
+ 103  0047 e8            	dc.b	232
+ 104  0048 1b            	dc.b	27
+ 105  0049 db            	dc.b	219
+ 106  004a 5e            	dc.b	94
+ 107  004b 54            	dc.b	84
+ 108  004c 58            	dc.b	88
+ 109  004d 68            	dc.b	104
+ 110  004e e2            	dc.b	226
+ 111  004f 81            	dc.b	129
+ 112  0050 8b            	dc.b	139
+ 113  0051 79            	dc.b	121
+ 114  0052 22            	dc.b	34
+ 115  0053 32            	dc.b	50
+ 116  0054 f0            	dc.b	240
+ 117  0055 c2            	dc.b	194
+ 118  0056 7f            	dc.b	127
+ 119  0057 df            	dc.b	223
+ 120  0058 25            	dc.b	37
+ 121  0059 75            	dc.b	117
+ 122  005a 97            	dc.b	151
+ 123  005b 1d            	dc.b	29
+ 124  005c 18            	dc.b	24
+ 125  005d 38            	dc.b	56
+ 126  005e 44            	dc.b	68
+ 127  005f 8e            	dc.b	142
+ 128  0060 94            	dc.b	148
+ 129  0061 57            	dc.b	87
+ 130  0062 63            	dc.b	99
+ 131  0063 56            	dc.b	86
+ 132  0064 90            	dc.b	144
+ 133  0065 e0            	dc.b	224
+ 134  0066 fa            	dc.b	250
+ 135  0067 b7            	dc.b	183
+ 136  0068 12            	dc.b	18
+ 137  0069 41            	dc.b	65
+ 138  006a 84            	dc.b	132
+ 139  006b e1            	dc.b	225
+ 140  006c 26            	dc.b	38
+ 141  006d e3            	dc.b	227
+ 142  006e 1f            	dc.b	31
+ 143  006f 8a            	dc.b	138
+ 144  0070 92            	dc.b	146
+ 145  0071 30            	dc.b	48
+ 146  0072 fb            	dc.b	251
+ 147  0073 9e            	dc.b	158
+ 148  0074 d9            	dc.b	217
+ 149  0075 8c            	dc.b	140
+ 150  0076 99            	dc.b	153
+ 151  0077 7c            	dc.b	124
+ 152  0078 96            	dc.b	150
+ 153  0079 5f            	dc.b	95
+ 154  007a 77            	dc.b	119
+ 155  007b a3            	dc.b	163
+ 156  007c 46            	dc.b	70
+ 157  007d 06            	dc.b	6
+ 158  007e 6d            	dc.b	109
+ 159  007f d2            	dc.b	210
+ 160  0080 b8            	dc.b	184
+ 161  0081 4c            	dc.b	76
+ 162  0082 83            	dc.b	131
+ 163  0083 72            	dc.b	114
+ 164  0084 3d            	dc.b	61
+ 165  0085 59            	dc.b	89
+ 166  0086 d1            	dc.b	209
+ 167  0087 6b            	dc.b	107
+ 168  0088 ab            	dc.b	171
+ 169  0089 b3            	dc.b	179
+ 170  008a d8            	dc.b	216
+ 171  008b 40            	dc.b	64
+ 172  008c 6f            	dc.b	111
+ 173  008d 3f            	dc.b	63
+ 174  008e 3b            	dc.b	59
+ 175  008f c6            	dc.b	198
+ 176  0090 ff            	dc.b	255
+ 177  0091 c0            	dc.b	192
+ 178  0092 98            	dc.b	152
+ 179  0093 cb            	dc.b	203
+ 180  0094 28            	dc.b	40
+ 181  0095 31            	dc.b	49
+ 182  0096 05            	dc.b	5
+ 183  0097 88            	dc.b	136
+ 184  0098 be            	dc.b	190
+ 185  0099 f4            	dc.b	244
+ 186  009a c4            	dc.b	196
+ 187  009b b5            	dc.b	181
+ 188  009c 89            	dc.b	137
+ 189  009d 55            	dc.b	85
+ 190  009e 0e            	dc.b	14
+ 191  009f 14            	dc.b	20
+ 192  00a0 15            	dc.b	21
+ 193  00a1 17            	dc.b	23
+ 194  00a2 ad            	dc.b	173
+ 195  00a3 71            	dc.b	113
+ 196  00a4 7b            	dc.b	123
+ 197  00a5 cc            	dc.b	204
+ 198  00a6 c1            	dc.b	193
+ 199  00a7 c9            	dc.b	201
+ 200  00a8 00            	dc.b	0
+ 201  00a9 d3            	dc.b	211
+ 202  00aa ea            	dc.b	234
+ 203  00ab 51            	dc.b	81
+ 204  00ac b4            	dc.b	180
+ 205  00ad 35            	dc.b	53
+ 206  00ae b2            	dc.b	178
+ 207  00af 3e            	dc.b	62
+ 208  00b0 47            	dc.b	71
+ 209  00b1 08            	dc.b	8
+ 210  00b2 73            	dc.b	115
+ 211  00b3 20            	dc.b	32
+ 212  00b4 b1            	dc.b	177
+ 213  00b5 4e            	dc.b	78
+ 214  00b6 60            	dc.b	96
+ 215  00b7 b9            	dc.b	185
+ 216  00b8 0d            	dc.b	13
+ 217  00b9 fe            	dc.b	254
+ 218  00ba 76            	dc.b	118
+ 219  00bb 37            	dc.b	55
+ 220  00bc 0c            	dc.b	12
+ 221  00bd d7            	dc.b	215
+ 222  00be f9            	dc.b	249
+ 223  00bf 50            	dc.b	80
+ 224  00c0 5b            	dc.b	91
+ 225  00c1 01            	dc.b	1
+ 226  00c2 8d            	dc.b	141
+ 227  00c3 78            	dc.b	120
+ 228  00c4 ce            	dc.b	206
+ 229  00c5 ae            	dc.b	174
+ 230  00c6 e6            	dc.b	230
+ 231  00c7 4b            	dc.b	75
+ 232  00c8 f5            	dc.b	245
+ 233  00c9 cd            	dc.b	205
+ 234  00ca 09            	dc.b	9
+ 235  00cb c7            	dc.b	199
+ 236  00cc f6            	dc.b	246
+ 237  00cd 52            	dc.b	82
+ 238  00ce 9b            	dc.b	155
+ 239  00cf fc            	dc.b	252
+ 240  00d0 62            	dc.b	98
+ 241  00d1 85            	dc.b	133
+ 242  00d2 11            	dc.b	17
+ 243  00d3 74            	dc.b	116
+ 244  00d4 49            	dc.b	73
+ 245  00d5 93            	dc.b	147
+ 246  00d6 66            	dc.b	102
+ 247  00d7 16            	dc.b	22
+ 248  00d8 a8            	dc.b	168
+ 249  00d9 43            	dc.b	67
+ 250  00da 19            	dc.b	25
+ 251  00db 9f            	dc.b	159
+ 252  00dc 27            	dc.b	39
+ 253  00dd eb            	dc.b	235
+ 254  00de 13            	dc.b	19
+ 255  00df 3a            	dc.b	58
+ 256  00e0 e7            	dc.b	231
+ 257  00e1 65            	dc.b	101
+ 258  00e2 82            	dc.b	130
+ 259  00e3 36            	dc.b	54
+ 260  00e4 39            	dc.b	57
+ 261  00e5 dd            	dc.b	221
+ 262  00e6 87            	dc.b	135
+ 263  00e7 86            	dc.b	134
+ 264  00e8 0a            	dc.b	10
+ 265  00e9 b6            	dc.b	182
+ 266  00ea d6            	dc.b	214
+ 267  00eb af            	dc.b	175
+ 268  00ec 69            	dc.b	105
+ 269  00ed 2f            	dc.b	47
+ 270  00ee 42            	dc.b	66
+ 271  00ef 10            	dc.b	16
+ 272  00f0 91            	dc.b	145
+ 273  00f1 f2            	dc.b	242
+ 274  00f2 2c            	dc.b	44
+ 275  00f3 d0            	dc.b	208
+ 276  00f4 7a            	dc.b	122
+ 277  00f5 d4            	dc.b	212
+ 278  00f6 ee            	dc.b	238
+ 279  00f7 80            	dc.b	128
+ 280  00f8 07            	dc.b	7
+ 281  00f9 a6            	dc.b	166
+ 282  00fa f8            	dc.b	248
+ 283  00fb f1            	dc.b	241
+ 284  00fc ef            	dc.b	239
+ 285  00fd cf            	dc.b	207
+ 286  00fe aa            	dc.b	170
+ 287  00ff ed            	dc.b	237
+ 288  0100               L13_secret_key_table2:
+ 289  0100 ec            	dc.b	236
+ 290  0101 7c            	dc.b	124
+ 291  0102 5a            	dc.b	90
+ 292  0103 da            	dc.b	218
+ 293  0104 42            	dc.b	66
+ 294  0105 bd            	dc.b	189
+ 295  0106 a1            	dc.b	161
+ 296  0107 23            	dc.b	35
+ 297  0108 c8            	dc.b	200
+ 298  0109 d9            	dc.b	217
+ 299  010a 26            	dc.b	38
+ 300  010b ee            	dc.b	238
+ 301  010c 8e            	dc.b	142
+ 302  010d 80            	dc.b	128
+ 303  010e e1            	dc.b	225
+ 304  010f 0f            	dc.b	15
+ 305  0110 4f            	dc.b	79
+ 306  0111 4b            	dc.b	75
+ 307  0112 5c            	dc.b	92
+ 308  0113 49            	dc.b	73
+ 309  0114 bc            	dc.b	188
+ 310  0115 dc            	dc.b	220
+ 311  0116 06            	dc.b	6
+ 312  0117 0d            	dc.b	13
+ 313  0118 d2            	dc.b	210
+ 314  0119 be            	dc.b	190
+ 315  011a 50            	dc.b	80
+ 316  011b 7a            	dc.b	122
+ 317  011c 94            	dc.b	148
+ 318  011d ed            	dc.b	237
+ 319  011e 08            	dc.b	8
+ 320  011f 2b            	dc.b	43
+ 321  0120 17            	dc.b	23
+ 322  0121 2e            	dc.b	46
+ 323  0122 e9            	dc.b	233
+ 324  0123 e6            	dc.b	230
+ 325  0124 6f            	dc.b	111
+ 326  0125 43            	dc.b	67
+ 327  0126 c2            	dc.b	194
+ 328  0127 74            	dc.b	116
+ 329  0128 83            	dc.b	131
+ 330  0129 a2            	dc.b	162
+ 331  012a 97            	dc.b	151
+ 332  012b a4            	dc.b	164
+ 333  012c f0            	dc.b	240
+ 334  012d 36            	dc.b	54
+ 335  012e b5            	dc.b	181
+ 336  012f 44            	dc.b	68
+ 337  0130 58            	dc.b	88
+ 338  0131 90            	dc.b	144
+ 339  0132 5e            	dc.b	94
+ 340  0133 bf            	dc.b	191
+ 341  0134 84            	dc.b	132
+ 342  0135 c6            	dc.b	198
+ 343  0136 27            	dc.b	39
+ 344  0137 3d            	dc.b	61
+ 345  0138 20            	dc.b	32
+ 346  0139 12            	dc.b	18
+ 347  013a 60            	dc.b	96
+ 348  013b 55            	dc.b	85
+ 349  013c d8            	dc.b	216
+ 350  013d 62            	dc.b	98
+ 351  013e f6            	dc.b	246
+ 352  013f 21            	dc.b	33
+ 353  0140 16            	dc.b	22
+ 354  0141 73            	dc.b	115
+ 355  0142 79            	dc.b	121
+ 356  0143 5b            	dc.b	91
+ 357  0144 93            	dc.b	147
+ 358  0145 92            	dc.b	146
+ 359  0146 69            	dc.b	105
+ 360  0147 37            	dc.b	55
+ 361  0148 09            	dc.b	9
+ 362  0149 04            	dc.b	4
+ 363  014a b8            	dc.b	184
+ 364  014b 57            	dc.b	87
+ 365  014c 33            	dc.b	51
+ 366  014d 39            	dc.b	57
+ 367  014e 99            	dc.b	153
+ 368  014f 88            	dc.b	136
+ 369  0150 7f            	dc.b	127
+ 370  0151 f5            	dc.b	245
+ 371  0152 7e            	dc.b	126
+ 372  0153 6a            	dc.b	106
+ 373  0154 4a            	dc.b	74
+ 374  0155 22            	dc.b	34
+ 375  0156 91            	dc.b	145
+ 376  0157 40            	dc.b	64
+ 377  0158 a8            	dc.b	168
+ 378  0159 ad            	dc.b	173
+ 379  015a b6            	dc.b	182
+ 380  015b d4            	dc.b	212
+ 381  015c 24            	dc.b	36
+ 382  015d 7b            	dc.b	123
+ 383  015e 0c            	dc.b	12
+ 384  015f b1            	dc.b	177
+ 385  0160 45            	dc.b	69
+ 386  0161 9d            	dc.b	157
+ 387  0162 13            	dc.b	19
+ 388  0163 c0            	dc.b	192
+ 389  0164 51            	dc.b	81
+ 390  0165 5d            	dc.b	93
+ 391  0166 ba            	dc.b	186
+ 392  0167 9e            	dc.b	158
+ 393  0168 41            	dc.b	65
+ 394  0169 2f            	dc.b	47
+ 395  016a 01            	dc.b	1
+ 396  016b ae            	dc.b	174
+ 397  016c 9b            	dc.b	155
+ 398  016d b0            	dc.b	176
+ 399  016e 8f            	dc.b	143
+ 400  016f d7            	dc.b	215
+ 401  0170 1e            	dc.b	30
+ 402  0171 b4            	dc.b	180
+ 403  0172 8a            	dc.b	138
+ 404  0173 d5            	dc.b	213
+ 405  0174 df            	dc.b	223
+ 406  0175 8d            	dc.b	141
+ 407  0176 63            	dc.b	99
+ 408  0177 a0            	dc.b	160
+ 409  0178 18            	dc.b	24
+ 410  0179 e3            	dc.b	227
+ 411  017a 56            	dc.b	86
+ 412  017b 1d            	dc.b	29
+ 413  017c 86            	dc.b	134
+ 414  017d 25            	dc.b	37
+ 415  017e 48            	dc.b	72
+ 416  017f f9            	dc.b	249
+ 417  0180 87            	dc.b	135
+ 418  0181 a6            	dc.b	166
+ 419  0182 1c            	dc.b	28
+ 420  0183 67            	dc.b	103
+ 421  0184 65            	dc.b	101
+ 422  0185 70            	dc.b	112
+ 423  0186 ab            	dc.b	171
+ 424  0187 35            	dc.b	53
+ 425  0188 eb            	dc.b	235
+ 426  0189 e2            	dc.b	226
+ 427  018a 2a            	dc.b	42
+ 428  018b 9a            	dc.b	154
+ 429  018c ca            	dc.b	202
+ 430  018d cf            	dc.b	207
+ 431  018e d6            	dc.b	214
+ 432  018f a7            	dc.b	167
+ 433  0190 5f            	dc.b	95
+ 434  0191 31            	dc.b	49
+ 435  0192 53            	dc.b	83
+ 436  0193 59            	dc.b	89
+ 437  0194 d1            	dc.b	209
+ 438  0195 3e            	dc.b	62
+ 439  0196 cb            	dc.b	203
+ 440  0197 cc            	dc.b	204
+ 441  0198 8b            	dc.b	139
+ 442  0199 e7            	dc.b	231
+ 443  019a b3            	dc.b	179
+ 444  019b 1f            	dc.b	31
+ 445  019c 81            	dc.b	129
+ 446  019d e0            	dc.b	224
+ 447  019e 77            	dc.b	119
+ 448  019f 0b            	dc.b	11
+ 449  01a0 de            	dc.b	222
+ 450  01a1 f1            	dc.b	241
+ 451  01a2 a9            	dc.b	169
+ 452  01a3 52            	dc.b	82
+ 453  01a4 c1            	dc.b	193
+ 454  01a5 c4            	dc.b	196
+ 455  01a6 3f            	dc.b	63
+ 456  01a7 10            	dc.b	16
+ 457  01a8 3a            	dc.b	58
+ 458  01a9 4e            	dc.b	78
+ 459  01aa c5            	dc.b	197
+ 460  01ab 6b            	dc.b	107
+ 461  01ac b2            	dc.b	178
+ 462  01ad a3            	dc.b	163
+ 463  01ae cd            	dc.b	205
+ 464  01af 98            	dc.b	152
+ 465  01b0 e8            	dc.b	232
+ 466  01b1 96            	dc.b	150
+ 467  01b2 71            	dc.b	113
+ 468  01b3 15            	dc.b	21
+ 469  01b4 6e            	dc.b	110
+ 470  01b5 00            	dc.b	0
+ 471  01b6 f7            	dc.b	247
+ 472  01b7 29            	dc.b	41
+ 473  01b8 61            	dc.b	97
+ 474  01b9 3c            	dc.b	60
+ 475  01ba d0            	dc.b	208
+ 476  01bb 3b            	dc.b	59
+ 477  01bc db            	dc.b	219
+ 478  01bd fa            	dc.b	250
+ 479  01be 0a            	dc.b	10
+ 480  01bf b9            	dc.b	185
+ 481  01c0 9c            	dc.b	156
+ 482  01c1 32            	dc.b	50
+ 483  01c2 fe            	dc.b	254
+ 484  01c3 6d            	dc.b	109
+ 485  01c4 68            	dc.b	104
+ 486  01c5 c9            	dc.b	201
+ 487  01c6 e5            	dc.b	229
+ 488  01c7 1b            	dc.b	27
+ 489  01c8 66            	dc.b	102
+ 490  01c9 30            	dc.b	48
+ 491  01ca d3            	dc.b	211
+ 492  01cb ac            	dc.b	172
+ 493  01cc 82            	dc.b	130
+ 494  01cd bb            	dc.b	187
+ 495  01ce fb            	dc.b	251
+ 496  01cf 19            	dc.b	25
+ 497  01d0 03            	dc.b	3
+ 498  01d1 ef            	dc.b	239
+ 499  01d2 ce            	dc.b	206
+ 500  01d3 fc            	dc.b	252
+ 501  01d4 46            	dc.b	70
+ 502  01d5 4d            	dc.b	77
+ 503  01d6 0e            	dc.b	14
+ 504  01d7 76            	dc.b	118
+ 505  01d8 14            	dc.b	20
+ 506  01d9 1a            	dc.b	26
+ 507  01da 2d            	dc.b	45
+ 508  01db 89            	dc.b	137
+ 509  01dc 05            	dc.b	5
+ 510  01dd 72            	dc.b	114
+ 511  01de 07            	dc.b	7
+ 512  01df 11            	dc.b	17
+ 513  01e0 e4            	dc.b	228
+ 514  01e1 02            	dc.b	2
+ 515  01e2 54            	dc.b	84
+ 516  01e3 f4            	dc.b	244
+ 517  01e4 fd            	dc.b	253
+ 518  01e5 75            	dc.b	117
+ 519  01e6 aa            	dc.b	170
+ 520  01e7 47            	dc.b	71
+ 521  01e8 ea            	dc.b	234
+ 522  01e9 f8            	dc.b	248
+ 523  01ea 7d            	dc.b	125
+ 524  01eb c7            	dc.b	199
+ 525  01ec 6c            	dc.b	108
+ 526  01ed 28            	dc.b	40
+ 527  01ee 8c            	dc.b	140
+ 528  01ef 38            	dc.b	56
+ 529  01f0 95            	dc.b	149
+ 530  01f1 f3            	dc.b	243
+ 531  01f2 f2            	dc.b	242
+ 532  01f3 9f            	dc.b	159
+ 533  01f4 b7            	dc.b	183
+ 534  01f5 4c            	dc.b	76
+ 535  01f6 34            	dc.b	52
+ 536  01f7 c3            	dc.b	195
+ 537  01f8 ff            	dc.b	255
+ 538  01f9 64            	dc.b	100
+ 539  01fa dd            	dc.b	221
+ 540  01fb 78            	dc.b	120
+ 541  01fc af            	dc.b	175
+ 542  01fd a5            	dc.b	165
+ 543  01fe 2c            	dc.b	44
+ 544  01ff 85            	dc.b	133
+ 545  0200               L33_secret_key_table3:
+ 546  0200 98            	dc.b	152
+ 547  0201 e8            	dc.b	232
+ 548  0202 b8            	dc.b	184
+ 549  0203 63            	dc.b	99
+ 550  0204 48            	dc.b	72
+ 551  0205 60            	dc.b	96
+ 552  0206 70            	dc.b	112
+ 553  0207 95            	dc.b	149
+ 554  0208 ea            	dc.b	234
+ 555  0209 23            	dc.b	35
+ 556  020a 69            	dc.b	105
+ 557  020b 64            	dc.b	100
+ 558  020c 74            	dc.b	116
+ 559  020d f0            	dc.b	240
+ 560  020e 9c            	dc.b	156
+ 561  020f 5f            	dc.b	95
+ 562  0210 6c            	dc.b	108
+ 563  0211 08            	dc.b	8
+ 564  0212 01            	dc.b	1
+ 565  0213 c3            	dc.b	195
+ 566  0214 3f            	dc.b	63
+ 567  0215 2c            	dc.b	44
+ 568  0216 05            	dc.b	5
+ 569  0217 1f            	dc.b	31
+ 570  0218 0a            	dc.b	10
+ 571  0219 d1            	dc.b	209
+ 572  021a 66            	dc.b	102
+ 573  021b cf            	dc.b	207
+ 574  021c 1a            	dc.b	26
+ 575  021d 4a            	dc.b	74
+ 576  021e 85            	dc.b	133
+ 577  021f 5b            	dc.b	91
+ 578  0220 94            	dc.b	148
+ 579  0221 92            	dc.b	146
+ 580  0222 67            	dc.b	103
+ 581  0223 7c            	dc.b	124
+ 582  0224 e5            	dc.b	229
+ 583  0225 99            	dc.b	153
+ 584  0226 87            	dc.b	135
+ 585  0227 ec            	dc.b	236
+ 586  0228 28            	dc.b	40
+ 587  0229 f5            	dc.b	245
+ 588  022a 6f            	dc.b	111
+ 589  022b 41            	dc.b	65
+ 590  022c d6            	dc.b	214
+ 591  022d eb            	dc.b	235
+ 592  022e 86            	dc.b	134
+ 593  022f 75            	dc.b	117
+ 594  0230 50            	dc.b	80
+ 595  0231 b5            	dc.b	181
+ 596  0232 45            	dc.b	69
+ 597  0233 21            	dc.b	33
+ 598  0234 93            	dc.b	147
+ 599  0235 71            	dc.b	113
+ 600  0236 ac            	dc.b	172
+ 601  0237 e3            	dc.b	227
+ 602  0238 f9            	dc.b	249
+ 603  0239 7d            	dc.b	125
+ 604  023a 80            	dc.b	128
+ 605  023b 3c            	dc.b	60
+ 606  023c 3a            	dc.b	58
+ 607  023d e6            	dc.b	230
+ 608  023e 24            	dc.b	36
+ 609  023f 5a            	dc.b	90
+ 610  0240 55            	dc.b	85
+ 611  0241 5e            	dc.b	94
+ 612  0242 0d            	dc.b	13
+ 613  0243 68            	dc.b	104
+ 614  0244 7f            	dc.b	127
+ 615  0245 ae            	dc.b	174
+ 616  0246 82            	dc.b	130
+ 617  0247 0c            	dc.b	12
+ 618  0248 18            	dc.b	24
+ 619  0249 f3            	dc.b	243
+ 620  024a 32            	dc.b	50
+ 621  024b e0            	dc.b	224
+ 622  024c 89            	dc.b	137
+ 623  024d d8            	dc.b	216
+ 624  024e 34            	dc.b	52
+ 625  024f 79            	dc.b	121
+ 626  0250 25            	dc.b	37
+ 627  0251 c4            	dc.b	196
+ 628  0252 6e            	dc.b	110
+ 629  0253 8a            	dc.b	138
+ 630  0254 46            	dc.b	70
+ 631  0255 ba            	dc.b	186
+ 632  0256 4f            	dc.b	79
+ 633  0257 88            	dc.b	136
+ 634  0258 e7            	dc.b	231
+ 635  0259 6a            	dc.b	106
+ 636  025a 17            	dc.b	23
+ 637  025b f6            	dc.b	246
+ 638  025c 20            	dc.b	32
+ 639  025d af            	dc.b	175
+ 640  025e bc            	dc.b	188
+ 641  025f 42            	dc.b	66
+ 642  0260 78            	dc.b	120
+ 643  0261 fd            	dc.b	253
+ 644  0262 44            	dc.b	68
+ 645  0263 b4            	dc.b	180
+ 646  0264 40            	dc.b	64
+ 647  0265 c9            	dc.b	201
+ 648  0266 11            	dc.b	17
+ 649  0267 14            	dc.b	20
+ 650  0268 5c            	dc.b	92
+ 651  0269 0f            	dc.b	15
+ 652  026a bb            	dc.b	187
+ 653  026b 06            	dc.b	6
+ 654  026c c0            	dc.b	192
+ 655  026d f2            	dc.b	242
+ 656  026e 12            	dc.b	18
+ 657  026f 29            	dc.b	41
+ 658  0270 13            	dc.b	19
+ 659  0271 c6            	dc.b	198
+ 660  0272 f4            	dc.b	244
+ 661  0273 09            	dc.b	9
+ 662  0274 bd            	dc.b	189
+ 663  0275 e1            	dc.b	225
+ 664  0276 4e            	dc.b	78
+ 665  0277 da            	dc.b	218
+ 666  0278 22            	dc.b	34
+ 667  0279 e4            	dc.b	228
+ 668  027a b3            	dc.b	179
+ 669  027b db            	dc.b	219
+ 670  027c a3            	dc.b	163
+ 671  027d 5d            	dc.b	93
+ 672  027e 84            	dc.b	132
+ 673  027f 0b            	dc.b	11
+ 674  0280 9b            	dc.b	155
+ 675  0281 b2            	dc.b	178
+ 676  0282 c7            	dc.b	199
+ 677  0283 8b            	dc.b	139
+ 678  0284 2a            	dc.b	42
+ 679  0285 76            	dc.b	118
+ 680  0286 9a            	dc.b	154
+ 681  0287 f8            	dc.b	248
+ 682  0288 73            	dc.b	115
+ 683  0289 be            	dc.b	190
+ 684  028a 7e            	dc.b	126
+ 685  028b 8f            	dc.b	143
+ 686  028c a1            	dc.b	161
+ 687  028d cb            	dc.b	203
+ 688  028e cc            	dc.b	204
+ 689  028f 15            	dc.b	21
+ 690  0290 4c            	dc.b	76
+ 691  0291 ef            	dc.b	239
+ 692  0292 90            	dc.b	144
+ 693  0293 33            	dc.b	51
+ 694  0294 2d            	dc.b	45
+ 695  0295 a4            	dc.b	164
+ 696  0296 9d            	dc.b	157
+ 697  0297 35            	dc.b	53
+ 698  0298 dc            	dc.b	220
+ 699  0299 8e            	dc.b	142
+ 700  029a a5            	dc.b	165
+ 701  029b 04            	dc.b	4
+ 702  029c 4b            	dc.b	75
+ 703  029d 7b            	dc.b	123
+ 704  029e 07            	dc.b	7
+ 705  029f bf            	dc.b	191
+ 706  02a0 65            	dc.b	101
+ 707  02a1 aa            	dc.b	170
+ 708  02a2 d3            	dc.b	211
+ 709  02a3 d2            	dc.b	210
+ 710  02a4 c2            	dc.b	194
+ 711  02a5 97            	dc.b	151
+ 712  02a6 b0            	dc.b	176
+ 713  02a7 d7            	dc.b	215
+ 714  02a8 56            	dc.b	86
+ 715  02a9 ff            	dc.b	255
+ 716  02aa cd            	dc.b	205
+ 717  02ab ad            	dc.b	173
+ 718  02ac b7            	dc.b	183
+ 719  02ad ce            	dc.b	206
+ 720  02ae 83            	dc.b	131
+ 721  02af a9            	dc.b	169
+ 722  02b0 39            	dc.b	57
+ 723  02b1 fe            	dc.b	254
+ 724  02b2 fc            	dc.b	252
+ 725  02b3 30            	dc.b	48
+ 726  02b4 2b            	dc.b	43
+ 727  02b5 c8            	dc.b	200
+ 728  02b6 96            	dc.b	150
+ 729  02b7 b9            	dc.b	185
+ 730  02b8 38            	dc.b	56
+ 731  02b9 fa            	dc.b	250
+ 732  02ba b6            	dc.b	182
+ 733  02bb 77            	dc.b	119
+ 734  02bc 72            	dc.b	114
+ 735  02bd e9            	dc.b	233
+ 736  02be 4d            	dc.b	77
+ 737  02bf 26            	dc.b	38
+ 738  02c0 53            	dc.b	83
+ 739  02c1 1d            	dc.b	29
+ 740  02c2 6d            	dc.b	109
+ 741  02c3 c5            	dc.b	197
+ 742  02c4 00            	dc.b	0
+ 743  02c5 dd            	dc.b	221
+ 744  02c6 f1            	dc.b	241
+ 745  02c7 52            	dc.b	82
+ 746  02c8 9e            	dc.b	158
+ 747  02c9 ed            	dc.b	237
+ 748  02ca 43            	dc.b	67
+ 749  02cb 0e            	dc.b	14
+ 750  02cc 03            	dc.b	3
+ 751  02cd 47            	dc.b	71
+ 752  02ce 37            	dc.b	55
+ 753  02cf d9            	dc.b	217
+ 754  02d0 ca            	dc.b	202
+ 755  02d1 61            	dc.b	97
+ 756  02d2 36            	dc.b	54
+ 757  02d3 49            	dc.b	73
+ 758  02d4 7a            	dc.b	122
+ 759  02d5 10            	dc.b	16
+ 760  02d6 a7            	dc.b	167
+ 761  02d7 a2            	dc.b	162
+ 762  02d8 1b            	dc.b	27
+ 763  02d9 31            	dc.b	49
+ 764  02da a0            	dc.b	160
+ 765  02db 8c            	dc.b	140
+ 766  02dc f7            	dc.b	247
+ 767  02dd 51            	dc.b	81
+ 768  02de 16            	dc.b	22
+ 769  02df 2f            	dc.b	47
+ 770  02e0 1c            	dc.b	28
+ 771  02e1 2e            	dc.b	46
+ 772  02e2 6b            	dc.b	107
+ 773  02e3 54            	dc.b	84
+ 774  02e4 1e            	dc.b	30
+ 775  02e5 df            	dc.b	223
+ 776  02e6 3b            	dc.b	59
+ 777  02e7 9f            	dc.b	159
+ 778  02e8 c1            	dc.b	193
+ 779  02e9 19            	dc.b	25
+ 780  02ea b1            	dc.b	177
+ 781  02eb fb            	dc.b	251
+ 782  02ec 59            	dc.b	89
+ 783  02ed 57            	dc.b	87
+ 784  02ee e2            	dc.b	226
+ 785  02ef 8d            	dc.b	141
+ 786  02f0 a6            	dc.b	166
+ 787  02f1 d4            	dc.b	212
+ 788  02f2 02            	dc.b	2
+ 789  02f3 58            	dc.b	88
+ 790  02f4 ee            	dc.b	238
+ 791  02f5 91            	dc.b	145
+ 792  02f6 ab            	dc.b	171
+ 793  02f7 27            	dc.b	39
+ 794  02f8 a8            	dc.b	168
+ 795  02f9 de            	dc.b	222
+ 796  02fa 81            	dc.b	129
+ 797  02fb 3d            	dc.b	61
+ 798  02fc 3e            	dc.b	62
+ 799  02fd d5            	dc.b	213
+ 800  02fe d0            	dc.b	208
+ 801  02ff 62            	dc.b	98
+ 802  0300               L53_secret_key_table4:
+ 803  0300 fb            	dc.b	251
+ 804  0301 4e            	dc.b	78
+ 805  0302 bd            	dc.b	189
+ 806  0303 01            	dc.b	1
+ 807  0304 03            	dc.b	3
+ 808  0305 37            	dc.b	55
+ 809  0306 1c            	dc.b	28
+ 810  0307 d9            	dc.b	217
+ 811  0308 c3            	dc.b	195
+ 812  0309 57            	dc.b	87
+ 813  030a b2            	dc.b	178
+ 814  030b 2a            	dc.b	42
+ 815  030c d1            	dc.b	209
+ 816  030d f0            	dc.b	240
+ 817  030e 86            	dc.b	134
+ 818  030f 30            	dc.b	48
+ 819  0310 3c            	dc.b	60
+ 820  0311 5c            	dc.b	92
+ 821  0312 85            	dc.b	133
+ 822  0313 1a            	dc.b	26
+ 823  0314 3a            	dc.b	58
+ 824  0315 f5            	dc.b	245
+ 825  0316 53            	dc.b	83
+ 826  0317 21            	dc.b	33
+ 827  0318 8d            	dc.b	141
+ 828  0319 38            	dc.b	56
+ 829  031a 58            	dc.b	88
+ 830  031b af            	dc.b	175
+ 831  031c 41            	dc.b	65
+ 832  031d 2b            	dc.b	43
+ 833  031e 94            	dc.b	148
+ 834  031f 29            	dc.b	41
+ 835  0320 d2            	dc.b	210
+ 836  0321 25            	dc.b	37
+ 837  0322 db            	dc.b	219
+ 838  0323 47            	dc.b	71
+ 839  0324 78            	dc.b	120
+ 840  0325 98            	dc.b	152
+ 841  0326 e8            	dc.b	232
+ 842  0327 be            	dc.b	190
+ 843  0328 ac            	dc.b	172
+ 844  0329 8b            	dc.b	139
+ 845  032a c2            	dc.b	194
+ 846  032b 67            	dc.b	103
+ 847  032c 64            	dc.b	100
+ 848  032d 2d            	dc.b	45
+ 849  032e b9            	dc.b	185
+ 850  032f 5f            	dc.b	95
+ 851  0330 bf            	dc.b	191
+ 852  0331 e0            	dc.b	224
+ 853  0332 e5            	dc.b	229
+ 854  0333 8e            	dc.b	142
+ 855  0334 aa            	dc.b	170
+ 856  0335 91            	dc.b	145
+ 857  0336 8f            	dc.b	143
+ 858  0337 46            	dc.b	70
+ 859  0338 6b            	dc.b	107
+ 860  0339 8c            	dc.b	140
+ 861  033a 13            	dc.b	19
+ 862  033b 71            	dc.b	113
+ 863  033c 02            	dc.b	2
+ 864  033d 84            	dc.b	132
+ 865  033e 5d            	dc.b	93
+ 866  033f 50            	dc.b	80
+ 867  0340 f3            	dc.b	243
+ 868  0341 61            	dc.b	97
+ 869  0342 f7            	dc.b	247
+ 870  0343 89            	dc.b	137
+ 871  0344 ae            	dc.b	174
+ 872  0345 90            	dc.b	144
+ 873  0346 ed            	dc.b	237
+ 874  0347 a4            	dc.b	164
+ 875  0348 7a            	dc.b	122
+ 876  0349 b5            	dc.b	181
+ 877  034a f6            	dc.b	246
+ 878  034b df            	dc.b	223
+ 879  034c 96            	dc.b	150
+ 880  034d 18            	dc.b	24
+ 881  034e a5            	dc.b	165
+ 882  034f 7c            	dc.b	124
+ 883  0350 b1            	dc.b	177
+ 884  0351 34            	dc.b	52
+ 885  0352 b0            	dc.b	176
+ 886  0353 7f            	dc.b	127
+ 887  0354 2c            	dc.b	44
+ 888  0355 87            	dc.b	135
+ 889  0356 77            	dc.b	119
+ 890  0357 7e            	dc.b	126
+ 891  0358 39            	dc.b	57
+ 892  0359 07            	dc.b	7
+ 893  035a 43            	dc.b	67
+ 894  035b 6a            	dc.b	106
+ 895  035c c8            	dc.b	200
+ 896  035d d8            	dc.b	216
+ 897  035e 9b            	dc.b	155
+ 898  035f 75            	dc.b	117
+ 899  0360 31            	dc.b	49
+ 900  0361 fc            	dc.b	252
+ 901  0362 6f            	dc.b	111
+ 902  0363 12            	dc.b	18
+ 903  0364 0c            	dc.b	12
+ 904  0365 10            	dc.b	16
+ 905  0366 d7            	dc.b	215
+ 906  0367 5a            	dc.b	90
+ 907  0368 88            	dc.b	136
+ 908  0369 69            	dc.b	105
+ 909  036a 3d            	dc.b	61
+ 910  036b d4            	dc.b	212
+ 911  036c 1e            	dc.b	30
+ 912  036d d6            	dc.b	214
+ 913  036e 9d            	dc.b	157
+ 914  036f a3            	dc.b	163
+ 915  0370 fe            	dc.b	254
+ 916  0371 0a            	dc.b	10
+ 917  0372 d0            	dc.b	208
+ 918  0373 b7            	dc.b	183
+ 919  0374 80            	dc.b	128
+ 920  0375 49            	dc.b	73
+ 921  0376 16            	dc.b	22
+ 922  0377 ca            	dc.b	202
+ 923  0378 68            	dc.b	104
+ 924  0379 ea            	dc.b	234
+ 925  037a 24            	dc.b	36
+ 926  037b e9            	dc.b	233
+ 927  037c ce            	dc.b	206
+ 928  037d 9f            	dc.b	159
+ 929  037e 11            	dc.b	17
+ 930  037f bb            	dc.b	187
+ 931  0380 92            	dc.b	146
+ 932  0381 83            	dc.b	131
+ 933  0382 52            	dc.b	82
+ 934  0383 45            	dc.b	69
+ 935  0384 27            	dc.b	39
+ 936  0385 33            	dc.b	51
+ 937  0386 e1            	dc.b	225
+ 938  0387 a8            	dc.b	168
+ 939  0388 6d            	dc.b	109
+ 940  0389 97            	dc.b	151
+ 941  038a 5e            	dc.b	94
+ 942  038b cd            	dc.b	205
+ 943  038c c7            	dc.b	199
+ 944  038d ab            	dc.b	171
+ 945  038e e2            	dc.b	226
+ 946  038f cc            	dc.b	204
+ 947  0390 4d            	dc.b	77
+ 948  0391 28            	dc.b	40
+ 949  0392 04            	dc.b	4
+ 950  0393 35            	dc.b	53
+ 951  0394 55            	dc.b	85
+ 952  0395 a2            	dc.b	162
+ 953  0396 ff            	dc.b	255
+ 954  0397 05            	dc.b	5
+ 955  0398 ec            	dc.b	236
+ 956  0399 b6            	dc.b	182
+ 957  039a eb            	dc.b	235
+ 958  039b 6c            	dc.b	108
+ 959  039c a0            	dc.b	160
+ 960  039d 44            	dc.b	68
+ 961  039e b8            	dc.b	184
+ 962  039f 60            	dc.b	96
+ 963  03a0 26            	dc.b	38
+ 964  03a1 95            	dc.b	149
+ 965  03a2 76            	dc.b	118
+ 966  03a3 c1            	dc.b	193
+ 967  03a4 dc            	dc.b	220
+ 968  03a5 56            	dc.b	86
+ 969  03a6 fa            	dc.b	250
+ 970  03a7 23            	dc.b	35
+ 971  03a8 66            	dc.b	102
+ 972  03a9 4f            	dc.b	79
+ 973  03aa 19            	dc.b	25
+ 974  03ab 1f            	dc.b	31
+ 975  03ac da            	dc.b	218
+ 976  03ad 65            	dc.b	101
+ 977  03ae 54            	dc.b	84
+ 978  03af dd            	dc.b	221
+ 979  03b0 b4            	dc.b	180
+ 980  03b1 f9            	dc.b	249
+ 981  03b2 93            	dc.b	147
+ 982  03b3 4c            	dc.b	76
+ 983  03b4 ee            	dc.b	238
+ 984  03b5 51            	dc.b	81
+ 985  03b6 63            	dc.b	99
+ 986  03b7 72            	dc.b	114
+ 987  03b8 f2            	dc.b	242
+ 988  03b9 0f            	dc.b	15
+ 989  03ba c6            	dc.b	198
+ 990  03bb cf            	dc.b	207
+ 991  03bc e4            	dc.b	228
+ 992  03bd a6            	dc.b	166
+ 993  03be 3b            	dc.b	59
+ 994  03bf 81            	dc.b	129
+ 995  03c0 08            	dc.b	8
+ 996  03c1 a7            	dc.b	167
+ 997  03c2 e6            	dc.b	230
+ 998  03c3 1d            	dc.b	29
+ 999  03c4 d5            	dc.b	213
+1000  03c5 6e            	dc.b	110
+1001  03c6 9a            	dc.b	154
+1002  03c7 4b            	dc.b	75
+1003  03c8 cb            	dc.b	203
+1004  03c9 f4            	dc.b	244
+1005  03ca 9e            	dc.b	158
+1006  03cb e7            	dc.b	231
+1007  03cc f8            	dc.b	248
+1008  03cd f1            	dc.b	241
+1009  03ce bc            	dc.b	188
+1010  03cf c0            	dc.b	192
+1011  03d0 15            	dc.b	21
+1012  03d1 09            	dc.b	9
+1013  03d2 22            	dc.b	34
+1014  03d3 82            	dc.b	130
+1015  03d4 79            	dc.b	121
+1016  03d5 a1            	dc.b	161
+1017  03d6 74            	dc.b	116
+1018  03d7 0e            	dc.b	14
+1019  03d8 c9            	dc.b	201
+1020  03d9 17            	dc.b	23
+1021  03da 5b            	dc.b	91
+1022  03db 8a            	dc.b	138
+1023  03dc 7b            	dc.b	123
+1024  03dd 06            	dc.b	6
+1025  03de c5            	dc.b	197
+1026  03df 3f            	dc.b	63
+1027  03e0 00            	dc.b	0
+1028  03e1 a9            	dc.b	169
+1029  03e2 14            	dc.b	20
+1030  03e3 62            	dc.b	98
+1031  03e4 4a            	dc.b	74
+1032  03e5 c4            	dc.b	196
+1033  03e6 de            	dc.b	222
+1034  03e7 48            	dc.b	72
+1035  03e8 d3            	dc.b	211
+1036  03e9 b3            	dc.b	179
+1037  03ea 2e            	dc.b	46
+1038  03eb 0b            	dc.b	11
+1039  03ec 0d            	dc.b	13
+1040  03ed 40            	dc.b	64
+1041  03ee 3e            	dc.b	62
+1042  03ef e3            	dc.b	227
+1043  03f0 2f            	dc.b	47
+1044  03f1 73            	dc.b	115
+1045  03f2 70            	dc.b	112
+1046  03f3 ef            	dc.b	239
+1047  03f4 9c            	dc.b	156
+1048  03f5 36            	dc.b	54
+1049  03f6 42            	dc.b	66
+1050  03f7 32            	dc.b	50
+1051  03f8 ad            	dc.b	173
+1052  03f9 20            	dc.b	32
+1053  03fa 99            	dc.b	153
+1054  03fb 59            	dc.b	89
+1055  03fc 7d            	dc.b	125
+1056  03fd fd            	dc.b	253
+1057  03fe ba            	dc.b	186
+1058  03ff 1b            	dc.b	27
+1096                     ; 154 static void _Delay_5us(void)
+1096                     ; 155 {
+1097                     	switch	.text
+1098  0000               L73f__Delay_5us:
+1100  0000 88            	push	a
+1101       00000001      OFST:	set	1
+1104                     ; 157    	for (i = 0;i < 10;i++);
+1106  0001 0f01          	clr	(OFST+0,sp)
+1107  0003               L36:
+1111  0003 0c01          	inc	(OFST+0,sp)
+1114  0005 7b01          	ld	a,(OFST+0,sp)
+1115  0007 a10a          	cp	a,#10
+1116  0009 25f8          	jrult	L36
+1117                     ; 158 }
+1120  000b 84            	pop	a
+1121  000c 87            	retf
+1146                     ; 160 static void _SWI2C_Start(void)
+1146                     ; 161 {
+1147                     	switch	.text
+1148  000d               L17f__SWI2C_Start:
+1152                     ; 162 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+1154  000d 4b10          	push	#16
+1155  000f ae5005        	ldw	x,#20485
+1156  0012 8d000000      	callf	f_GPIO_WriteHigh
+1158  0016 84            	pop	a
+1159                     ; 163 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+1161  0017 4b20          	push	#32
+1162  0019 ae5005        	ldw	x,#20485
+1163  001c 8d000000      	callf	f_GPIO_WriteHigh
+1165  0020 84            	pop	a
+1166                     ; 164 	_Delay_5us();
+1168  0021 8d000000      	callf	L73f__Delay_5us
+1170                     ; 165 	GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+1172  0025 4b20          	push	#32
+1173  0027 ae5005        	ldw	x,#20485
+1174  002a 8d000000      	callf	f_GPIO_WriteLow
+1176  002e 84            	pop	a
+1177                     ; 166 	_Delay_5us();
+1179  002f 8d000000      	callf	L73f__Delay_5us
+1181                     ; 167 	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+1183  0033 4b10          	push	#16
+1184  0035 ae5005        	ldw	x,#20485
+1185  0038 8d000000      	callf	f_GPIO_WriteLow
+1187  003c 84            	pop	a
+1188                     ; 168 }
+1191  003d 87            	retf
+1216                     ; 170 static void _SWI2C_Stop(void)
+1216                     ; 171 {
+1217                     	switch	.text
+1218  003e               L301f__SWI2C_Stop:
+1222                     ; 172 	GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+1224  003e 4b20          	push	#32
+1225  0040 ae5005        	ldw	x,#20485
+1226  0043 8d000000      	callf	f_GPIO_WriteLow
+1228  0047 84            	pop	a
+1229                     ; 173 	_Delay_5us();
+1231  0048 8d000000      	callf	L73f__Delay_5us
+1233                     ; 174 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+1235  004c 4b10          	push	#16
+1236  004e ae5005        	ldw	x,#20485
+1237  0051 8d000000      	callf	f_GPIO_WriteHigh
+1239  0055 84            	pop	a
+1240                     ; 175 	_Delay_5us();
+1242  0056 8d000000      	callf	L73f__Delay_5us
+1244                     ; 176 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+1246  005a 4b20          	push	#32
+1247  005c ae5005        	ldw	x,#20485
+1248  005f 8d000000      	callf	f_GPIO_WriteHigh
+1250  0063 84            	pop	a
+1251                     ; 177 }
+1254  0064 87            	retf
+1297                     ; 179 static u8 _SWI2C_SendByte(u8 value)
+1297                     ; 180 {
+1298                     	switch	.text
+1299  0065               L511f__SWI2C_SendByte:
+1301  0065 88            	push	a
+1302  0066 88            	push	a
+1303       00000001      OFST:	set	1
+1306                     ; 183 	for (count = 0;count < 8;count++)
+1308  0067 0f01          	clr	(OFST+0,sp)
+1309  0069               L531:
+1310                     ; 185 		if (value&0x80)
+1312  0069 7b02          	ld	a,(OFST+1,sp)
+1313  006b a580          	bcp	a,#128
+1314  006d 270c          	jreq	L341
+1315                     ; 187 			GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+1317  006f 4b20          	push	#32
+1318  0071 ae5005        	ldw	x,#20485
+1319  0074 8d000000      	callf	f_GPIO_WriteHigh
+1321  0078 84            	pop	a
+1323  0079 200a          	jra	L541
+1324  007b               L341:
+1325                     ; 191 			GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+1327  007b 4b20          	push	#32
+1328  007d ae5005        	ldw	x,#20485
+1329  0080 8d000000      	callf	f_GPIO_WriteLow
+1331  0084 84            	pop	a
+1332  0085               L541:
+1333                     ; 193 		_Delay_5us();
+1335  0085 8d000000      	callf	L73f__Delay_5us
+1337                     ; 194 		GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+1339  0089 4b10          	push	#16
+1340  008b ae5005        	ldw	x,#20485
+1341  008e 8d000000      	callf	f_GPIO_WriteHigh
+1343  0092 84            	pop	a
+1344                     ; 195 		_Delay_5us();
+1346  0093 8d000000      	callf	L73f__Delay_5us
+1348                     ; 196 		GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+1350  0097 4b10          	push	#16
+1351  0099 ae5005        	ldw	x,#20485
+1352  009c 8d000000      	callf	f_GPIO_WriteLow
+1354  00a0 84            	pop	a
+1355                     ; 197 		value = value<<1;
+1357  00a1 0802          	sll	(OFST+1,sp)
+1358                     ; 183 	for (count = 0;count < 8;count++)
+1360  00a3 0c01          	inc	(OFST+0,sp)
+1363  00a5 7b01          	ld	a,(OFST+0,sp)
+1364  00a7 a108          	cp	a,#8
+1365  00a9 25be          	jrult	L531
+1366                     ; 199 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+1368  00ab 4b20          	push	#32
+1369  00ad ae5005        	ldw	x,#20485
+1370  00b0 8d000000      	callf	f_GPIO_WriteHigh
+1372  00b4 84            	pop	a
+1373                     ; 200 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_IN_FL_NO_IT);
+1375  00b5 4b00          	push	#0
+1376  00b7 4b20          	push	#32
+1377  00b9 ae5005        	ldw	x,#20485
+1378  00bc 8d000000      	callf	f_GPIO_Init
+1380  00c0 85            	popw	x
+1381                     ; 201 	_Delay_5us();
+1383  00c1 8d000000      	callf	L73f__Delay_5us
+1385                     ; 202 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+1387  00c5 4b10          	push	#16
+1388  00c7 ae5005        	ldw	x,#20485
+1389  00ca 8d000000      	callf	f_GPIO_WriteHigh
+1391  00ce 84            	pop	a
+1392                     ; 203 	for (count = 0;count < IIC_ACK_TIMEOUT;count++)
+1394  00cf 0f01          	clr	(OFST+0,sp)
+1395  00d1               L741:
+1396                     ; 205 		if (GPIO_ReadInputPin(IIC_SDA_PORT, IIC_SDA_PIN) == 0)
+1398  00d1 4b20          	push	#32
+1399  00d3 ae5005        	ldw	x,#20485
+1400  00d6 8d000000      	callf	f_GPIO_ReadInputPin
+1402  00da 5b01          	addw	sp,#1
+1403  00dc 4d            	tnz	a
+1404  00dd 261a          	jrne	L551
+1405                     ; 207 			GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+1407  00df 4b10          	push	#16
+1408  00e1 ae5005        	ldw	x,#20485
+1409  00e4 8d000000      	callf	f_GPIO_WriteLow
+1411  00e8 84            	pop	a
+1412                     ; 208 			GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_LOW_FAST);
+1414  00e9 4ba0          	push	#160
+1415  00eb 4b20          	push	#32
+1416  00ed ae5005        	ldw	x,#20485
+1417  00f0 8d000000      	callf	f_GPIO_Init
+1419  00f4 85            	popw	x
+1420                     ; 209 			return IIC_OK;
+1422  00f5 a601          	ld	a,#1
+1424  00f7 201f          	jra	L41
+1425  00f9               L551:
+1426                     ; 203 	for (count = 0;count < IIC_ACK_TIMEOUT;count++)
+1428  00f9 0c01          	inc	(OFST+0,sp)
+1431  00fb 7b01          	ld	a,(OFST+0,sp)
+1432  00fd a132          	cp	a,#50
+1433  00ff 25d0          	jrult	L741
+1434                     ; 212 	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+1436  0101 4b10          	push	#16
+1437  0103 ae5005        	ldw	x,#20485
+1438  0106 8d000000      	callf	f_GPIO_WriteLow
+1440  010a 84            	pop	a
+1441                     ; 213 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+1443  010b 4bb0          	push	#176
+1444  010d 4b20          	push	#32
+1445  010f ae5005        	ldw	x,#20485
+1446  0112 8d000000      	callf	f_GPIO_Init
+1448  0116 85            	popw	x
+1449                     ; 215 	return IIC_FAIL;
+1451  0117 4f            	clr	a
+1453  0118               L41:
+1455  0118 85            	popw	x
+1456  0119 87            	retf
+1513                     ; 219 static u8 _SWI2C_ReceiveByte(u8 send_ack)
+1513                     ; 220 {
+1514                     	switch	.text
+1515  011a               L751f__SWI2C_ReceiveByte:
+1517  011a 88            	push	a
+1518  011b 5203          	subw	sp,#3
+1519       00000003      OFST:	set	3
+1522                     ; 221 	u8 count, read, value = 0;
+1524  011d 0f02          	clr	(OFST-1,sp)
+1525                     ; 223 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_IN_FL_NO_IT);
+1527  011f 4b00          	push	#0
+1528  0121 4b20          	push	#32
+1529  0123 ae5005        	ldw	x,#20485
+1530  0126 8d000000      	callf	f_GPIO_Init
+1532  012a 85            	popw	x
+1533                     ; 224 	for (count = 0;count < 8;count++)
+1535  012b 0f01          	clr	(OFST-2,sp)
+1536  012d               L302:
+1537                     ; 226 		_Delay_5us();
+1539  012d 8d000000      	callf	L73f__Delay_5us
+1541                     ; 227 		GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+1543  0131 4b10          	push	#16
+1544  0133 ae5005        	ldw	x,#20485
+1545  0136 8d000000      	callf	f_GPIO_WriteHigh
+1547  013a 84            	pop	a
+1548                     ; 228 		if (GPIO_ReadInputPin(IIC_SDA_PORT, IIC_SDA_PIN))
+1550  013b 4b20          	push	#32
+1551  013d ae5005        	ldw	x,#20485
+1552  0140 8d000000      	callf	f_GPIO_ReadInputPin
+1554  0144 5b01          	addw	sp,#1
+1555  0146 4d            	tnz	a
+1556  0147 2706          	jreq	L112
+1557                     ; 230 			read = 1;
+1559  0149 a601          	ld	a,#1
+1560  014b 6b03          	ld	(OFST+0,sp),a
+1562  014d 2002          	jra	L312
+1563  014f               L112:
+1564                     ; 234 			read = 0;
+1566  014f 0f03          	clr	(OFST+0,sp)
+1567  0151               L312:
+1568                     ; 236 		value = (value<<1)|read;
+1570  0151 7b02          	ld	a,(OFST-1,sp)
+1571  0153 48            	sll	a
+1572  0154 1a03          	or	a,(OFST+0,sp)
+1573  0156 6b02          	ld	(OFST-1,sp),a
+1574                     ; 237 		_Delay_5us();
+1576  0158 8d000000      	callf	L73f__Delay_5us
+1578                     ; 238 		GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+1580  015c 4b10          	push	#16
+1581  015e ae5005        	ldw	x,#20485
+1582  0161 8d000000      	callf	f_GPIO_WriteLow
+1584  0165 84            	pop	a
+1585                     ; 224 	for (count = 0;count < 8;count++)
+1587  0166 0c01          	inc	(OFST-2,sp)
+1590  0168 7b01          	ld	a,(OFST-2,sp)
+1591  016a a108          	cp	a,#8
+1592  016c 25bf          	jrult	L302
+1593                     ; 240 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+1595  016e 4bb0          	push	#176
+1596  0170 4b20          	push	#32
+1597  0172 ae5005        	ldw	x,#20485
+1598  0175 8d000000      	callf	f_GPIO_Init
+1600  0179 85            	popw	x
+1601                     ; 241 	if (send_ack)
+1603  017a 0d04          	tnz	(OFST+1,sp)
+1604  017c 270c          	jreq	L512
+1605                     ; 243 		GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+1607  017e 4b20          	push	#32
+1608  0180 ae5005        	ldw	x,#20485
+1609  0183 8d000000      	callf	f_GPIO_WriteLow
+1611  0187 84            	pop	a
+1613  0188 200a          	jra	L712
+1614  018a               L512:
+1615                     ; 247 		GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+1617  018a 4b20          	push	#32
+1618  018c ae5005        	ldw	x,#20485
+1619  018f 8d000000      	callf	f_GPIO_WriteHigh
+1621  0193 84            	pop	a
+1622  0194               L712:
+1623                     ; 249 	_Delay_5us();
+1625  0194 8d000000      	callf	L73f__Delay_5us
+1627                     ; 250 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+1629  0198 4b10          	push	#16
+1630  019a ae5005        	ldw	x,#20485
+1631  019d 8d000000      	callf	f_GPIO_WriteHigh
+1633  01a1 84            	pop	a
+1634                     ; 251 	_Delay_5us();
+1636  01a2 8d000000      	callf	L73f__Delay_5us
+1638                     ; 252 	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+1640  01a6 4b10          	push	#16
+1641  01a8 ae5005        	ldw	x,#20485
+1642  01ab 8d000000      	callf	f_GPIO_WriteLow
+1644  01af 84            	pop	a
+1645                     ; 253 	_Delay_5us();
+1647  01b0 8d000000      	callf	L73f__Delay_5us
+1649                     ; 255 	return	value;		
+1651  01b4 7b02          	ld	a,(OFST-1,sp)
+1654  01b6 5b04          	addw	sp,#4
+1655  01b8 87            	retf
+1709                     ; 258 static u8 SWI2C_GetSignalStatus(void)
+1709                     ; 259 {
+1710                     	switch	.text
+1711  01b9               L122f_SWI2C_GetSignalStatus:
+1713  01b9 5208          	subw	sp,#8
+1714       00000008      OFST:	set	8
+1717                     ; 264 	SWI2C_ReadByte(0x90, 0x0A, &p0_status);
+1719  01bb 96            	ldw	x,sp
+1720  01bc 1c0003        	addw	x,#OFST-5
+1721  01bf 89            	pushw	x
+1722  01c0 ae000a        	ldw	x,#10
+1723  01c3 a690          	ld	a,#144
+1724  01c5 95            	ld	xh,a
+1725  01c6 8d530353      	callf	f_SWI2C_ReadByte
+1727  01ca 85            	popw	x
+1728                     ; 265 	SWI2C_ReadByte(0x90, 0x9F, &val);
+1730  01cb 96            	ldw	x,sp
+1731  01cc 1c0008        	addw	x,#OFST+0
+1732  01cf 89            	pushw	x
+1733  01d0 ae009f        	ldw	x,#159
+1734  01d3 a690          	ld	a,#144
+1735  01d5 95            	ld	xh,a
+1736  01d6 8d530353      	callf	f_SWI2C_ReadByte
+1738  01da 85            	popw	x
+1739                     ; 266 	HActive = val&0x3F;
+1741  01db 7b08          	ld	a,(OFST+0,sp)
+1742  01dd a43f          	and	a,#63
+1743  01df 5f            	clrw	x
+1744  01e0 97            	ld	xl,a
+1745  01e1 1f04          	ldw	(OFST-4,sp),x
+1746                     ; 267 	HActive = HActive<<8;
+1748  01e3 7b05          	ld	a,(OFST-3,sp)
+1749  01e5 6b04          	ld	(OFST-4,sp),a
+1750  01e7 0f05          	clr	(OFST-3,sp)
+1751                     ; 268 	SWI2C_ReadByte(0x90, 0x9E, &val);
+1753  01e9 96            	ldw	x,sp
+1754  01ea 1c0008        	addw	x,#OFST+0
+1755  01ed 89            	pushw	x
+1756  01ee ae009e        	ldw	x,#158
+1757  01f1 a690          	ld	a,#144
+1758  01f3 95            	ld	xh,a
+1759  01f4 8d530353      	callf	f_SWI2C_ReadByte
+1761  01f8 85            	popw	x
+1762                     ; 269 	HActive += val;
+1764  01f9 7b08          	ld	a,(OFST+0,sp)
+1765  01fb 5f            	clrw	x
+1766  01fc 97            	ld	xl,a
+1767  01fd 1f01          	ldw	(OFST-7,sp),x
+1768  01ff 1e04          	ldw	x,(OFST-4,sp)
+1769  0201 72fb01        	addw	x,(OFST-7,sp)
+1770  0204 1f04          	ldw	(OFST-4,sp),x
+1771                     ; 270 	SWI2C_ReadByte(0x90, 0xA4, &val);
+1773  0206 96            	ldw	x,sp
+1774  0207 1c0008        	addw	x,#OFST+0
+1775  020a 89            	pushw	x
+1776  020b ae00a4        	ldw	x,#164
+1777  020e a690          	ld	a,#144
+1778  0210 95            	ld	xh,a
+1779  0211 8d530353      	callf	f_SWI2C_ReadByte
+1781  0215 85            	popw	x
+1782                     ; 271 	VActive = val&0xF0;
+1784  0216 7b08          	ld	a,(OFST+0,sp)
+1785  0218 a4f0          	and	a,#240
+1786  021a 5f            	clrw	x
+1787  021b 97            	ld	xl,a
+1788  021c 1f06          	ldw	(OFST-2,sp),x
+1789                     ; 272 	VActive = VActive<<4;
+1791  021e a604          	ld	a,#4
+1792  0220               L22:
+1793  0220 0807          	sll	(OFST-1,sp)
+1794  0222 0906          	rlc	(OFST-2,sp)
+1795  0224 4a            	dec	a
+1796  0225 26f9          	jrne	L22
+1797                     ; 273 	SWI2C_ReadByte(0x90, 0xA5, &val);
+1799  0227 96            	ldw	x,sp
+1800  0228 1c0008        	addw	x,#OFST+0
+1801  022b 89            	pushw	x
+1802  022c ae00a5        	ldw	x,#165
+1803  022f a690          	ld	a,#144
+1804  0231 95            	ld	xh,a
+1805  0232 8d530353      	callf	f_SWI2C_ReadByte
+1807  0236 85            	popw	x
+1808                     ; 274 	VActive += val;
+1810  0237 7b08          	ld	a,(OFST+0,sp)
+1811  0239 5f            	clrw	x
+1812  023a 97            	ld	xl,a
+1813  023b 1f01          	ldw	(OFST-7,sp),x
+1814  023d 1e06          	ldw	x,(OFST-2,sp)
+1815  023f 72fb01        	addw	x,(OFST-7,sp)
+1816  0242 1f06          	ldw	(OFST-2,sp),x
+1817                     ; 276 	if ((p0_status&0x0C) == 0x0C)
+1819  0244 7b03          	ld	a,(OFST-5,sp)
+1820  0246 a40c          	and	a,#12
+1821  0248 a10c          	cp	a,#12
+1822  024a 2612          	jrne	L542
+1823                     ; 279 		if (HActive == 3840 && VActive == 2160)
+1825  024c 1e04          	ldw	x,(OFST-4,sp)
+1826  024e a30f00        	cpw	x,#3840
+1827  0251 260b          	jrne	L542
+1829  0253 1e06          	ldw	x,(OFST-2,sp)
+1830  0255 a30870        	cpw	x,#2160
+1831  0258 2604          	jrne	L542
+1832                     ; 282 			return 1;
+1834  025a a601          	ld	a,#1
+1836  025c 2001          	jra	L42
+1837  025e               L542:
+1838                     ; 286 	return 0;
+1840  025e 4f            	clr	a
+1842  025f               L42:
+1844  025f 5b08          	addw	sp,#8
+1845  0261 87            	retf
+1847                     	switch	.const
+1848  0400               L152_weaving_table:
+1849  0400 00            	dc.b	0
+1850  0401 00            	dc.b	0
+1851  0402 00            	dc.b	0
+1852  0403 00            	dc.b	0
+1853  0404 08            	dc.b	8
+1854  0405 00            	dc.b	0
+1855  0406 00            	dc.b	0
+1856  0407 00            	dc.b	0
+1857  0408 00            	dc.b	0
+1858  0409 08            	dc.b	8
+1859  040a 00            	dc.b	0
+1860  040b 00            	dc.b	0
+1861  040c 00            	dc.b	0
+1862  040d 00            	dc.b	0
+1863  040e 08            	dc.b	8
+1864  040f 00            	dc.b	0
+1865  0410 00            	dc.b	0
+1866  0411 00            	dc.b	0
+1867  0412 00            	dc.b	0
+1868  0413 08            	dc.b	8
+1869  0414 00            	dc.b	0
+1870  0415 00            	dc.b	0
+1871  0416 00            	dc.b	0
+1872  0417 00            	dc.b	0
+1873  0418 08            	dc.b	8
+1874  0419 01            	dc.b	1
+1875  041a 00            	dc.b	0
+1876  041b 00            	dc.b	0
+1877  041c 00            	dc.b	0
+1878  041d 07            	dc.b	7
+1879  041e 01            	dc.b	1
+1880  041f 00            	dc.b	0
+1881  0420 00            	dc.b	0
+1882  0421 00            	dc.b	0
+1883  0422 07            	dc.b	7
+1884  0423 01            	dc.b	1
+1885  0424 00            	dc.b	0
+1886  0425 00            	dc.b	0
+1887  0426 00            	dc.b	0
+1888  0427 07            	dc.b	7
+1889  0428 01            	dc.b	1
+1890  0429 00            	dc.b	0
+1891  042a 00            	dc.b	0
+1892  042b 00            	dc.b	0
+1893  042c 07            	dc.b	7
+1894  042d 02            	dc.b	2
+1895  042e 00            	dc.b	0
+1896  042f 00            	dc.b	0
+1897  0430 00            	dc.b	0
+1898  0431 06            	dc.b	6
+1899  0432 02            	dc.b	2
+1900  0433 00            	dc.b	0
+1901  0434 00            	dc.b	0
+1902  0435 00            	dc.b	0
+1903  0436 06            	dc.b	6
+1904  0437 02            	dc.b	2
+1905  0438 00            	dc.b	0
+1906  0439 00            	dc.b	0
+1907  043a 00            	dc.b	0
+1908  043b 06            	dc.b	6
+1909  043c 03            	dc.b	3
+1910  043d 00            	dc.b	0
+1911  043e 00            	dc.b	0
+1912  043f 00            	dc.b	0
+1913  0440 05            	dc.b	5
+1914  0441 03            	dc.b	3
+1915  0442 00            	dc.b	0
+1916  0443 00            	dc.b	0
+1917  0444 00            	dc.b	0
+1918  0445 05            	dc.b	5
+1919  0446 03            	dc.b	3
+1920  0447 00            	dc.b	0
+1921  0448 00            	dc.b	0
+1922  0449 00            	dc.b	0
+1923  044a 05            	dc.b	5
+1924  044b 04            	dc.b	4
+1925  044c 00            	dc.b	0
+1926  044d 00            	dc.b	0
+1927  044e 00            	dc.b	0
+1928  044f 04            	dc.b	4
+1929  0450 04            	dc.b	4
+1930  0451 00            	dc.b	0
+1931  0452 00            	dc.b	0
+1932  0453 00            	dc.b	0
+1933  0454 04            	dc.b	4
+1934  0455 05            	dc.b	5
+1935  0456 00            	dc.b	0
+1936  0457 00            	dc.b	0
+1937  0458 00            	dc.b	0
+1938  0459 03            	dc.b	3
+1939  045a 05            	dc.b	5
+1940  045b 00            	dc.b	0
+1941  045c 00            	dc.b	0
+1942  045d 00            	dc.b	0
+1943  045e 03            	dc.b	3
+1944  045f 05            	dc.b	5
+1945  0460 00            	dc.b	0
+1946  0461 00            	dc.b	0
+1947  0462 00            	dc.b	0
+1948  0463 03            	dc.b	3
+1949  0464 06            	dc.b	6
+1950  0465 00            	dc.b	0
+1951  0466 00            	dc.b	0
+1952  0467 00            	dc.b	0
+1953  0468 02            	dc.b	2
+1954  0469 06            	dc.b	6
+1955  046a 00            	dc.b	0
+1956  046b 00            	dc.b	0
+1957  046c 00            	dc.b	0
+1958  046d 02            	dc.b	2
+1959  046e 06            	dc.b	6
+1960  046f 00            	dc.b	0
+1961  0470 00            	dc.b	0
+1962  0471 00            	dc.b	0
+1963  0472 02            	dc.b	2
+1964  0473 07            	dc.b	7
+1965  0474 00            	dc.b	0
+1966  0475 00            	dc.b	0
+1967  0476 00            	dc.b	0
+1968  0477 01            	dc.b	1
+1969  0478 07            	dc.b	7
+1970  0479 00            	dc.b	0
+1971  047a 00            	dc.b	0
+1972  047b 00            	dc.b	0
+1973  047c 01            	dc.b	1
+1974  047d 07            	dc.b	7
+1975  047e 00            	dc.b	0
+1976  047f 00            	dc.b	0
+1977  0480 00            	dc.b	0
+1978  0481 01            	dc.b	1
+1979  0482 07            	dc.b	7
+1980  0483 00            	dc.b	0
+1981  0484 00            	dc.b	0
+1982  0485 00            	dc.b	0
+1983  0486 01            	dc.b	1
+1984  0487 08            	dc.b	8
+1985  0488 00            	dc.b	0
+1986  0489 00            	dc.b	0
+1987  048a 00            	dc.b	0
+1988  048b 00            	dc.b	0
+1989  048c 08            	dc.b	8
+1990  048d 00            	dc.b	0
+1991  048e 00            	dc.b	0
+1992  048f 00            	dc.b	0
+1993  0490 00            	dc.b	0
+1994  0491 08            	dc.b	8
+1995  0492 00            	dc.b	0
+1996  0493 00            	dc.b	0
+1997  0494 00            	dc.b	0
+1998  0495 00            	dc.b	0
+1999  0496 08            	dc.b	8
+2000  0497 00            	dc.b	0
+2001  0498 00            	dc.b	0
+2002  0499 00            	dc.b	0
+2003  049a 00            	dc.b	0
+2004  049b 08            	dc.b	8
+2005  049c 00            	dc.b	0
+2006  049d 00            	dc.b	0
+2007  049e 00            	dc.b	0
+2008  049f 00            	dc.b	0
+2009  04a0 08            	dc.b	8
+2010  04a1 00            	dc.b	0
+2011  04a2 00            	dc.b	0
+2012  04a3 00            	dc.b	0
+2013  04a4 00            	dc.b	0
+2014  04a5 08            	dc.b	8
+2015  04a6 00            	dc.b	0
+2016  04a7 00            	dc.b	0
+2017  04a8 00            	dc.b	0
+2018  04a9 00            	dc.b	0
+2019  04aa 08            	dc.b	8
+2020  04ab 00            	dc.b	0
+2021  04ac 00            	dc.b	0
+2022  04ad 00            	dc.b	0
+2023  04ae 00            	dc.b	0
+2024  04af 08            	dc.b	8
+2025  04b0 00            	dc.b	0
+2026  04b1 00            	dc.b	0
+2027  04b2 00            	dc.b	0
+2028  04b3 00            	dc.b	0
+2029  04b4 08            	dc.b	8
+2030  04b5 00            	dc.b	0
+2031  04b6 00            	dc.b	0
+2032  04b7 00            	dc.b	0
+2033  04b8 00            	dc.b	0
+2034  04b9 07            	dc.b	7
+2035  04ba 10            	dc.b	16
+2036  04bb 00            	dc.b	0
+2037  04bc 00            	dc.b	0
+2038  04bd 00            	dc.b	0
+2039  04be 07            	dc.b	7
+2040  04bf 10            	dc.b	16
+2041  04c0 00            	dc.b	0
+2042  04c1 00            	dc.b	0
+2043  04c2 00            	dc.b	0
+2044  04c3 07            	dc.b	7
+2045  04c4 10            	dc.b	16
+2046  04c5 00            	dc.b	0
+2047  04c6 00            	dc.b	0
+2048  04c7 00            	dc.b	0
+2049  04c8 07            	dc.b	7
+2050  04c9 10            	dc.b	16
+2051  04ca 00            	dc.b	0
+2052  04cb 00            	dc.b	0
+2053  04cc 00            	dc.b	0
+2054  04cd 06            	dc.b	6
+2055  04ce 20            	dc.b	32
+2056  04cf 00            	dc.b	0
+2057  04d0 00            	dc.b	0
+2058  04d1 00            	dc.b	0
+2059  04d2 06            	dc.b	6
+2060  04d3 20            	dc.b	32
+2061  04d4 00            	dc.b	0
+2062  04d5 00            	dc.b	0
+2063  04d6 00            	dc.b	0
+2064  04d7 06            	dc.b	6
+2065  04d8 20            	dc.b	32
+2066  04d9 00            	dc.b	0
+2067  04da 00            	dc.b	0
+2068  04db 00            	dc.b	0
+2069  04dc 05            	dc.b	5
+2070  04dd 30            	dc.b	48
+2071  04de 00            	dc.b	0
+2072  04df 00            	dc.b	0
+2073  04e0 00            	dc.b	0
+2074  04e1 05            	dc.b	5
+2075  04e2 30            	dc.b	48
+2076  04e3 00            	dc.b	0
+2077  04e4 00            	dc.b	0
+2078  04e5 00            	dc.b	0
+2079  04e6 05            	dc.b	5
+2080  04e7 30            	dc.b	48
+2081  04e8 00            	dc.b	0
+2082  04e9 00            	dc.b	0
+2083  04ea 00            	dc.b	0
+2084  04eb 04            	dc.b	4
+2085  04ec 40            	dc.b	64
+2086  04ed 00            	dc.b	0
+2087  04ee 00            	dc.b	0
+2088  04ef 00            	dc.b	0
+2089  04f0 04            	dc.b	4
+2090  04f1 40            	dc.b	64
+2091  04f2 00            	dc.b	0
+2092  04f3 00            	dc.b	0
+2093  04f4 00            	dc.b	0
+2094  04f5 03            	dc.b	3
+2095  04f6 50            	dc.b	80
+2096  04f7 00            	dc.b	0
+2097  04f8 00            	dc.b	0
+2098  04f9 00            	dc.b	0
+2099  04fa 03            	dc.b	3
+2100  04fb 50            	dc.b	80
+2101  04fc 00            	dc.b	0
+2102  04fd 00            	dc.b	0
+2103  04fe 00            	dc.b	0
+2104  04ff 03            	dc.b	3
+2105  0500 50            	dc.b	80
+2106  0501 00            	dc.b	0
+2107  0502 00            	dc.b	0
+2108  0503 00            	dc.b	0
+2109  0504 02            	dc.b	2
+2110  0505 60            	dc.b	96
+2111  0506 00            	dc.b	0
+2112  0507 00            	dc.b	0
+2113  0508 00            	dc.b	0
+2114  0509 02            	dc.b	2
+2115  050a 60            	dc.b	96
+2116  050b 00            	dc.b	0
+2117  050c 00            	dc.b	0
+2118  050d 00            	dc.b	0
+2119  050e 02            	dc.b	2
+2120  050f 60            	dc.b	96
+2121  0510 00            	dc.b	0
+2122  0511 00            	dc.b	0
+2123  0512 00            	dc.b	0
+2124  0513 01            	dc.b	1
+2125  0514 70            	dc.b	112
+2126  0515 00            	dc.b	0
+2127  0516 00            	dc.b	0
+2128  0517 00            	dc.b	0
+2129  0518 01            	dc.b	1
+2130  0519 70            	dc.b	112
+2131  051a 00            	dc.b	0
+2132  051b 00            	dc.b	0
+2133  051c 00            	dc.b	0
+2134  051d 01            	dc.b	1
+2135  051e 70            	dc.b	112
+2136  051f 00            	dc.b	0
+2137  0520 00            	dc.b	0
+2138  0521 00            	dc.b	0
+2139  0522 01            	dc.b	1
+2140  0523 70            	dc.b	112
+2141  0524 00            	dc.b	0
+2142  0525 00            	dc.b	0
+2143  0526 00            	dc.b	0
+2144  0527 00            	dc.b	0
+2145  0528 80            	dc.b	128
+2146  0529 00            	dc.b	0
+2147  052a 00            	dc.b	0
+2148  052b 00            	dc.b	0
+2149  052c 00            	dc.b	0
+2150  052d 80            	dc.b	128
+2151  052e 00            	dc.b	0
+2152  052f 00            	dc.b	0
+2153  0530 00            	dc.b	0
+2154  0531 00            	dc.b	0
+2155  0532 80            	dc.b	128
+2156  0533 00            	dc.b	0
+2157  0534 00            	dc.b	0
+2158  0535 00            	dc.b	0
+2159  0536 00            	dc.b	0
+2160  0537 80            	dc.b	128
+2161  0538 00            	dc.b	0
+2162  0539 00            	dc.b	0
+2163  053a 00            	dc.b	0
+2164  053b 00            	dc.b	0
+2165  053c 80            	dc.b	128
+2166  053d 00            	dc.b	0
+2167  053e 00            	dc.b	0
+2168  053f 00            	dc.b	0
+2169  0540 00            	dc.b	0
+2170  0541 80            	dc.b	128
+2171  0542 00            	dc.b	0
+2172  0543 00            	dc.b	0
+2173  0544 00            	dc.b	0
+2174  0545 00            	dc.b	0
+2175  0546 80            	dc.b	128
+2176  0547 00            	dc.b	0
+2177  0548 00            	dc.b	0
+2178  0549 00            	dc.b	0
+2179  054a 00            	dc.b	0
+2180  054b 80            	dc.b	128
+2181  054c 00            	dc.b	0
+2182  054d 00            	dc.b	0
+2183  054e 00            	dc.b	0
+2184  054f 00            	dc.b	0
+2185  0550 80            	dc.b	128
+2186  0551 00            	dc.b	0
+2187  0552 00            	dc.b	0
+2188  0553 00            	dc.b	0
+2189  0554 00            	dc.b	0
+2190  0555 80            	dc.b	128
+2191  0556 00            	dc.b	0
+2192  0557 00            	dc.b	0
+2193  0558 00            	dc.b	0
+2194  0559 01            	dc.b	1
+2195  055a 70            	dc.b	112
+2196  055b 00            	dc.b	0
+2197  055c 00            	dc.b	0
+2198  055d 00            	dc.b	0
+2199  055e 01            	dc.b	1
+2200  055f 70            	dc.b	112
+2201  0560 00            	dc.b	0
+2202  0561 00            	dc.b	0
+2203  0562 00            	dc.b	0
+2204  0563 01            	dc.b	1
+2205  0564 70            	dc.b	112
+2206  0565 00            	dc.b	0
+2207  0566 00            	dc.b	0
+2208  0567 00            	dc.b	0
+2209  0568 01            	dc.b	1
+2210  0569 70            	dc.b	112
+2211  056a 00            	dc.b	0
+2212  056b 00            	dc.b	0
+2213  056c 00            	dc.b	0
+2214  056d 02            	dc.b	2
+2215  056e 60            	dc.b	96
+2216  056f 00            	dc.b	0
+2217  0570 00            	dc.b	0
+2218  0571 00            	dc.b	0
+2219  0572 02            	dc.b	2
+2220  0573 60            	dc.b	96
+2221  0574 00            	dc.b	0
+2222  0575 00            	dc.b	0
+2223  0576 00            	dc.b	0
+2224  0577 02            	dc.b	2
+2225  0578 60            	dc.b	96
+2226  0579 00            	dc.b	0
+2227  057a 00            	dc.b	0
+2228  057b 00            	dc.b	0
+2229  057c 03            	dc.b	3
+2230  057d 50            	dc.b	80
+2231  057e 00            	dc.b	0
+2232  057f 00            	dc.b	0
+2233  0580 00            	dc.b	0
+2234  0581 03            	dc.b	3
+2235  0582 50            	dc.b	80
+2236  0583 00            	dc.b	0
+2237  0584 00            	dc.b	0
+2238  0585 00            	dc.b	0
+2239  0586 03            	dc.b	3
+2240  0587 50            	dc.b	80
+2241  0588 00            	dc.b	0
+2242  0589 00            	dc.b	0
+2243  058a 00            	dc.b	0
+2244  058b 04            	dc.b	4
+2245  058c 40            	dc.b	64
+2246  058d 00            	dc.b	0
+2247  058e 00            	dc.b	0
+2248  058f 00            	dc.b	0
+2249  0590 04            	dc.b	4
+2250  0591 40            	dc.b	64
+2251  0592 00            	dc.b	0
+2252  0593 00            	dc.b	0
+2253  0594 00            	dc.b	0
+2254  0595 05            	dc.b	5
+2255  0596 30            	dc.b	48
+2256  0597 00            	dc.b	0
+2257  0598 00            	dc.b	0
+2258  0599 00            	dc.b	0
+2259  059a 05            	dc.b	5
+2260  059b 30            	dc.b	48
+2261  059c 00            	dc.b	0
+2262  059d 00            	dc.b	0
+2263  059e 00            	dc.b	0
+2264  059f 05            	dc.b	5
+2265  05a0 30            	dc.b	48
+2266  05a1 00            	dc.b	0
+2267  05a2 00            	dc.b	0
+2268  05a3 00            	dc.b	0
+2269  05a4 06            	dc.b	6
+2270  05a5 20            	dc.b	32
+2271  05a6 00            	dc.b	0
+2272  05a7 00            	dc.b	0
+2273  05a8 00            	dc.b	0
+2274  05a9 06            	dc.b	6
+2275  05aa 20            	dc.b	32
+2276  05ab 00            	dc.b	0
+2277  05ac 00            	dc.b	0
+2278  05ad 00            	dc.b	0
+2279  05ae 06            	dc.b	6
+2280  05af 20            	dc.b	32
+2281  05b0 00            	dc.b	0
+2282  05b1 00            	dc.b	0
+2283  05b2 00            	dc.b	0
+2284  05b3 07            	dc.b	7
+2285  05b4 10            	dc.b	16
+2286  05b5 00            	dc.b	0
+2287  05b6 00            	dc.b	0
+2288  05b7 00            	dc.b	0
+2289  05b8 07            	dc.b	7
+2290  05b9 10            	dc.b	16
+2291  05ba 00            	dc.b	0
+2292  05bb 00            	dc.b	0
+2293  05bc 00            	dc.b	0
+2294  05bd 07            	dc.b	7
+2295  05be 10            	dc.b	16
+2296  05bf 00            	dc.b	0
+2297  05c0 00            	dc.b	0
+2298  05c1 00            	dc.b	0
+2299  05c2 07            	dc.b	7
+2300  05c3 10            	dc.b	16
+2301  05c4 00            	dc.b	0
+2302  05c5 00            	dc.b	0
+2303  05c6 00            	dc.b	0
+2304  05c7 08            	dc.b	8
+2305  05c8 00            	dc.b	0
+2306  05c9 00            	dc.b	0
+2307  05ca 00            	dc.b	0
+2308  05cb 00            	dc.b	0
+2309  05cc 08            	dc.b	8
+2310  05cd 00            	dc.b	0
+2311  05ce 00            	dc.b	0
+2312  05cf 00            	dc.b	0
+2313  05d0 00            	dc.b	0
+2314  05d1 08            	dc.b	8
+2315  05d2 00            	dc.b	0
+2316  05d3 00            	dc.b	0
+2317  05d4 00            	dc.b	0
+2318  05d5 00            	dc.b	0
+2319  05d6 08            	dc.b	8
+2320  05d7 00            	dc.b	0
+2321  05d8 00            	dc.b	0
+2322  05d9 00            	dc.b	0
+2323  05da 00            	dc.b	0
+2324  05db 08            	dc.b	8
+2325  05dc 00            	dc.b	0
+2326  05dd 00            	dc.b	0
+2327  05de 00            	dc.b	0
+2328  05df 00            	dc.b	0
+2329  05e0 08            	dc.b	8
+2330  05e1 00            	dc.b	0
+2331  05e2 00            	dc.b	0
+2332  05e3 00            	dc.b	0
+2333  05e4 00            	dc.b	0
+2334  05e5 08            	dc.b	8
+2335  05e6 00            	dc.b	0
+2336  05e7 00            	dc.b	0
+2337  05e8 00            	dc.b	0
+2338  05e9 00            	dc.b	0
+2339  05ea 08            	dc.b	8
+2340  05eb 00            	dc.b	0
+2341  05ec 00            	dc.b	0
+2342  05ed 00            	dc.b	0
+2343  05ee 00            	dc.b	0
+2344  05ef 08            	dc.b	8
+2345  05f0 00            	dc.b	0
+2346  05f1 00            	dc.b	0
+2347  05f2 00            	dc.b	0
+2348  05f3 00            	dc.b	0
+2349  05f4 08            	dc.b	8
+2350  05f5 00            	dc.b	0
+2351  05f6 00            	dc.b	0
+2352  05f7 00            	dc.b	0
+2353  05f8 00            	dc.b	0
+2354  05f9 07            	dc.b	7
+2355  05fa 00            	dc.b	0
+2356  05fb 00            	dc.b	0
+2357  05fc 00            	dc.b	0
+2358  05fd 01            	dc.b	1
+2359  05fe 07            	dc.b	7
+2360  05ff 00            	dc.b	0
+2361  0600 00            	dc.b	0
+2362  0601 00            	dc.b	0
+2363  0602 01            	dc.b	1
+2364  0603 07            	dc.b	7
+2365  0604 00            	dc.b	0
+2366  0605 00            	dc.b	0
+2367  0606 00            	dc.b	0
+2368  0607 01            	dc.b	1
+2369  0608 07            	dc.b	7
+2370  0609 00            	dc.b	0
+2371  060a 00            	dc.b	0
+2372  060b 00            	dc.b	0
+2373  060c 01            	dc.b	1
+2374  060d 06            	dc.b	6
+2375  060e 00            	dc.b	0
+2376  060f 00            	dc.b	0
+2377  0610 00            	dc.b	0
+2378  0611 02            	dc.b	2
+2379  0612 06            	dc.b	6
+2380  0613 00            	dc.b	0
+2381  0614 00            	dc.b	0
+2382  0615 00            	dc.b	0
+2383  0616 02            	dc.b	2
+2384  0617 06            	dc.b	6
+2385  0618 00            	dc.b	0
+2386  0619 00            	dc.b	0
+2387  061a 00            	dc.b	0
+2388  061b 02            	dc.b	2
+2389  061c 05            	dc.b	5
+2390  061d 00            	dc.b	0
+2391  061e 00            	dc.b	0
+2392  061f 00            	dc.b	0
+2393  0620 03            	dc.b	3
+2394  0621 05            	dc.b	5
+2395  0622 00            	dc.b	0
+2396  0623 00            	dc.b	0
+2397  0624 00            	dc.b	0
+2398  0625 03            	dc.b	3
+2399  0626 05            	dc.b	5
+2400  0627 00            	dc.b	0
+2401  0628 00            	dc.b	0
+2402  0629 00            	dc.b	0
+2403  062a 03            	dc.b	3
+2404  062b 04            	dc.b	4
+2405  062c 00            	dc.b	0
+2406  062d 00            	dc.b	0
+2407  062e 00            	dc.b	0
+2408  062f 04            	dc.b	4
+2409  0630 04            	dc.b	4
+2410  0631 00            	dc.b	0
+2411  0632 00            	dc.b	0
+2412  0633 00            	dc.b	0
+2413  0634 04            	dc.b	4
+2414  0635 03            	dc.b	3
+2415  0636 00            	dc.b	0
+2416  0637 00            	dc.b	0
+2417  0638 00            	dc.b	0
+2418  0639 05            	dc.b	5
+2419  063a 03            	dc.b	3
+2420  063b 00            	dc.b	0
+2421  063c 00            	dc.b	0
+2422  063d 00            	dc.b	0
+2423  063e 05            	dc.b	5
+2424  063f 03            	dc.b	3
+2425  0640 00            	dc.b	0
+2426  0641 00            	dc.b	0
+2427  0642 00            	dc.b	0
+2428  0643 05            	dc.b	5
+2429  0644 02            	dc.b	2
+2430  0645 00            	dc.b	0
+2431  0646 00            	dc.b	0
+2432  0647 00            	dc.b	0
+2433  0648 06            	dc.b	6
+2434  0649 02            	dc.b	2
+2435  064a 00            	dc.b	0
+2436  064b 00            	dc.b	0
+2437  064c 00            	dc.b	0
+2438  064d 06            	dc.b	6
+2439  064e 02            	dc.b	2
+2440  064f 00            	dc.b	0
+2441  0650 00            	dc.b	0
+2442  0651 00            	dc.b	0
+2443  0652 06            	dc.b	6
+2444  0653 01            	dc.b	1
+2445  0654 00            	dc.b	0
+2446  0655 00            	dc.b	0
+2447  0656 00            	dc.b	0
+2448  0657 07            	dc.b	7
+2449  0658 01            	dc.b	1
+2450  0659 00            	dc.b	0
+2451  065a 00            	dc.b	0
+2452  065b 00            	dc.b	0
+2453  065c 07            	dc.b	7
+2454  065d 01            	dc.b	1
+2455  065e 00            	dc.b	0
+2456  065f 00            	dc.b	0
+2457  0660 00            	dc.b	0
+2458  0661 07            	dc.b	7
+2459  0662 01            	dc.b	1
+2460  0663 00            	dc.b	0
+2461  0664 00            	dc.b	0
+2462  0665 00            	dc.b	0
+2463  0666 07            	dc.b	7
+2464  0667 00            	dc.b	0
+2465  0668 00            	dc.b	0
+2466  0669 00            	dc.b	0
+2467  066a 00            	dc.b	0
+2468  066b 08            	dc.b	8
+2469  066c 00            	dc.b	0
+2470  066d 00            	dc.b	0
+2471  066e 00            	dc.b	0
+2472  066f 00            	dc.b	0
+2473  0670 08            	dc.b	8
+2474  0671 00            	dc.b	0
+2475  0672 00            	dc.b	0
+2476  0673 00            	dc.b	0
+2477  0674 00            	dc.b	0
+2478  0675 08            	dc.b	8
+2479  0676 00            	dc.b	0
+2480  0677 00            	dc.b	0
+2481  0678 00            	dc.b	0
+2482  0679 00            	dc.b	0
+2483  067a 08            	dc.b	8
+2484  067b 00            	dc.b	0
+2485  067c 00            	dc.b	0
+2486  067d 00            	dc.b	0
+2487  067e 00            	dc.b	0
+2488  067f 08            	dc.b	8
+2489  0680 00            	dc.b	0
+2490  0681 00            	dc.b	0
+2491  0682 00            	dc.b	0
+2492  0683 00            	dc.b	0
+2493  0684 08            	dc.b	8
+2494  0685 00            	dc.b	0
+2495  0686 00            	dc.b	0
+2496  0687 00            	dc.b	0
+2497  0688 00            	dc.b	0
+2498  0689 08            	dc.b	8
+2499  068a 00            	dc.b	0
+2500  068b 00            	dc.b	0
+2501  068c 00            	dc.b	0
+2502  068d 00            	dc.b	0
+2503  068e 08            	dc.b	8
+2504  068f 00            	dc.b	0
+2505  0690 00            	dc.b	0
+2506  0691 00            	dc.b	0
+2507  0692 00            	dc.b	0
+2508  0693 08            	dc.b	8
+2509  0694 00            	dc.b	0
+2510  0695 00            	dc.b	0
+2511  0696 00            	dc.b	0
+2512  0697 00            	dc.b	0
+2513  0698 08            	dc.b	8
+2514  0699 00            	dc.b	0
+2515  069a 00            	dc.b	0
+2516  069b 00            	dc.b	0
+2517  069c 00            	dc.b	0
+2518  069d 17            	dc.b	23
+2519  069e 00            	dc.b	0
+2520  069f 00            	dc.b	0
+2521  06a0 00            	dc.b	0
+2522  06a1 00            	dc.b	0
+2523  06a2 17            	dc.b	23
+2524  06a3 00            	dc.b	0
+2525  06a4 00            	dc.b	0
+2526  06a5 00            	dc.b	0
+2527  06a6 00            	dc.b	0
+2528  06a7 17            	dc.b	23
+2529  06a8 00            	dc.b	0
+2530  06a9 00            	dc.b	0
+2531  06aa 00            	dc.b	0
+2532  06ab 00            	dc.b	0
+2533  06ac 17            	dc.b	23
+2534  06ad 00            	dc.b	0
+2535  06ae 00            	dc.b	0
+2536  06af 00            	dc.b	0
+2537  06b0 00            	dc.b	0
+2538  06b1 26            	dc.b	38
+2539  06b2 00            	dc.b	0
+2540  06b3 00            	dc.b	0
+2541  06b4 00            	dc.b	0
+2542  06b5 00            	dc.b	0
+2543  06b6 26            	dc.b	38
+2544  06b7 00            	dc.b	0
+2545  06b8 00            	dc.b	0
+2546  06b9 00            	dc.b	0
+2547  06ba 00            	dc.b	0
+2548  06bb 26            	dc.b	38
+2549  06bc 00            	dc.b	0
+2550  06bd 00            	dc.b	0
+2551  06be 00            	dc.b	0
+2552  06bf 00            	dc.b	0
+2553  06c0 35            	dc.b	53
+2554  06c1 00            	dc.b	0
+2555  06c2 00            	dc.b	0
+2556  06c3 00            	dc.b	0
+2557  06c4 00            	dc.b	0
+2558  06c5 35            	dc.b	53
+2559  06c6 00            	dc.b	0
+2560  06c7 00            	dc.b	0
+2561  06c8 00            	dc.b	0
+2562  06c9 00            	dc.b	0
+2563  06ca 35            	dc.b	53
+2564  06cb 00            	dc.b	0
+2565  06cc 00            	dc.b	0
+2566  06cd 00            	dc.b	0
+2567  06ce 00            	dc.b	0
+2568  06cf 44            	dc.b	68
+2569  06d0 00            	dc.b	0
+2570  06d1 00            	dc.b	0
+2571  06d2 00            	dc.b	0
+2572  06d3 00            	dc.b	0
+2573  06d4 44            	dc.b	68
+2574  06d5 00            	dc.b	0
+2575  06d6 00            	dc.b	0
+2576  06d7 00            	dc.b	0
+2577  06d8 00            	dc.b	0
+2578  06d9 53            	dc.b	83
+2579  06da 00            	dc.b	0
+2580  06db 00            	dc.b	0
+2581  06dc 00            	dc.b	0
+2582  06dd 00            	dc.b	0
+2583  06de 53            	dc.b	83
+2584  06df 00            	dc.b	0
+2585  06e0 00            	dc.b	0
+2586  06e1 00            	dc.b	0
+2587  06e2 00            	dc.b	0
+2588  06e3 53            	dc.b	83
+2589  06e4 00            	dc.b	0
+2590  06e5 00            	dc.b	0
+2591  06e6 00            	dc.b	0
+2592  06e7 00            	dc.b	0
+2593  06e8 62            	dc.b	98
+2594  06e9 00            	dc.b	0
+2595  06ea 00            	dc.b	0
+2596  06eb 00            	dc.b	0
+2597  06ec 00            	dc.b	0
+2598  06ed 62            	dc.b	98
+2599  06ee 00            	dc.b	0
+2600  06ef 00            	dc.b	0
+2601  06f0 00            	dc.b	0
+2602  06f1 00            	dc.b	0
+2603  06f2 62            	dc.b	98
+2604  06f3 00            	dc.b	0
+2605  06f4 00            	dc.b	0
+2606  06f5 00            	dc.b	0
+2607  06f6 00            	dc.b	0
+2608  06f7 71            	dc.b	113
+2609  06f8 00            	dc.b	0
+2610  06f9 00            	dc.b	0
+2611  06fa 00            	dc.b	0
+2612  06fb 00            	dc.b	0
+2613  06fc 71            	dc.b	113
+2614  06fd 00            	dc.b	0
+2615  06fe 00            	dc.b	0
+2616  06ff 00            	dc.b	0
+2617  0700 00            	dc.b	0
+2618  0701 71            	dc.b	113
+2619  0702 00            	dc.b	0
+2620  0703 00            	dc.b	0
+2621  0704 00            	dc.b	0
+2622  0705 00            	dc.b	0
+2623  0706 71            	dc.b	113
+2624  0707 00            	dc.b	0
+2625  0708 00            	dc.b	0
+2626  0709 00            	dc.b	0
+2627  070a 00            	dc.b	0
+2628  070b 80            	dc.b	128
+2629  070c 00            	dc.b	0
+2630  070d 00            	dc.b	0
+2631  070e 00            	dc.b	0
+2632  070f 00            	dc.b	0
+2633  0710 80            	dc.b	128
+2634  0711 00            	dc.b	0
+2635  0712 00            	dc.b	0
+2636  0713 00            	dc.b	0
+2637  0714 00            	dc.b	0
+2638  0715 80            	dc.b	128
+2639  0716 00            	dc.b	0
+2640  0717 00            	dc.b	0
+2641  0718 00            	dc.b	0
+2642  0719 00            	dc.b	0
+2643  071a 80            	dc.b	128
+2644  071b 00            	dc.b	0
+2645  071c 00            	dc.b	0
+2646  071d 00            	dc.b	0
+2647  071e 00            	dc.b	0
+2648  071f 80            	dc.b	128
+2649  0720 00            	dc.b	0
+2650  0721 00            	dc.b	0
+2651  0722 00            	dc.b	0
+2652  0723 00            	dc.b	0
+2653  0724 80            	dc.b	128
+2654  0725 00            	dc.b	0
+2655  0726 00            	dc.b	0
+2656  0727 00            	dc.b	0
+2657  0728 00            	dc.b	0
+2658  0729 80            	dc.b	128
+2659  072a 00            	dc.b	0
+2660  072b 00            	dc.b	0
+2661  072c 00            	dc.b	0
+2662  072d 00            	dc.b	0
+2663  072e 80            	dc.b	128
+2664  072f 00            	dc.b	0
+2665  0730 00            	dc.b	0
+2666  0731 00            	dc.b	0
+2667  0732 00            	dc.b	0
+2668  0733 80            	dc.b	128
+2669  0734 00            	dc.b	0
+2670  0735 00            	dc.b	0
+2671  0736 00            	dc.b	0
+2672  0737 00            	dc.b	0
+2673  0738 80            	dc.b	128
+2674  0739 00            	dc.b	0
+2675  073a 00            	dc.b	0
+2676  073b 00            	dc.b	0
+2677  073c 01            	dc.b	1
+2678  073d 70            	dc.b	112
+2679  073e 00            	dc.b	0
+2680  073f 00            	dc.b	0
+2681  0740 00            	dc.b	0
+2682  0741 01            	dc.b	1
+2683  0742 70            	dc.b	112
+2684  0743 00            	dc.b	0
+2685  0744 00            	dc.b	0
+2686  0745 00            	dc.b	0
+2687  0746 01            	dc.b	1
+2688  0747 70            	dc.b	112
+2689  0748 00            	dc.b	0
+2690  0749 00            	dc.b	0
+2691  074a 00            	dc.b	0
+2692  074b 01            	dc.b	1
+2693  074c 70            	dc.b	112
+2694  074d 00            	dc.b	0
+2695  074e 00            	dc.b	0
+2696  074f 00            	dc.b	0
+2697  0750 02            	dc.b	2
+2698  0751 60            	dc.b	96
+2699  0752 00            	dc.b	0
+2700  0753 00            	dc.b	0
+2701  0754 00            	dc.b	0
+2702  0755 02            	dc.b	2
+2703  0756 60            	dc.b	96
+2704  0757 00            	dc.b	0
+2705  0758 00            	dc.b	0
+2706  0759 00            	dc.b	0
+2707  075a 02            	dc.b	2
+2708  075b 60            	dc.b	96
+2709  075c 00            	dc.b	0
+2710  075d 00            	dc.b	0
+2711  075e 00            	dc.b	0
+2712  075f 03            	dc.b	3
+2713  0760 50            	dc.b	80
+2714  0761 00            	dc.b	0
+2715  0762 00            	dc.b	0
+2716  0763 00            	dc.b	0
+2717  0764 03            	dc.b	3
+2718  0765 50            	dc.b	80
+2719  0766 00            	dc.b	0
+2720  0767 00            	dc.b	0
+2721  0768 00            	dc.b	0
+2722  0769 03            	dc.b	3
+2723  076a 50            	dc.b	80
+2724  076b 00            	dc.b	0
+2725  076c 00            	dc.b	0
+2726  076d 00            	dc.b	0
+2727  076e 04            	dc.b	4
+2728  076f 40            	dc.b	64
+2729  0770 00            	dc.b	0
+2730  0771 00            	dc.b	0
+2731  0772 00            	dc.b	0
+2732  0773 04            	dc.b	4
+2733  0774 40            	dc.b	64
+2734  0775 00            	dc.b	0
+2735  0776 00            	dc.b	0
+2736  0777 00            	dc.b	0
+2737  0778 05            	dc.b	5
+2738  0779 30            	dc.b	48
+2739  077a 00            	dc.b	0
+2740  077b 00            	dc.b	0
+2741  077c 00            	dc.b	0
+2742  077d 05            	dc.b	5
+2743  077e 30            	dc.b	48
+2744  077f 00            	dc.b	0
+2745  0780 00            	dc.b	0
+2746  0781 00            	dc.b	0
+2747  0782 05            	dc.b	5
+2748  0783 30            	dc.b	48
+2749  0784 00            	dc.b	0
+2750  0785 00            	dc.b	0
+2751  0786 00            	dc.b	0
+2752  0787 06            	dc.b	6
+2753  0788 20            	dc.b	32
+2754  0789 00            	dc.b	0
+2755  078a 00            	dc.b	0
+2756  078b 00            	dc.b	0
+2757  078c 06            	dc.b	6
+2758  078d 20            	dc.b	32
+2759  078e 00            	dc.b	0
+2760  078f 00            	dc.b	0
+2761  0790 00            	dc.b	0
+2762  0791 06            	dc.b	6
+2763  0792 20            	dc.b	32
+2764  0793 00            	dc.b	0
+2765  0794 00            	dc.b	0
+2766  0795 00            	dc.b	0
+2767  0796 07            	dc.b	7
+2768  0797 10            	dc.b	16
+2769  0798 00            	dc.b	0
+2770  0799 00            	dc.b	0
+2771  079a 00            	dc.b	0
+2772  079b 07            	dc.b	7
+2773  079c 10            	dc.b	16
+2774  079d 00            	dc.b	0
+2775  079e 00            	dc.b	0
+2776  079f 00            	dc.b	0
+2777  07a0 07            	dc.b	7
+2778  07a1 10            	dc.b	16
+2779  07a2 00            	dc.b	0
+2780  07a3 00            	dc.b	0
+2781  07a4 00            	dc.b	0
+2782  07a5 07            	dc.b	7
+2783  07a6 10            	dc.b	16
+2784  07a7 00            	dc.b	0
+2785  07a8 00            	dc.b	0
+2786  07a9 00            	dc.b	0
+2787  07aa 08            	dc.b	8
+2788  07ab 00            	dc.b	0
+2789  07ac 00            	dc.b	0
+2790  07ad 00            	dc.b	0
+2791  07ae 00            	dc.b	0
+2792  07af 08            	dc.b	8
+2793  07b0 00            	dc.b	0
+2794  07b1 00            	dc.b	0
+2795  07b2 00            	dc.b	0
+2796  07b3 00            	dc.b	0
+2797  07b4 08            	dc.b	8
+2798  07b5 00            	dc.b	0
+2799  07b6 00            	dc.b	0
+2800  07b7 00            	dc.b	0
+2801  07b8 00            	dc.b	0
+2802  07b9 08            	dc.b	8
+2803  07ba 00            	dc.b	0
+2804  07bb 00            	dc.b	0
+2805  07bc 00            	dc.b	0
+2806  07bd 00            	dc.b	0
+2807  07be 08            	dc.b	8
+2808  07bf 00            	dc.b	0
+2809  07c0 00            	dc.b	0
+2810  07c1 00            	dc.b	0
+2811  07c2 00            	dc.b	0
+2812  07c3 08            	dc.b	8
+2813  07c4 00            	dc.b	0
+2814  07c5 00            	dc.b	0
+2815  07c6 00            	dc.b	0
+2816  07c7 00            	dc.b	0
+2817  07c8 08            	dc.b	8
+2818  07c9 00            	dc.b	0
+2819  07ca 00            	dc.b	0
+2820  07cb 00            	dc.b	0
+2821  07cc 00            	dc.b	0
+2822  07cd 08            	dc.b	8
+2823  07ce 00            	dc.b	0
+2824  07cf 00            	dc.b	0
+2825  07d0 00            	dc.b	0
+2826  07d1 00            	dc.b	0
+2827  07d2 08            	dc.b	8
+2828  07d3 00            	dc.b	0
+2829  07d4 00            	dc.b	0
+2830  07d5 00            	dc.b	0
+2831  07d6 00            	dc.b	0
+2832  07d7 08            	dc.b	8
+2833  07d8 00            	dc.b	0
+2834  07d9 00            	dc.b	0
+2835  07da 00            	dc.b	0
+2836  07db 00            	dc.b	0
+2837  07dc 07            	dc.b	7
+2838  07dd 10            	dc.b	16
+2839  07de 00            	dc.b	0
+2840  07df 00            	dc.b	0
+2841  07e0 00            	dc.b	0
+2842  07e1 07            	dc.b	7
+2843  07e2 10            	dc.b	16
+2844  07e3 00            	dc.b	0
+2845  07e4 00            	dc.b	0
+2846  07e5 00            	dc.b	0
+2847  07e6 07            	dc.b	7
+2848  07e7 10            	dc.b	16
+2849  07e8 00            	dc.b	0
+2850  07e9 00            	dc.b	0
+2851  07ea 00            	dc.b	0
+2852  07eb 07            	dc.b	7
+2853  07ec 10            	dc.b	16
+2854  07ed 00            	dc.b	0
+2855  07ee 00            	dc.b	0
+2856  07ef 00            	dc.b	0
+2857  07f0 06            	dc.b	6
+2858  07f1 20            	dc.b	32
+2859  07f2 00            	dc.b	0
+2860  07f3 00            	dc.b	0
+2861  07f4 00            	dc.b	0
+2862  07f5 06            	dc.b	6
+2863  07f6 20            	dc.b	32
+2864  07f7 00            	dc.b	0
+2865  07f8 00            	dc.b	0
+2866  07f9 00            	dc.b	0
+2867  07fa 06            	dc.b	6
+2868  07fb 20            	dc.b	32
+2869  07fc 00            	dc.b	0
+2870  07fd 00            	dc.b	0
+2871  07fe 00            	dc.b	0
+2872  07ff 05            	dc.b	5
+2873  0800 30            	dc.b	48
+2874  0801 00            	dc.b	0
+2875  0802 00            	dc.b	0
+2876  0803 00            	dc.b	0
+2877  0804 05            	dc.b	5
+2878  0805 30            	dc.b	48
+2879  0806 00            	dc.b	0
+2880  0807 00            	dc.b	0
+2881  0808 00            	dc.b	0
+2882  0809 05            	dc.b	5
+2883  080a 30            	dc.b	48
+2884  080b 00            	dc.b	0
+2885  080c 00            	dc.b	0
+2886  080d 00            	dc.b	0
+2887  080e 04            	dc.b	4
+2888  080f 40            	dc.b	64
+2889  0810 00            	dc.b	0
+2890  0811 00            	dc.b	0
+2891  0812 00            	dc.b	0
+2892  0813 04            	dc.b	4
+2893  0814 40            	dc.b	64
+2894  0815 00            	dc.b	0
+2895  0816 00            	dc.b	0
+2896  0817 00            	dc.b	0
+2897  0818 03            	dc.b	3
+2898  0819 50            	dc.b	80
+2899  081a 00            	dc.b	0
+2900  081b 00            	dc.b	0
+2901  081c 00            	dc.b	0
+2902  081d 03            	dc.b	3
+2903  081e 50            	dc.b	80
+2904  081f 00            	dc.b	0
+2905  0820 00            	dc.b	0
+2906  0821 00            	dc.b	0
+2907  0822 03            	dc.b	3
+2908  0823 50            	dc.b	80
+2909  0824 00            	dc.b	0
+2910  0825 00            	dc.b	0
+2911  0826 00            	dc.b	0
+2912  0827 02            	dc.b	2
+2913  0828 60            	dc.b	96
+2914  0829 00            	dc.b	0
+2915  082a 00            	dc.b	0
+2916  082b 00            	dc.b	0
+2917  082c 02            	dc.b	2
+2918  082d 60            	dc.b	96
+2919  082e 00            	dc.b	0
+2920  082f 00            	dc.b	0
+2921  0830 00            	dc.b	0
+2922  0831 02            	dc.b	2
+2923  0832 60            	dc.b	96
+2924  0833 00            	dc.b	0
+2925  0834 00            	dc.b	0
+2926  0835 00            	dc.b	0
+2927  0836 01            	dc.b	1
+2928  0837 70            	dc.b	112
+2929  0838 00            	dc.b	0
+2930  0839 00            	dc.b	0
+2931  083a 00            	dc.b	0
+2932  083b 01            	dc.b	1
+2933  083c 70            	dc.b	112
+2934  083d 00            	dc.b	0
+2935  083e 00            	dc.b	0
+2936  083f 00            	dc.b	0
+2937  0840 01            	dc.b	1
+2938  0841 70            	dc.b	112
+2939  0842 00            	dc.b	0
+2940  0843 00            	dc.b	0
+2941  0844 00            	dc.b	0
+2942  0845 01            	dc.b	1
+2943  0846 70            	dc.b	112
+2944  0847 00            	dc.b	0
+2945  0848 00            	dc.b	0
+2946  0849 00            	dc.b	0
+2947  084a 00            	dc.b	0
+2948  084b 80            	dc.b	128
+2949  084c 00            	dc.b	0
+2950  084d 00            	dc.b	0
+2951  084e 00            	dc.b	0
+2952  084f 00            	dc.b	0
+2953  0850 80            	dc.b	128
+2954  0851 00            	dc.b	0
+2955  0852 00            	dc.b	0
+2956  0853 00            	dc.b	0
+2957  0854 00            	dc.b	0
+2958  0855 80            	dc.b	128
+2959  0856 00            	dc.b	0
+2960  0857 00            	dc.b	0
+2961  0858 00            	dc.b	0
+2962  0859 00            	dc.b	0
+2963  085a 80            	dc.b	128
+2964  085b 00            	dc.b	0
+2965  085c 00            	dc.b	0
+2966  085d 00            	dc.b	0
+2967  085e 00            	dc.b	0
+2968  085f 80            	dc.b	128
+2969  0860 00            	dc.b	0
+2970  0861 00            	dc.b	0
+2971  0862 00            	dc.b	0
+2972  0863 00            	dc.b	0
+2973  0864 80            	dc.b	128
+2974  0865 00            	dc.b	0
+2975  0866 00            	dc.b	0
+2976  0867 00            	dc.b	0
+2977  0868 00            	dc.b	0
+2978  0869 80            	dc.b	128
+2979  086a 00            	dc.b	0
+2980  086b 00            	dc.b	0
+2981  086c 00            	dc.b	0
+2982  086d 00            	dc.b	0
+2983  086e 80            	dc.b	128
+2984  086f 00            	dc.b	0
+2985  0870 00            	dc.b	0
+2986  0871 00            	dc.b	0
+2987  0872 00            	dc.b	0
+2988  0873 80            	dc.b	128
+2989  0874 00            	dc.b	0
+2990  0875 00            	dc.b	0
+2991  0876 00            	dc.b	0
+2992  0877 00            	dc.b	0
+2993  0878 80            	dc.b	128
+2994  0879 00            	dc.b	0
+2995  087a 00            	dc.b	0
+2996  087b 00            	dc.b	0
+2997  087c 00            	dc.b	0
+2998  087d 71            	dc.b	113
+2999  087e 00            	dc.b	0
+3000  087f 00            	dc.b	0
+3001  0880 00            	dc.b	0
+3002  0881 00            	dc.b	0
+3003  0882 71            	dc.b	113
+3004  0883 00            	dc.b	0
+3005  0884 00            	dc.b	0
+3006  0885 00            	dc.b	0
+3007  0886 00            	dc.b	0
+3008  0887 71            	dc.b	113
+3009  0888 00            	dc.b	0
+3010  0889 00            	dc.b	0
+3011  088a 00            	dc.b	0
+3012  088b 00            	dc.b	0
+3013  088c 71            	dc.b	113
+3014  088d 00            	dc.b	0
+3015  088e 00            	dc.b	0
+3016  088f 00            	dc.b	0
+3017  0890 00            	dc.b	0
+3018  0891 62            	dc.b	98
+3019  0892 00            	dc.b	0
+3020  0893 00            	dc.b	0
+3021  0894 00            	dc.b	0
+3022  0895 00            	dc.b	0
+3023  0896 62            	dc.b	98
+3024  0897 00            	dc.b	0
+3025  0898 00            	dc.b	0
+3026  0899 00            	dc.b	0
+3027  089a 00            	dc.b	0
+3028  089b 62            	dc.b	98
+3029  089c 00            	dc.b	0
+3030  089d 00            	dc.b	0
+3031  089e 00            	dc.b	0
+3032  089f 00            	dc.b	0
+3033  08a0 53            	dc.b	83
+3034  08a1 00            	dc.b	0
+3035  08a2 00            	dc.b	0
+3036  08a3 00            	dc.b	0
+3037  08a4 00            	dc.b	0
+3038  08a5 53            	dc.b	83
+3039  08a6 00            	dc.b	0
+3040  08a7 00            	dc.b	0
+3041  08a8 00            	dc.b	0
+3042  08a9 00            	dc.b	0
+3043  08aa 53            	dc.b	83
+3044  08ab 00            	dc.b	0
+3045  08ac 00            	dc.b	0
+3046  08ad 00            	dc.b	0
+3047  08ae 00            	dc.b	0
+3048  08af 44            	dc.b	68
+3049  08b0 00            	dc.b	0
+3050  08b1 00            	dc.b	0
+3051  08b2 00            	dc.b	0
+3052  08b3 00            	dc.b	0
+3053  08b4 44            	dc.b	68
+3054  08b5 00            	dc.b	0
+3055  08b6 00            	dc.b	0
+3056  08b7 00            	dc.b	0
+3057  08b8 00            	dc.b	0
+3058  08b9 35            	dc.b	53
+3059  08ba 00            	dc.b	0
+3060  08bb 00            	dc.b	0
+3061  08bc 00            	dc.b	0
+3062  08bd 00            	dc.b	0
+3063  08be 35            	dc.b	53
+3064  08bf 00            	dc.b	0
+3065  08c0 00            	dc.b	0
+3066  08c1 00            	dc.b	0
+3067  08c2 00            	dc.b	0
+3068  08c3 35            	dc.b	53
+3069  08c4 00            	dc.b	0
+3070  08c5 00            	dc.b	0
+3071  08c6 00            	dc.b	0
+3072  08c7 00            	dc.b	0
+3073  08c8 26            	dc.b	38
+3074  08c9 00            	dc.b	0
+3075  08ca 00            	dc.b	0
+3076  08cb 00            	dc.b	0
+3077  08cc 00            	dc.b	0
+3078  08cd 26            	dc.b	38
+3079  08ce 00            	dc.b	0
+3080  08cf 00            	dc.b	0
+3081  08d0 00            	dc.b	0
+3082  08d1 00            	dc.b	0
+3083  08d2 26            	dc.b	38
+3084  08d3 00            	dc.b	0
+3085  08d4 00            	dc.b	0
+3086  08d5 00            	dc.b	0
+3087  08d6 00            	dc.b	0
+3088  08d7 17            	dc.b	23
+3089  08d8 00            	dc.b	0
+3090  08d9 00            	dc.b	0
+3091  08da 00            	dc.b	0
+3092  08db 00            	dc.b	0
+3093  08dc 17            	dc.b	23
+3094  08dd 00            	dc.b	0
+3095  08de 00            	dc.b	0
+3096  08df 00            	dc.b	0
+3097  08e0 00            	dc.b	0
+3098  08e1 17            	dc.b	23
+3099  08e2 00            	dc.b	0
+3100  08e3 00            	dc.b	0
+3101  08e4 00            	dc.b	0
+3102  08e5 00            	dc.b	0
+3103  08e6 17            	dc.b	23
+3104  08e7 00            	dc.b	0
+3105  08e8 00            	dc.b	0
+3106  08e9 00            	dc.b	0
+3107  08ea 00            	dc.b	0
+3108  08eb 08            	dc.b	8
+3109  08ec 00            	dc.b	0
+3110  08ed 00            	dc.b	0
+3111  08ee 00            	dc.b	0
+3112  08ef 00            	dc.b	0
+3113  08f0 08            	dc.b	8
+3114  08f1 00            	dc.b	0
+3115  08f2 00            	dc.b	0
+3116  08f3 00            	dc.b	0
+3117  08f4 00            	dc.b	0
+3118  08f5 08            	dc.b	8
+3119  08f6 00            	dc.b	0
+3120  08f7 00            	dc.b	0
+3121  08f8 00            	dc.b	0
+3122  08f9 00            	dc.b	0
+3123  08fa 08            	dc.b	8
+3124  08fb 00            	dc.b	0
+3125  08fc 00            	dc.b	0
+3126  08fd 00            	dc.b	0
+3127  08fe 00            	dc.b	0
+3128  08ff 08            	dc.b	8
+3161                     ; 294 static void FPGA_WriteWeavingTable(void)
+3161                     ; 295 {
+3162                     	switch	.text
+3163  0262               L352f_FPGA_WriteWeavingTable:
+3165  0262 89            	pushw	x
+3166       00000002      OFST:	set	2
+3169                     ; 298 	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
+3171  0263 4b25          	push	#37
+3172  0265 ae004a        	ldw	x,#74
+3173  0268 a6ba          	ld	a,#186
+3174  026a 95            	ld	xh,a
+3175  026b 8dcf03cf      	callf	f_SWI2C_WriteByte
+3177  026f 84            	pop	a
+3178                     ; 299 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
+3180  0270 4b01          	push	#1
+3181  0272 ae00c6        	ldw	x,#198
+3182  0275 a6ba          	ld	a,#186
+3183  0277 95            	ld	xh,a
+3184  0278 8dcf03cf      	callf	f_SWI2C_WriteByte
+3186  027c 84            	pop	a
+3187                     ; 300 	for (i = 0; i < sizeof(weaving_table); i++)
+3189  027d 5f            	clrw	x
+3190  027e 1f01          	ldw	(OFST-1,sp),x
+3191  0280               L172:
+3192                     ; 302 		SWI2C_WriteByte(FPGA_ADDRESS, 0xC7, weaving_table[i]);
+3194  0280 1e01          	ldw	x,(OFST-1,sp)
+3195  0282 d60400        	ld	a,(L152_weaving_table,x)
+3196  0285 88            	push	a
+3197  0286 ae00c7        	ldw	x,#199
+3198  0289 a6ba          	ld	a,#186
+3199  028b 95            	ld	xh,a
+3200  028c 8dcf03cf      	callf	f_SWI2C_WriteByte
+3202  0290 84            	pop	a
+3203                     ; 300 	for (i = 0; i < sizeof(weaving_table); i++)
+3205  0291 1e01          	ldw	x,(OFST-1,sp)
+3206  0293 1c0001        	addw	x,#1
+3207  0296 1f01          	ldw	(OFST-1,sp),x
+3210  0298 1e01          	ldw	x,(OFST-1,sp)
+3211  029a a30500        	cpw	x,#1280
+3212  029d 25e1          	jrult	L172
+3213                     ; 304 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
+3215  029f 4b02          	push	#2
+3216  02a1 ae00c6        	ldw	x,#198
+3217  02a4 a6ba          	ld	a,#186
+3218  02a6 95            	ld	xh,a
+3219  02a7 8dcf03cf      	callf	f_SWI2C_WriteByte
+3221  02ab 84            	pop	a
+3222                     ; 305 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+3224  02ac 4b11          	push	#17
+3225  02ae ae00e0        	ldw	x,#224
+3226  02b1 a6ba          	ld	a,#186
+3227  02b3 95            	ld	xh,a
+3228  02b4 8dcf03cf      	callf	f_SWI2C_WriteByte
+3230  02b8 84            	pop	a
+3231                     ; 306 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
+3233  02b9 4b07          	push	#7
+3234  02bb ae00e4        	ldw	x,#228
+3235  02be a6ba          	ld	a,#186
+3236  02c0 95            	ld	xh,a
+3237  02c1 8dcf03cf      	callf	f_SWI2C_WriteByte
+3239  02c5 84            	pop	a
+3240                     ; 307 }
+3243  02c6 85            	popw	x
+3244  02c7 87            	retf
+3246                     	switch	.const
+3247  0900               L772_test_weaving_table:
+3248  0900 00            	dc.b	0
+3249  0901 00            	dc.b	0
+3250  0902 00            	dc.b	0
+3251  0903 00            	dc.b	0
+3252  0904 44            	dc.b	68
+3253  0905 00            	dc.b	0
+3254  0906 00            	dc.b	0
+3255  0907 00            	dc.b	0
+3256  0908 00            	dc.b	0
+3257  0909 35            	dc.b	53
+3258  090a 00            	dc.b	0
+3259  090b 00            	dc.b	0
+3260  090c 00            	dc.b	0
+3261  090d 00            	dc.b	0
+3262  090e 35            	dc.b	53
+3263  090f 00            	dc.b	0
+3264  0910 00            	dc.b	0
+3265  0911 00            	dc.b	0
+3266  0912 00            	dc.b	0
+3267  0913 26            	dc.b	38
+3268  0914 00            	dc.b	0
+3269  0915 00            	dc.b	0
+3270  0916 00            	dc.b	0
+3271  0917 00            	dc.b	0
+3272  0918 26            	dc.b	38
+3273  0919 00            	dc.b	0
+3274  091a 00            	dc.b	0
+3275  091b 00            	dc.b	0
+3276  091c 00            	dc.b	0
+3277  091d 26            	dc.b	38
+3278  091e 00            	dc.b	0
+3279  091f 00            	dc.b	0
+3280  0920 00            	dc.b	0
+3281  0921 00            	dc.b	0
+3282  0922 17            	dc.b	23
+3283  0923 00            	dc.b	0
+3284  0924 00            	dc.b	0
+3285  0925 00            	dc.b	0
+3286  0926 00            	dc.b	0
+3287  0927 17            	dc.b	23
+3288  0928 00            	dc.b	0
+3289  0929 00            	dc.b	0
+3290  092a 00            	dc.b	0
+3291  092b 00            	dc.b	0
+3292  092c 17            	dc.b	23
+3293  092d 00            	dc.b	0
+3294  092e 00            	dc.b	0
+3295  092f 00            	dc.b	0
+3296  0930 00            	dc.b	0
+3297  0931 08            	dc.b	8
+3298  0932 00            	dc.b	0
+3299  0933 00            	dc.b	0
+3300  0934 00            	dc.b	0
+3301  0935 00            	dc.b	0
+3302  0936 08            	dc.b	8
+3303  0937 00            	dc.b	0
+3304  0938 00            	dc.b	0
+3305  0939 00            	dc.b	0
+3306  093a 00            	dc.b	0
+3307  093b 08            	dc.b	8
+3308  093c 00            	dc.b	0
+3309  093d 00            	dc.b	0
+3310  093e 00            	dc.b	0
+3311  093f 00            	dc.b	0
+3312  0940 08            	dc.b	8
+3313  0941 00            	dc.b	0
+3314  0942 00            	dc.b	0
+3315  0943 00            	dc.b	0
+3316  0944 00            	dc.b	0
+3317  0945 08            	dc.b	8
+3318  0946 00            	dc.b	0
+3319  0947 00            	dc.b	0
+3320  0948 00            	dc.b	0
+3321  0949 00            	dc.b	0
+3322  094a 08            	dc.b	8
+3323  094b 00            	dc.b	0
+3324  094c 00            	dc.b	0
+3325  094d 00            	dc.b	0
+3326  094e 00            	dc.b	0
+3327  094f 08            	dc.b	8
+3328  0950 00            	dc.b	0
+3329  0951 00            	dc.b	0
+3330  0952 00            	dc.b	0
+3331  0953 00            	dc.b	0
+3332  0954 08            	dc.b	8
+3333  0955 01            	dc.b	1
+3334  0956 00            	dc.b	0
+3335  0957 00            	dc.b	0
+3336  0958 00            	dc.b	0
+3337  0959 07            	dc.b	7
+3338  095a 01            	dc.b	1
+3339  095b 00            	dc.b	0
+3340  095c 00            	dc.b	0
+3341  095d 00            	dc.b	0
+3342  095e 07            	dc.b	7
+3343  095f 01            	dc.b	1
+3344  0960 00            	dc.b	0
+3345  0961 00            	dc.b	0
+3346  0962 00            	dc.b	0
+3347  0963 07            	dc.b	7
+3348  0964 02            	dc.b	2
+3349  0965 00            	dc.b	0
+3350  0966 00            	dc.b	0
+3351  0967 00            	dc.b	0
+3352  0968 06            	dc.b	6
+3353  0969 02            	dc.b	2
+3354  096a 00            	dc.b	0
+3355  096b 00            	dc.b	0
+3356  096c 00            	dc.b	0
+3357  096d 06            	dc.b	6
+3358  096e 03            	dc.b	3
+3359  096f 00            	dc.b	0
+3360  0970 00            	dc.b	0
+3361  0971 00            	dc.b	0
+3362  0972 05            	dc.b	5
+3363  0973 03            	dc.b	3
+3364  0974 00            	dc.b	0
+3365  0975 00            	dc.b	0
+3366  0976 00            	dc.b	0
+3367  0977 05            	dc.b	5
+3368  0978 03            	dc.b	3
+3369  0979 00            	dc.b	0
+3370  097a 00            	dc.b	0
+3371  097b 00            	dc.b	0
+3372  097c 05            	dc.b	5
+3373  097d 04            	dc.b	4
+3374  097e 00            	dc.b	0
+3375  097f 00            	dc.b	0
+3376  0980 00            	dc.b	0
+3377  0981 04            	dc.b	4
+3378  0982 04            	dc.b	4
+3379  0983 00            	dc.b	0
+3380  0984 00            	dc.b	0
+3381  0985 00            	dc.b	0
+3382  0986 04            	dc.b	4
+3383  0987 05            	dc.b	5
+3384  0988 00            	dc.b	0
+3385  0989 00            	dc.b	0
+3386  098a 00            	dc.b	0
+3387  098b 03            	dc.b	3
+3388  098c 05            	dc.b	5
+3389  098d 00            	dc.b	0
+3390  098e 00            	dc.b	0
+3391  098f 00            	dc.b	0
+3392  0990 03            	dc.b	3
+3393  0991 06            	dc.b	6
+3394  0992 00            	dc.b	0
+3395  0993 00            	dc.b	0
+3396  0994 00            	dc.b	0
+3397  0995 02            	dc.b	2
+3398  0996 06            	dc.b	6
+3399  0997 00            	dc.b	0
+3400  0998 00            	dc.b	0
+3401  0999 00            	dc.b	0
+3402  099a 02            	dc.b	2
+3403  099b 07            	dc.b	7
+3404  099c 00            	dc.b	0
+3405  099d 00            	dc.b	0
+3406  099e 00            	dc.b	0
+3407  099f 01            	dc.b	1
+3408  09a0 07            	dc.b	7
+3409  09a1 00            	dc.b	0
+3410  09a2 00            	dc.b	0
+3411  09a3 00            	dc.b	0
+3412  09a4 01            	dc.b	1
+3413  09a5 07            	dc.b	7
+3414  09a6 00            	dc.b	0
+3415  09a7 00            	dc.b	0
+3416  09a8 00            	dc.b	0
+3417  09a9 01            	dc.b	1
+3418  09aa 08            	dc.b	8
+3419  09ab 00            	dc.b	0
+3420  09ac 00            	dc.b	0
+3421  09ad 00            	dc.b	0
+3422  09ae 00            	dc.b	0
+3423  09af 08            	dc.b	8
+3424  09b0 00            	dc.b	0
+3425  09b1 00            	dc.b	0
+3426  09b2 00            	dc.b	0
+3427  09b3 00            	dc.b	0
+3428  09b4 08            	dc.b	8
+3429  09b5 00            	dc.b	0
+3430  09b6 00            	dc.b	0
+3431  09b7 00            	dc.b	0
+3432  09b8 00            	dc.b	0
+3433  09b9 08            	dc.b	8
+3434  09ba 00            	dc.b	0
+3435  09bb 00            	dc.b	0
+3436  09bc 00            	dc.b	0
+3437  09bd 00            	dc.b	0
+3438  09be 08            	dc.b	8
+3439  09bf 00            	dc.b	0
+3440  09c0 00            	dc.b	0
+3441  09c1 00            	dc.b	0
+3442  09c2 00            	dc.b	0
+3443  09c3 08            	dc.b	8
+3444  09c4 00            	dc.b	0
+3445  09c5 00            	dc.b	0
+3446  09c6 00            	dc.b	0
+3447  09c7 00            	dc.b	0
+3448  09c8 08            	dc.b	8
+3449  09c9 00            	dc.b	0
+3450  09ca 00            	dc.b	0
+3451  09cb 00            	dc.b	0
+3452  09cc 00            	dc.b	0
+3453  09cd 08            	dc.b	8
+3454  09ce 00            	dc.b	0
+3455  09cf 00            	dc.b	0
+3456  09d0 00            	dc.b	0
+3457  09d1 00            	dc.b	0
+3458  09d2 08            	dc.b	8
+3459  09d3 00            	dc.b	0
+3460  09d4 00            	dc.b	0
+3461  09d5 00            	dc.b	0
+3462  09d6 00            	dc.b	0
+3463  09d7 07            	dc.b	7
+3464  09d8 10            	dc.b	16
+3465  09d9 00            	dc.b	0
+3466  09da 00            	dc.b	0
+3467  09db 00            	dc.b	0
+3468  09dc 07            	dc.b	7
+3469  09dd 10            	dc.b	16
+3470  09de 00            	dc.b	0
+3471  09df 00            	dc.b	0
+3472  09e0 00            	dc.b	0
+3473  09e1 07            	dc.b	7
+3474  09e2 10            	dc.b	16
+3475  09e3 00            	dc.b	0
+3476  09e4 00            	dc.b	0
+3477  09e5 00            	dc.b	0
+3478  09e6 06            	dc.b	6
+3479  09e7 20            	dc.b	32
+3480  09e8 00            	dc.b	0
+3481  09e9 00            	dc.b	0
+3482  09ea 00            	dc.b	0
+3483  09eb 06            	dc.b	6
+3484  09ec 20            	dc.b	32
+3485  09ed 00            	dc.b	0
+3486  09ee 00            	dc.b	0
+3487  09ef 00            	dc.b	0
+3488  09f0 05            	dc.b	5
+3489  09f1 30            	dc.b	48
+3490  09f2 00            	dc.b	0
+3491  09f3 00            	dc.b	0
+3492  09f4 00            	dc.b	0
+3493  09f5 05            	dc.b	5
+3494  09f6 30            	dc.b	48
+3495  09f7 00            	dc.b	0
+3496  09f8 00            	dc.b	0
+3497  09f9 00            	dc.b	0
+3498  09fa 04            	dc.b	4
+3499  09fb 40            	dc.b	64
+3500  09fc 00            	dc.b	0
+3501  09fd 00            	dc.b	0
+3502  09fe 00            	dc.b	0
+3503  09ff 04            	dc.b	4
+3504  0a00 40            	dc.b	64
+3505  0a01 00            	dc.b	0
+3506  0a02 00            	dc.b	0
+3507  0a03 00            	dc.b	0
+3508  0a04 03            	dc.b	3
+3509  0a05 50            	dc.b	80
+3510  0a06 00            	dc.b	0
+3511  0a07 00            	dc.b	0
+3512  0a08 00            	dc.b	0
+3513  0a09 03            	dc.b	3
+3514  0a0a 50            	dc.b	80
+3515  0a0b 00            	dc.b	0
+3516  0a0c 00            	dc.b	0
+3517  0a0d 00            	dc.b	0
+3518  0a0e 02            	dc.b	2
+3519  0a0f 60            	dc.b	96
+3520  0a10 00            	dc.b	0
+3521  0a11 00            	dc.b	0
+3522  0a12 00            	dc.b	0
+3523  0a13 02            	dc.b	2
+3524  0a14 60            	dc.b	96
+3525  0a15 00            	dc.b	0
+3526  0a16 00            	dc.b	0
+3527  0a17 00            	dc.b	0
+3528  0a18 02            	dc.b	2
+3529  0a19 60            	dc.b	96
+3530  0a1a 00            	dc.b	0
+3531  0a1b 00            	dc.b	0
+3532  0a1c 00            	dc.b	0
+3533  0a1d 01            	dc.b	1
+3534  0a1e 70            	dc.b	112
+3535  0a1f 00            	dc.b	0
+3536  0a20 00            	dc.b	0
+3537  0a21 00            	dc.b	0
+3538  0a22 01            	dc.b	1
+3539  0a23 70            	dc.b	112
+3540  0a24 00            	dc.b	0
+3541  0a25 00            	dc.b	0
+3542  0a26 00            	dc.b	0
+3543  0a27 01            	dc.b	1
+3544  0a28 70            	dc.b	112
+3545  0a29 00            	dc.b	0
+3546  0a2a 00            	dc.b	0
+3547  0a2b 00            	dc.b	0
+3548  0a2c 00            	dc.b	0
+3549  0a2d 80            	dc.b	128
+3550  0a2e 00            	dc.b	0
+3551  0a2f 00            	dc.b	0
+3552  0a30 00            	dc.b	0
+3553  0a31 00            	dc.b	0
+3554  0a32 80            	dc.b	128
+3555  0a33 00            	dc.b	0
+3556  0a34 00            	dc.b	0
+3557  0a35 00            	dc.b	0
+3558  0a36 00            	dc.b	0
+3559  0a37 80            	dc.b	128
+3560  0a38 00            	dc.b	0
+3561  0a39 00            	dc.b	0
+3562  0a3a 00            	dc.b	0
+3563  0a3b 00            	dc.b	0
+3564  0a3c 80            	dc.b	128
+3565  0a3d 00            	dc.b	0
+3566  0a3e 00            	dc.b	0
+3567  0a3f 00            	dc.b	0
+3568  0a40 00            	dc.b	0
+3569  0a41 80            	dc.b	128
+3570  0a42 00            	dc.b	0
+3571  0a43 00            	dc.b	0
+3572  0a44 00            	dc.b	0
+3573  0a45 00            	dc.b	0
+3574  0a46 80            	dc.b	128
+3575  0a47 00            	dc.b	0
+3576  0a48 00            	dc.b	0
+3577  0a49 00            	dc.b	0
+3578  0a4a 00            	dc.b	0
+3579  0a4b 80            	dc.b	128
+3580  0a4c 00            	dc.b	0
+3581  0a4d 00            	dc.b	0
+3582  0a4e 00            	dc.b	0
+3583  0a4f 00            	dc.b	0
+3584  0a50 80            	dc.b	128
+3585  0a51 00            	dc.b	0
+3586  0a52 00            	dc.b	0
+3587  0a53 00            	dc.b	0
+3588  0a54 01            	dc.b	1
+3589  0a55 70            	dc.b	112
+3590  0a56 00            	dc.b	0
+3591  0a57 00            	dc.b	0
+3592  0a58 00            	dc.b	0
+3593  0a59 01            	dc.b	1
+3594  0a5a 70            	dc.b	112
+3595  0a5b 00            	dc.b	0
+3596  0a5c 00            	dc.b	0
+3597  0a5d 00            	dc.b	0
+3598  0a5e 01            	dc.b	1
+3599  0a5f 70            	dc.b	112
+3600  0a60 00            	dc.b	0
+3601  0a61 00            	dc.b	0
+3602  0a62 00            	dc.b	0
+3603  0a63 02            	dc.b	2
+3604  0a64 60            	dc.b	96
+3605  0a65 00            	dc.b	0
+3606  0a66 00            	dc.b	0
+3607  0a67 00            	dc.b	0
+3608  0a68 02            	dc.b	2
+3609  0a69 60            	dc.b	96
+3610  0a6a 00            	dc.b	0
+3611  0a6b 00            	dc.b	0
+3612  0a6c 00            	dc.b	0
+3613  0a6d 02            	dc.b	2
+3614  0a6e 60            	dc.b	96
+3615  0a6f 00            	dc.b	0
+3616  0a70 00            	dc.b	0
+3617  0a71 00            	dc.b	0
+3618  0a72 03            	dc.b	3
+3619  0a73 50            	dc.b	80
+3620  0a74 00            	dc.b	0
+3621  0a75 00            	dc.b	0
+3622  0a76 00            	dc.b	0
+3623  0a77 03            	dc.b	3
+3624  0a78 50            	dc.b	80
+3625  0a79 00            	dc.b	0
+3626  0a7a 00            	dc.b	0
+3627  0a7b 00            	dc.b	0
+3628  0a7c 04            	dc.b	4
+3629  0a7d 40            	dc.b	64
+3630  0a7e 00            	dc.b	0
+3631  0a7f 00            	dc.b	0
+3632  0a80 00            	dc.b	0
+3633  0a81 04            	dc.b	4
+3634  0a82 40            	dc.b	64
+3635  0a83 00            	dc.b	0
+3636  0a84 00            	dc.b	0
+3637  0a85 00            	dc.b	0
+3638  0a86 05            	dc.b	5
+3639  0a87 30            	dc.b	48
+3640  0a88 00            	dc.b	0
+3641  0a89 00            	dc.b	0
+3642  0a8a 00            	dc.b	0
+3643  0a8b 05            	dc.b	5
+3644  0a8c 30            	dc.b	48
+3645  0a8d 00            	dc.b	0
+3646  0a8e 00            	dc.b	0
+3647  0a8f 00            	dc.b	0
+3648  0a90 06            	dc.b	6
+3649  0a91 20            	dc.b	32
+3650  0a92 00            	dc.b	0
+3651  0a93 00            	dc.b	0
+3652  0a94 00            	dc.b	0
+3653  0a95 06            	dc.b	6
+3654  0a96 20            	dc.b	32
+3655  0a97 00            	dc.b	0
+3656  0a98 00            	dc.b	0
+3657  0a99 00            	dc.b	0
+3658  0a9a 07            	dc.b	7
+3659  0a9b 10            	dc.b	16
+3660  0a9c 00            	dc.b	0
+3661  0a9d 00            	dc.b	0
+3662  0a9e 00            	dc.b	0
+3663  0a9f 07            	dc.b	7
+3664  0aa0 10            	dc.b	16
+3665  0aa1 00            	dc.b	0
+3666  0aa2 00            	dc.b	0
+3667  0aa3 00            	dc.b	0
+3668  0aa4 07            	dc.b	7
+3669  0aa5 10            	dc.b	16
+3670  0aa6 00            	dc.b	0
+3671  0aa7 00            	dc.b	0
+3672  0aa8 00            	dc.b	0
+3673  0aa9 08            	dc.b	8
+3674  0aaa 00            	dc.b	0
+3675  0aab 00            	dc.b	0
+3676  0aac 00            	dc.b	0
+3677  0aad 00            	dc.b	0
+3678  0aae 08            	dc.b	8
+3679  0aaf 00            	dc.b	0
+3680  0ab0 00            	dc.b	0
+3681  0ab1 00            	dc.b	0
+3682  0ab2 00            	dc.b	0
+3683  0ab3 08            	dc.b	8
+3684  0ab4 00            	dc.b	0
+3685  0ab5 00            	dc.b	0
+3686  0ab6 00            	dc.b	0
+3687  0ab7 00            	dc.b	0
+3688  0ab8 08            	dc.b	8
+3689  0ab9 00            	dc.b	0
+3690  0aba 00            	dc.b	0
+3691  0abb 00            	dc.b	0
+3692  0abc 00            	dc.b	0
+3693  0abd 08            	dc.b	8
+3694  0abe 00            	dc.b	0
+3695  0abf 00            	dc.b	0
+3696  0ac0 00            	dc.b	0
+3697  0ac1 00            	dc.b	0
+3698  0ac2 08            	dc.b	8
+3699  0ac3 00            	dc.b	0
+3700  0ac4 00            	dc.b	0
+3701  0ac5 00            	dc.b	0
+3702  0ac6 00            	dc.b	0
+3703  0ac7 08            	dc.b	8
+3704  0ac8 00            	dc.b	0
+3705  0ac9 00            	dc.b	0
+3706  0aca 00            	dc.b	0
+3707  0acb 00            	dc.b	0
+3708  0acc 08            	dc.b	8
+3709  0acd 00            	dc.b	0
+3710  0ace 00            	dc.b	0
+3711  0acf 00            	dc.b	0
+3712  0ad0 00            	dc.b	0
+3713  0ad1 08            	dc.b	8
+3714  0ad2 00            	dc.b	0
+3715  0ad3 00            	dc.b	0
+3716  0ad4 00            	dc.b	0
+3717  0ad5 00            	dc.b	0
+3718  0ad6 07            	dc.b	7
+3719  0ad7 00            	dc.b	0
+3720  0ad8 00            	dc.b	0
+3721  0ad9 00            	dc.b	0
+3722  0ada 01            	dc.b	1
+3723  0adb 07            	dc.b	7
+3724  0adc 00            	dc.b	0
+3725  0add 00            	dc.b	0
+3726  0ade 00            	dc.b	0
+3727  0adf 01            	dc.b	1
+3728  0ae0 07            	dc.b	7
+3729  0ae1 00            	dc.b	0
+3730  0ae2 00            	dc.b	0
+3731  0ae3 00            	dc.b	0
+3732  0ae4 01            	dc.b	1
+3733  0ae5 06            	dc.b	6
+3734  0ae6 00            	dc.b	0
+3735  0ae7 00            	dc.b	0
+3736  0ae8 00            	dc.b	0
+3737  0ae9 02            	dc.b	2
+3738  0aea 06            	dc.b	6
+3739  0aeb 00            	dc.b	0
+3740  0aec 00            	dc.b	0
+3741  0aed 00            	dc.b	0
+3742  0aee 02            	dc.b	2
+3743  0aef 05            	dc.b	5
+3744  0af0 00            	dc.b	0
+3745  0af1 00            	dc.b	0
+3746  0af2 00            	dc.b	0
+3747  0af3 03            	dc.b	3
+3748  0af4 05            	dc.b	5
+3749  0af5 00            	dc.b	0
+3750  0af6 00            	dc.b	0
+3751  0af7 00            	dc.b	0
+3752  0af8 03            	dc.b	3
+3753  0af9 04            	dc.b	4
+3754  0afa 00            	dc.b	0
+3755  0afb 00            	dc.b	0
+3756  0afc 00            	dc.b	0
+3757  0afd 04            	dc.b	4
+3758  0afe 04            	dc.b	4
+3759  0aff 00            	dc.b	0
+3760  0b00 00            	dc.b	0
+3761  0b01 00            	dc.b	0
+3762  0b02 04            	dc.b	4
+3763  0b03 03            	dc.b	3
+3764  0b04 00            	dc.b	0
+3765  0b05 00            	dc.b	0
+3766  0b06 00            	dc.b	0
+3767  0b07 05            	dc.b	5
+3768  0b08 03            	dc.b	3
+3769  0b09 00            	dc.b	0
+3770  0b0a 00            	dc.b	0
+3771  0b0b 00            	dc.b	0
+3772  0b0c 05            	dc.b	5
+3773  0b0d 03            	dc.b	3
+3774  0b0e 00            	dc.b	0
+3775  0b0f 00            	dc.b	0
+3776  0b10 00            	dc.b	0
+3777  0b11 05            	dc.b	5
+3778  0b12 02            	dc.b	2
+3779  0b13 00            	dc.b	0
+3780  0b14 00            	dc.b	0
+3781  0b15 00            	dc.b	0
+3782  0b16 06            	dc.b	6
+3783  0b17 02            	dc.b	2
+3784  0b18 00            	dc.b	0
+3785  0b19 00            	dc.b	0
+3786  0b1a 00            	dc.b	0
+3787  0b1b 06            	dc.b	6
+3788  0b1c 01            	dc.b	1
+3789  0b1d 00            	dc.b	0
+3790  0b1e 00            	dc.b	0
+3791  0b1f 00            	dc.b	0
+3792  0b20 07            	dc.b	7
+3793  0b21 01            	dc.b	1
+3794  0b22 00            	dc.b	0
+3795  0b23 00            	dc.b	0
+3796  0b24 00            	dc.b	0
+3797  0b25 07            	dc.b	7
+3798  0b26 01            	dc.b	1
+3799  0b27 00            	dc.b	0
+3800  0b28 00            	dc.b	0
+3801  0b29 00            	dc.b	0
+3802  0b2a 07            	dc.b	7
+3803  0b2b 00            	dc.b	0
+3804  0b2c 00            	dc.b	0
+3805  0b2d 00            	dc.b	0
+3806  0b2e 00            	dc.b	0
+3807  0b2f 08            	dc.b	8
+3808  0b30 00            	dc.b	0
+3809  0b31 00            	dc.b	0
+3810  0b32 00            	dc.b	0
+3811  0b33 00            	dc.b	0
+3812  0b34 08            	dc.b	8
+3813  0b35 00            	dc.b	0
+3814  0b36 00            	dc.b	0
+3815  0b37 00            	dc.b	0
+3816  0b38 00            	dc.b	0
+3817  0b39 08            	dc.b	8
+3818  0b3a 00            	dc.b	0
+3819  0b3b 00            	dc.b	0
+3820  0b3c 00            	dc.b	0
+3821  0b3d 00            	dc.b	0
+3822  0b3e 08            	dc.b	8
+3823  0b3f 00            	dc.b	0
+3824  0b40 00            	dc.b	0
+3825  0b41 00            	dc.b	0
+3826  0b42 00            	dc.b	0
+3827  0b43 08            	dc.b	8
+3828  0b44 00            	dc.b	0
+3829  0b45 00            	dc.b	0
+3830  0b46 00            	dc.b	0
+3831  0b47 00            	dc.b	0
+3832  0b48 08            	dc.b	8
+3833  0b49 00            	dc.b	0
+3834  0b4a 00            	dc.b	0
+3835  0b4b 00            	dc.b	0
+3836  0b4c 00            	dc.b	0
+3837  0b4d 08            	dc.b	8
+3838  0b4e 00            	dc.b	0
+3839  0b4f 00            	dc.b	0
+3840  0b50 00            	dc.b	0
+3841  0b51 00            	dc.b	0
+3842  0b52 08            	dc.b	8
+3843  0b53 00            	dc.b	0
+3844  0b54 00            	dc.b	0
+3845  0b55 00            	dc.b	0
+3846  0b56 00            	dc.b	0
+3847  0b57 17            	dc.b	23
+3848  0b58 00            	dc.b	0
+3849  0b59 00            	dc.b	0
+3850  0b5a 00            	dc.b	0
+3851  0b5b 00            	dc.b	0
+3852  0b5c 17            	dc.b	23
+3853  0b5d 00            	dc.b	0
+3854  0b5e 00            	dc.b	0
+3855  0b5f 00            	dc.b	0
+3856  0b60 00            	dc.b	0
+3857  0b61 17            	dc.b	23
+3858  0b62 00            	dc.b	0
+3859  0b63 00            	dc.b	0
+3860  0b64 00            	dc.b	0
+3861  0b65 00            	dc.b	0
+3862  0b66 26            	dc.b	38
+3863  0b67 00            	dc.b	0
+3864  0b68 00            	dc.b	0
+3865  0b69 00            	dc.b	0
+3866  0b6a 00            	dc.b	0
+3867  0b6b 26            	dc.b	38
+3868  0b6c 00            	dc.b	0
+3869  0b6d 00            	dc.b	0
+3870  0b6e 00            	dc.b	0
+3871  0b6f 00            	dc.b	0
+3872  0b70 26            	dc.b	38
+3873  0b71 00            	dc.b	0
+3874  0b72 00            	dc.b	0
+3875  0b73 00            	dc.b	0
+3876  0b74 00            	dc.b	0
+3877  0b75 35            	dc.b	53
+3878  0b76 00            	dc.b	0
+3879  0b77 00            	dc.b	0
+3880  0b78 00            	dc.b	0
+3881  0b79 00            	dc.b	0
+3882  0b7a 35            	dc.b	53
+3883  0b7b 00            	dc.b	0
+3884  0b7c 00            	dc.b	0
+3885  0b7d 00            	dc.b	0
+3886  0b7e 00            	dc.b	0
+3887  0b7f 44            	dc.b	68
+3888  0b80 00            	dc.b	0
+3889  0b81 00            	dc.b	0
+3890  0b82 00            	dc.b	0
+3891  0b83 00            	dc.b	0
+3892  0b84 44            	dc.b	68
+3893  0b85 00            	dc.b	0
+3894  0b86 00            	dc.b	0
+3895  0b87 00            	dc.b	0
+3896  0b88 00            	dc.b	0
+3897  0b89 53            	dc.b	83
+3898  0b8a 00            	dc.b	0
+3899  0b8b 00            	dc.b	0
+3900  0b8c 00            	dc.b	0
+3901  0b8d 00            	dc.b	0
+3902  0b8e 53            	dc.b	83
+3903  0b8f 00            	dc.b	0
+3904  0b90 00            	dc.b	0
+3905  0b91 00            	dc.b	0
+3906  0b92 00            	dc.b	0
+3907  0b93 62            	dc.b	98
+3908  0b94 00            	dc.b	0
+3909  0b95 00            	dc.b	0
+3910  0b96 00            	dc.b	0
+3911  0b97 00            	dc.b	0
+3912  0b98 62            	dc.b	98
+3913  0b99 00            	dc.b	0
+3914  0b9a 00            	dc.b	0
+3915  0b9b 00            	dc.b	0
+3916  0b9c 00            	dc.b	0
+3917  0b9d 62            	dc.b	98
+3918  0b9e 00            	dc.b	0
+3919  0b9f 00            	dc.b	0
+3920  0ba0 00            	dc.b	0
+3921  0ba1 00            	dc.b	0
+3922  0ba2 71            	dc.b	113
+3923  0ba3 00            	dc.b	0
+3924  0ba4 00            	dc.b	0
+3925  0ba5 00            	dc.b	0
+3926  0ba6 00            	dc.b	0
+3927  0ba7 71            	dc.b	113
+3928  0ba8 00            	dc.b	0
+3929  0ba9 00            	dc.b	0
+3930  0baa 00            	dc.b	0
+3931  0bab 00            	dc.b	0
+3932  0bac 71            	dc.b	113
+3933  0bad 00            	dc.b	0
+3934  0bae 00            	dc.b	0
+3935  0baf 00            	dc.b	0
+3936  0bb0 00            	dc.b	0
+3937  0bb1 80            	dc.b	128
+3938  0bb2 00            	dc.b	0
+3939  0bb3 00            	dc.b	0
+3940  0bb4 00            	dc.b	0
+3941  0bb5 00            	dc.b	0
+3942  0bb6 80            	dc.b	128
+3943  0bb7 00            	dc.b	0
+3944  0bb8 00            	dc.b	0
+3945  0bb9 00            	dc.b	0
+3946  0bba 00            	dc.b	0
+3947  0bbb 80            	dc.b	128
+3948  0bbc 00            	dc.b	0
+3949  0bbd 00            	dc.b	0
+3950  0bbe 00            	dc.b	0
+3951  0bbf 00            	dc.b	0
+3952  0bc0 80            	dc.b	128
+3953  0bc1 00            	dc.b	0
+3954  0bc2 00            	dc.b	0
+3955  0bc3 00            	dc.b	0
+3956  0bc4 00            	dc.b	0
+3957  0bc5 80            	dc.b	128
+3958  0bc6 00            	dc.b	0
+3959  0bc7 00            	dc.b	0
+3960  0bc8 00            	dc.b	0
+3961  0bc9 00            	dc.b	0
+3962  0bca 80            	dc.b	128
+3963  0bcb 00            	dc.b	0
+3964  0bcc 00            	dc.b	0
+3965  0bcd 00            	dc.b	0
+3966  0bce 00            	dc.b	0
+3967  0bcf 80            	dc.b	128
+3968  0bd0 00            	dc.b	0
+3969  0bd1 00            	dc.b	0
+3970  0bd2 00            	dc.b	0
+3971  0bd3 00            	dc.b	0
+3972  0bd4 80            	dc.b	128
+3973  0bd5 00            	dc.b	0
+3974  0bd6 00            	dc.b	0
+3975  0bd7 00            	dc.b	0
+3976  0bd8 01            	dc.b	1
+3977  0bd9 70            	dc.b	112
+3978  0bda 00            	dc.b	0
+3979  0bdb 00            	dc.b	0
+3980  0bdc 00            	dc.b	0
+3981  0bdd 01            	dc.b	1
+3982  0bde 70            	dc.b	112
+3983  0bdf 00            	dc.b	0
+3984  0be0 00            	dc.b	0
+3985  0be1 00            	dc.b	0
+3986  0be2 01            	dc.b	1
+3987  0be3 70            	dc.b	112
+3988  0be4 00            	dc.b	0
+3989  0be5 00            	dc.b	0
+3990  0be6 00            	dc.b	0
+3991  0be7 02            	dc.b	2
+3992  0be8 60            	dc.b	96
+3993  0be9 00            	dc.b	0
+3994  0bea 00            	dc.b	0
+3995  0beb 00            	dc.b	0
+3996  0bec 02            	dc.b	2
+3997  0bed 60            	dc.b	96
+3998  0bee 00            	dc.b	0
+3999  0bef 00            	dc.b	0
+4000  0bf0 00            	dc.b	0
+4001  0bf1 03            	dc.b	3
+4002  0bf2 50            	dc.b	80
+4003  0bf3 00            	dc.b	0
+4004  0bf4 00            	dc.b	0
+4005  0bf5 00            	dc.b	0
+4006  0bf6 03            	dc.b	3
+4007  0bf7 50            	dc.b	80
+4008  0bf8 00            	dc.b	0
+4009  0bf9 00            	dc.b	0
+4010  0bfa 00            	dc.b	0
+4011  0bfb 03            	dc.b	3
+4012  0bfc 50            	dc.b	80
+4013  0bfd 00            	dc.b	0
+4014  0bfe 00            	dc.b	0
+4015  0bff 00            	dc.b	0
+4016  0c00 04            	dc.b	4
+4017  0c01 40            	dc.b	64
+4018  0c02 00            	dc.b	0
+4019  0c03 00            	dc.b	0
+4020  0c04 00            	dc.b	0
+4021  0c05 04            	dc.b	4
+4022  0c06 40            	dc.b	64
+4023  0c07 00            	dc.b	0
+4024  0c08 00            	dc.b	0
+4025  0c09 00            	dc.b	0
+4026  0c0a 05            	dc.b	5
+4027  0c0b 30            	dc.b	48
+4028  0c0c 00            	dc.b	0
+4029  0c0d 00            	dc.b	0
+4030  0c0e 00            	dc.b	0
+4031  0c0f 05            	dc.b	5
+4032  0c10 30            	dc.b	48
+4033  0c11 00            	dc.b	0
+4034  0c12 00            	dc.b	0
+4035  0c13 00            	dc.b	0
+4036  0c14 06            	dc.b	6
+4037  0c15 20            	dc.b	32
+4038  0c16 00            	dc.b	0
+4039  0c17 00            	dc.b	0
+4040  0c18 00            	dc.b	0
+4041  0c19 06            	dc.b	6
+4042  0c1a 20            	dc.b	32
+4043  0c1b 00            	dc.b	0
+4044  0c1c 00            	dc.b	0
+4045  0c1d 00            	dc.b	0
+4046  0c1e 07            	dc.b	7
+4047  0c1f 10            	dc.b	16
+4048  0c20 00            	dc.b	0
+4049  0c21 00            	dc.b	0
+4050  0c22 00            	dc.b	0
+4051  0c23 07            	dc.b	7
+4052  0c24 10            	dc.b	16
+4053  0c25 00            	dc.b	0
+4054  0c26 00            	dc.b	0
+4055  0c27 00            	dc.b	0
+4056  0c28 07            	dc.b	7
+4057  0c29 10            	dc.b	16
+4058  0c2a 00            	dc.b	0
+4059  0c2b 00            	dc.b	0
+4060  0c2c 00            	dc.b	0
+4061  0c2d 08            	dc.b	8
+4062  0c2e 00            	dc.b	0
+4063  0c2f 00            	dc.b	0
+4064  0c30 00            	dc.b	0
+4065  0c31 00            	dc.b	0
+4066  0c32 08            	dc.b	8
+4067  0c33 00            	dc.b	0
+4068  0c34 00            	dc.b	0
+4069  0c35 00            	dc.b	0
+4070  0c36 00            	dc.b	0
+4071  0c37 08            	dc.b	8
+4072  0c38 00            	dc.b	0
+4073  0c39 00            	dc.b	0
+4074  0c3a 00            	dc.b	0
+4075  0c3b 00            	dc.b	0
+4076  0c3c 08            	dc.b	8
+4077  0c3d 00            	dc.b	0
+4078  0c3e 00            	dc.b	0
+4079  0c3f 00            	dc.b	0
+4080  0c40 00            	dc.b	0
+4081  0c41 08            	dc.b	8
+4082  0c42 00            	dc.b	0
+4083  0c43 00            	dc.b	0
+4084  0c44 00            	dc.b	0
+4085  0c45 00            	dc.b	0
+4086  0c46 08            	dc.b	8
+4087  0c47 00            	dc.b	0
+4088  0c48 00            	dc.b	0
+4089  0c49 00            	dc.b	0
+4090  0c4a 00            	dc.b	0
+4091  0c4b 08            	dc.b	8
+4092  0c4c 00            	dc.b	0
+4093  0c4d 00            	dc.b	0
+4094  0c4e 00            	dc.b	0
+4095  0c4f 00            	dc.b	0
+4096  0c50 08            	dc.b	8
+4097  0c51 00            	dc.b	0
+4098  0c52 00            	dc.b	0
+4099  0c53 00            	dc.b	0
+4100  0c54 00            	dc.b	0
+4101  0c55 08            	dc.b	8
+4102  0c56 00            	dc.b	0
+4103  0c57 00            	dc.b	0
+4104  0c58 00            	dc.b	0
+4105  0c59 00            	dc.b	0
+4106  0c5a 17            	dc.b	23
+4107  0c5b 00            	dc.b	0
+4108  0c5c 00            	dc.b	0
+4109  0c5d 00            	dc.b	0
+4110  0c5e 00            	dc.b	0
+4111  0c5f 17            	dc.b	23
+4112  0c60 00            	dc.b	0
+4113  0c61 00            	dc.b	0
+4114  0c62 00            	dc.b	0
+4115  0c63 00            	dc.b	0
+4116  0c64 17            	dc.b	23
+4117  0c65 00            	dc.b	0
+4118  0c66 00            	dc.b	0
+4119  0c67 00            	dc.b	0
+4120  0c68 00            	dc.b	0
+4121  0c69 26            	dc.b	38
+4122  0c6a 00            	dc.b	0
+4123  0c6b 00            	dc.b	0
+4124  0c6c 00            	dc.b	0
+4125  0c6d 00            	dc.b	0
+4126  0c6e 26            	dc.b	38
+4127  0c6f 00            	dc.b	0
+4128  0c70 00            	dc.b	0
+4129  0c71 00            	dc.b	0
+4130  0c72 00            	dc.b	0
+4131  0c73 35            	dc.b	53
+4132  0c74 00            	dc.b	0
+4133  0c75 00            	dc.b	0
+4134  0c76 00            	dc.b	0
+4135  0c77 00            	dc.b	0
+4136  0c78 35            	dc.b	53
+4137  0c79 00            	dc.b	0
+4138  0c7a 00            	dc.b	0
+4139  0c7b 00            	dc.b	0
+4140  0c7c 00            	dc.b	0
+4141  0c7d 44            	dc.b	68
+4142  0c7e 00            	dc.b	0
+4143  0c7f 00            	dc.b	0
+4144  0c80 00            	dc.b	0
+4145  0c81 00            	dc.b	0
+4146  0c82 44            	dc.b	68
+4147  0c83 00            	dc.b	0
+4148  0c84 00            	dc.b	0
+4149  0c85 00            	dc.b	0
+4150  0c86 00            	dc.b	0
+4151  0c87 53            	dc.b	83
+4152  0c88 00            	dc.b	0
+4153  0c89 00            	dc.b	0
+4154  0c8a 00            	dc.b	0
+4155  0c8b 00            	dc.b	0
+4156  0c8c 53            	dc.b	83
+4157  0c8d 00            	dc.b	0
+4158  0c8e 00            	dc.b	0
+4159  0c8f 00            	dc.b	0
+4160  0c90 00            	dc.b	0
+4161  0c91 62            	dc.b	98
+4162  0c92 00            	dc.b	0
+4163  0c93 00            	dc.b	0
+4164  0c94 00            	dc.b	0
+4165  0c95 00            	dc.b	0
+4166  0c96 62            	dc.b	98
+4167  0c97 00            	dc.b	0
+4168  0c98 00            	dc.b	0
+4169  0c99 00            	dc.b	0
+4170  0c9a 00            	dc.b	0
+4171  0c9b 62            	dc.b	98
+4172  0c9c 00            	dc.b	0
+4173  0c9d 00            	dc.b	0
+4174  0c9e 00            	dc.b	0
+4175  0c9f 00            	dc.b	0
+4176  0ca0 71            	dc.b	113
+4177  0ca1 00            	dc.b	0
+4178  0ca2 00            	dc.b	0
+4179  0ca3 00            	dc.b	0
+4180  0ca4 00            	dc.b	0
+4181  0ca5 71            	dc.b	113
+4182  0ca6 00            	dc.b	0
+4183  0ca7 00            	dc.b	0
+4184  0ca8 00            	dc.b	0
+4185  0ca9 00            	dc.b	0
+4186  0caa 71            	dc.b	113
+4187  0cab 00            	dc.b	0
+4188  0cac 00            	dc.b	0
+4189  0cad 00            	dc.b	0
+4190  0cae 00            	dc.b	0
+4191  0caf 80            	dc.b	128
+4192  0cb0 00            	dc.b	0
+4193  0cb1 00            	dc.b	0
+4194  0cb2 00            	dc.b	0
+4195  0cb3 00            	dc.b	0
+4196  0cb4 80            	dc.b	128
+4197  0cb5 00            	dc.b	0
+4198  0cb6 00            	dc.b	0
+4199  0cb7 00            	dc.b	0
+4200  0cb8 00            	dc.b	0
+4201  0cb9 80            	dc.b	128
+4202  0cba 00            	dc.b	0
+4203  0cbb 00            	dc.b	0
+4204  0cbc 00            	dc.b	0
+4205  0cbd 00            	dc.b	0
+4206  0cbe 80            	dc.b	128
+4207  0cbf 00            	dc.b	0
+4208  0cc0 00            	dc.b	0
+4209  0cc1 00            	dc.b	0
+4210  0cc2 00            	dc.b	0
+4211  0cc3 80            	dc.b	128
+4212  0cc4 00            	dc.b	0
+4213  0cc5 00            	dc.b	0
+4214  0cc6 00            	dc.b	0
+4215  0cc7 00            	dc.b	0
+4216  0cc8 80            	dc.b	128
+4217  0cc9 00            	dc.b	0
+4218  0cca 00            	dc.b	0
+4219  0ccb 00            	dc.b	0
+4220  0ccc 00            	dc.b	0
+4221  0ccd 80            	dc.b	128
+4222  0cce 00            	dc.b	0
+4223  0ccf 00            	dc.b	0
+4224  0cd0 00            	dc.b	0
+4225  0cd1 00            	dc.b	0
+4226  0cd2 80            	dc.b	128
+4227  0cd3 00            	dc.b	0
+4228  0cd4 00            	dc.b	0
+4229  0cd5 00            	dc.b	0
+4230  0cd6 00            	dc.b	0
+4231  0cd7 71            	dc.b	113
+4232  0cd8 00            	dc.b	0
+4233  0cd9 00            	dc.b	0
+4234  0cda 00            	dc.b	0
+4235  0cdb 00            	dc.b	0
+4236  0cdc 71            	dc.b	113
+4237  0cdd 00            	dc.b	0
+4238  0cde 00            	dc.b	0
+4239  0cdf 00            	dc.b	0
+4240  0ce0 00            	dc.b	0
+4241  0ce1 71            	dc.b	113
+4242  0ce2 00            	dc.b	0
+4243  0ce3 00            	dc.b	0
+4244  0ce4 00            	dc.b	0
+4245  0ce5 00            	dc.b	0
+4246  0ce6 62            	dc.b	98
+4247  0ce7 00            	dc.b	0
+4248  0ce8 00            	dc.b	0
+4249  0ce9 00            	dc.b	0
+4250  0cea 00            	dc.b	0
+4251  0ceb 62            	dc.b	98
+4252  0cec 00            	dc.b	0
+4253  0ced 00            	dc.b	0
+4254  0cee 00            	dc.b	0
+4255  0cef 00            	dc.b	0
+4256  0cf0 62            	dc.b	98
+4257  0cf1 00            	dc.b	0
+4258  0cf2 00            	dc.b	0
+4259  0cf3 00            	dc.b	0
+4260  0cf4 00            	dc.b	0
+4261  0cf5 53            	dc.b	83
+4262  0cf6 00            	dc.b	0
+4263  0cf7 00            	dc.b	0
+4264  0cf8 00            	dc.b	0
+4265  0cf9 00            	dc.b	0
+4266  0cfa 53            	dc.b	83
+4267  0cfb 00            	dc.b	0
+4268  0cfc 00            	dc.b	0
+4269  0cfd 00            	dc.b	0
+4270  0cfe 00            	dc.b	0
+4271  0cff 44            	dc.b	68
+4272  0d00 00            	dc.b	0
+4273  0d01 00            	dc.b	0
+4274  0d02 00            	dc.b	0
+4275  0d03 00            	dc.b	0
+4276  0d04 44            	dc.b	68
+4277  0d05 00            	dc.b	0
+4278  0d06 00            	dc.b	0
+4279  0d07 00            	dc.b	0
+4280  0d08 00            	dc.b	0
+4281  0d09 35            	dc.b	53
+4282  0d0a 00            	dc.b	0
+4283  0d0b 00            	dc.b	0
+4284  0d0c 00            	dc.b	0
+4285  0d0d 00            	dc.b	0
+4286  0d0e 35            	dc.b	53
+4287  0d0f 00            	dc.b	0
+4288  0d10 00            	dc.b	0
+4289  0d11 00            	dc.b	0
+4290  0d12 00            	dc.b	0
+4291  0d13 26            	dc.b	38
+4292  0d14 00            	dc.b	0
+4293  0d15 00            	dc.b	0
+4294  0d16 00            	dc.b	0
+4295  0d17 00            	dc.b	0
+4296  0d18 26            	dc.b	38
+4297  0d19 00            	dc.b	0
+4298  0d1a 00            	dc.b	0
+4299  0d1b 00            	dc.b	0
+4300  0d1c 00            	dc.b	0
+4301  0d1d 17            	dc.b	23
+4302  0d1e 00            	dc.b	0
+4303  0d1f 00            	dc.b	0
+4304  0d20 00            	dc.b	0
+4305  0d21 00            	dc.b	0
+4306  0d22 17            	dc.b	23
+4307  0d23 00            	dc.b	0
+4308  0d24 00            	dc.b	0
+4309  0d25 00            	dc.b	0
+4310  0d26 00            	dc.b	0
+4311  0d27 17            	dc.b	23
+4312  0d28 00            	dc.b	0
+4313  0d29 00            	dc.b	0
+4314  0d2a 00            	dc.b	0
+4315  0d2b 00            	dc.b	0
+4316  0d2c 08            	dc.b	8
+4317  0d2d 00            	dc.b	0
+4318  0d2e 00            	dc.b	0
+4319  0d2f 00            	dc.b	0
+4320  0d30 00            	dc.b	0
+4321  0d31 08            	dc.b	8
+4322  0d32 00            	dc.b	0
+4323  0d33 00            	dc.b	0
+4324  0d34 00            	dc.b	0
+4325  0d35 00            	dc.b	0
+4326  0d36 08            	dc.b	8
+4327  0d37 00            	dc.b	0
+4328  0d38 00            	dc.b	0
+4329  0d39 00            	dc.b	0
+4330  0d3a 00            	dc.b	0
+4331  0d3b 08            	dc.b	8
+4332  0d3c 00            	dc.b	0
+4333  0d3d 00            	dc.b	0
+4334  0d3e 00            	dc.b	0
+4335  0d3f 00            	dc.b	0
+4336  0d40 08            	dc.b	8
+4337  0d41 00            	dc.b	0
+4338  0d42 00            	dc.b	0
+4339  0d43 00            	dc.b	0
+4340  0d44 00            	dc.b	0
+4341  0d45 08            	dc.b	8
+4342  0d46 00            	dc.b	0
+4343  0d47 00            	dc.b	0
+4344  0d48 00            	dc.b	0
+4345  0d49 00            	dc.b	0
+4346  0d4a 08            	dc.b	8
+4347  0d4b 00            	dc.b	0
+4348  0d4c 00            	dc.b	0
+4349  0d4d 00            	dc.b	0
+4350  0d4e 00            	dc.b	0
+4351  0d4f 08            	dc.b	8
+4352  0d50 00            	dc.b	0
+4353  0d51 00            	dc.b	0
+4354  0d52 00            	dc.b	0
+4355  0d53 00            	dc.b	0
+4356  0d54 08            	dc.b	8
+4357  0d55 00            	dc.b	0
+4358  0d56 00            	dc.b	0
+4359  0d57 00            	dc.b	0
+4360  0d58 00            	dc.b	0
+4361  0d59 07            	dc.b	7
+4362  0d5a 10            	dc.b	16
+4363  0d5b 00            	dc.b	0
+4364  0d5c 00            	dc.b	0
+4365  0d5d 00            	dc.b	0
+4366  0d5e 07            	dc.b	7
+4367  0d5f 10            	dc.b	16
+4368  0d60 00            	dc.b	0
+4369  0d61 00            	dc.b	0
+4370  0d62 00            	dc.b	0
+4371  0d63 07            	dc.b	7
+4372  0d64 10            	dc.b	16
+4373  0d65 00            	dc.b	0
+4374  0d66 00            	dc.b	0
+4375  0d67 00            	dc.b	0
+4376  0d68 06            	dc.b	6
+4377  0d69 20            	dc.b	32
+4378  0d6a 00            	dc.b	0
+4379  0d6b 00            	dc.b	0
+4380  0d6c 00            	dc.b	0
+4381  0d6d 06            	dc.b	6
+4382  0d6e 20            	dc.b	32
+4383  0d6f 00            	dc.b	0
+4384  0d70 00            	dc.b	0
+4385  0d71 00            	dc.b	0
+4386  0d72 05            	dc.b	5
+4387  0d73 30            	dc.b	48
+4388  0d74 00            	dc.b	0
+4389  0d75 00            	dc.b	0
+4390  0d76 00            	dc.b	0
+4391  0d77 05            	dc.b	5
+4392  0d78 30            	dc.b	48
+4393  0d79 00            	dc.b	0
+4394  0d7a 00            	dc.b	0
+4395  0d7b 00            	dc.b	0
+4396  0d7c 04            	dc.b	4
+4397  0d7d 40            	dc.b	64
+4398  0d7e 00            	dc.b	0
+4399  0d7f 00            	dc.b	0
+4400  0d80 00            	dc.b	0
+4401  0d81 04            	dc.b	4
+4402  0d82 40            	dc.b	64
+4403  0d83 00            	dc.b	0
+4404  0d84 00            	dc.b	0
+4405  0d85 00            	dc.b	0
+4406  0d86 03            	dc.b	3
+4407  0d87 50            	dc.b	80
+4408  0d88 00            	dc.b	0
+4409  0d89 00            	dc.b	0
+4410  0d8a 00            	dc.b	0
+4411  0d8b 03            	dc.b	3
+4412  0d8c 50            	dc.b	80
+4413  0d8d 00            	dc.b	0
+4414  0d8e 00            	dc.b	0
+4415  0d8f 00            	dc.b	0
+4416  0d90 03            	dc.b	3
+4417  0d91 50            	dc.b	80
+4418  0d92 00            	dc.b	0
+4419  0d93 00            	dc.b	0
+4420  0d94 00            	dc.b	0
+4421  0d95 02            	dc.b	2
+4422  0d96 60            	dc.b	96
+4423  0d97 00            	dc.b	0
+4424  0d98 00            	dc.b	0
+4425  0d99 00            	dc.b	0
+4426  0d9a 02            	dc.b	2
+4427  0d9b 60            	dc.b	96
+4428  0d9c 00            	dc.b	0
+4429  0d9d 00            	dc.b	0
+4430  0d9e 00            	dc.b	0
+4431  0d9f 01            	dc.b	1
+4432  0da0 70            	dc.b	112
+4433  0da1 00            	dc.b	0
+4434  0da2 00            	dc.b	0
+4435  0da3 00            	dc.b	0
+4436  0da4 01            	dc.b	1
+4437  0da5 70            	dc.b	112
+4438  0da6 00            	dc.b	0
+4439  0da7 00            	dc.b	0
+4440  0da8 00            	dc.b	0
+4441  0da9 01            	dc.b	1
+4442  0daa 70            	dc.b	112
+4443  0dab 00            	dc.b	0
+4444  0dac 00            	dc.b	0
+4445  0dad 00            	dc.b	0
+4446  0dae 00            	dc.b	0
+4447  0daf 80            	dc.b	128
+4448  0db0 00            	dc.b	0
+4449  0db1 00            	dc.b	0
+4450  0db2 00            	dc.b	0
+4451  0db3 00            	dc.b	0
+4452  0db4 80            	dc.b	128
+4453  0db5 00            	dc.b	0
+4454  0db6 00            	dc.b	0
+4455  0db7 00            	dc.b	0
+4456  0db8 00            	dc.b	0
+4457  0db9 80            	dc.b	128
+4458  0dba 00            	dc.b	0
+4459  0dbb 00            	dc.b	0
+4460  0dbc 00            	dc.b	0
+4461  0dbd 00            	dc.b	0
+4462  0dbe 80            	dc.b	128
+4463  0dbf 00            	dc.b	0
+4464  0dc0 00            	dc.b	0
+4465  0dc1 00            	dc.b	0
+4466  0dc2 00            	dc.b	0
+4467  0dc3 80            	dc.b	128
+4468  0dc4 00            	dc.b	0
+4469  0dc5 00            	dc.b	0
+4470  0dc6 00            	dc.b	0
+4471  0dc7 00            	dc.b	0
+4472  0dc8 80            	dc.b	128
+4473  0dc9 00            	dc.b	0
+4474  0dca 00            	dc.b	0
+4475  0dcb 00            	dc.b	0
+4476  0dcc 00            	dc.b	0
+4477  0dcd 80            	dc.b	128
+4478  0dce 00            	dc.b	0
+4479  0dcf 00            	dc.b	0
+4480  0dd0 00            	dc.b	0
+4481  0dd1 00            	dc.b	0
+4482  0dd2 80            	dc.b	128
+4483  0dd3 00            	dc.b	0
+4484  0dd4 00            	dc.b	0
+4485  0dd5 00            	dc.b	0
+4486  0dd6 00            	dc.b	0
+4487  0dd7 71            	dc.b	113
+4488  0dd8 00            	dc.b	0
+4489  0dd9 00            	dc.b	0
+4490  0dda 00            	dc.b	0
+4491  0ddb 00            	dc.b	0
+4492  0ddc 71            	dc.b	113
+4493  0ddd 00            	dc.b	0
+4494  0dde 00            	dc.b	0
+4495  0ddf 00            	dc.b	0
+4496  0de0 00            	dc.b	0
+4497  0de1 71            	dc.b	113
+4498  0de2 00            	dc.b	0
+4499  0de3 00            	dc.b	0
+4500  0de4 00            	dc.b	0
+4501  0de5 00            	dc.b	0
+4502  0de6 62            	dc.b	98
+4503  0de7 00            	dc.b	0
+4504  0de8 00            	dc.b	0
+4505  0de9 00            	dc.b	0
+4506  0dea 00            	dc.b	0
+4507  0deb 62            	dc.b	98
+4508  0dec 00            	dc.b	0
+4509  0ded 00            	dc.b	0
+4510  0dee 00            	dc.b	0
+4511  0def 00            	dc.b	0
+4512  0df0 62            	dc.b	98
+4513  0df1 00            	dc.b	0
+4514  0df2 00            	dc.b	0
+4515  0df3 00            	dc.b	0
+4516  0df4 00            	dc.b	0
+4517  0df5 53            	dc.b	83
+4518  0df6 00            	dc.b	0
+4519  0df7 00            	dc.b	0
+4520  0df8 00            	dc.b	0
+4521  0df9 00            	dc.b	0
+4522  0dfa 53            	dc.b	83
+4523  0dfb 00            	dc.b	0
+4524  0dfc 00            	dc.b	0
+4525  0dfd 00            	dc.b	0
+4526  0dfe 00            	dc.b	0
+4527  0dff 44            	dc.b	68
+4528  0e00 00            	dc.b	0
+4529  0e01 00            	dc.b	0
+4530  0e02 00            	dc.b	0
+4531  0e03 00            	dc.b	0
+4532  0e04 44            	dc.b	68
+4533  0e05 00            	dc.b	0
+4534  0e06 00            	dc.b	0
+4535  0e07 00            	dc.b	0
+4536  0e08 00            	dc.b	0
+4537  0e09 35            	dc.b	53
+4538  0e0a 00            	dc.b	0
+4539  0e0b 00            	dc.b	0
+4540  0e0c 00            	dc.b	0
+4541  0e0d 00            	dc.b	0
+4542  0e0e 35            	dc.b	53
+4543  0e0f 00            	dc.b	0
+4544  0e10 00            	dc.b	0
+4545  0e11 00            	dc.b	0
+4546  0e12 00            	dc.b	0
+4547  0e13 26            	dc.b	38
+4548  0e14 00            	dc.b	0
+4549  0e15 00            	dc.b	0
+4550  0e16 00            	dc.b	0
+4551  0e17 00            	dc.b	0
+4552  0e18 26            	dc.b	38
+4553  0e19 00            	dc.b	0
+4554  0e1a 00            	dc.b	0
+4555  0e1b 00            	dc.b	0
+4556  0e1c 00            	dc.b	0
+4557  0e1d 17            	dc.b	23
+4558  0e1e 00            	dc.b	0
+4559  0e1f 00            	dc.b	0
+4560  0e20 00            	dc.b	0
+4561  0e21 00            	dc.b	0
+4562  0e22 17            	dc.b	23
+4563  0e23 00            	dc.b	0
+4564  0e24 00            	dc.b	0
+4565  0e25 00            	dc.b	0
+4566  0e26 00            	dc.b	0
+4567  0e27 08            	dc.b	8
+4568  0e28 00            	dc.b	0
+4569  0e29 00            	dc.b	0
+4570  0e2a 00            	dc.b	0
+4571  0e2b 00            	dc.b	0
+4572  0e2c 08            	dc.b	8
+4573  0e2d 00            	dc.b	0
+4574  0e2e 00            	dc.b	0
+4575  0e2f 00            	dc.b	0
+4576  0e30 00            	dc.b	0
+4577  0e31 08            	dc.b	8
+4578  0e32 00            	dc.b	0
+4579  0e33 00            	dc.b	0
+4580  0e34 00            	dc.b	0
+4581  0e35 00            	dc.b	0
+4582  0e36 08            	dc.b	8
+4583  0e37 00            	dc.b	0
+4584  0e38 00            	dc.b	0
+4585  0e39 00            	dc.b	0
+4586  0e3a 00            	dc.b	0
+4587  0e3b 08            	dc.b	8
+4588  0e3c 00            	dc.b	0
+4589  0e3d 00            	dc.b	0
+4590  0e3e 00            	dc.b	0
+4591  0e3f 00            	dc.b	0
+4592  0e40 08            	dc.b	8
+4593  0e41 00            	dc.b	0
+4594  0e42 00            	dc.b	0
+4595  0e43 00            	dc.b	0
+4596  0e44 00            	dc.b	0
+4597  0e45 08            	dc.b	8
+4598  0e46 01            	dc.b	1
+4599  0e47 00            	dc.b	0
+4600  0e48 00            	dc.b	0
+4601  0e49 00            	dc.b	0
+4602  0e4a 07            	dc.b	7
+4603  0e4b 01            	dc.b	1
+4604  0e4c 00            	dc.b	0
+4605  0e4d 00            	dc.b	0
+4606  0e4e 00            	dc.b	0
+4607  0e4f 07            	dc.b	7
+4608  0e50 01            	dc.b	1
+4609  0e51 00            	dc.b	0
+4610  0e52 00            	dc.b	0
+4611  0e53 00            	dc.b	0
+4612  0e54 07            	dc.b	7
+4613  0e55 02            	dc.b	2
+4614  0e56 00            	dc.b	0
+4615  0e57 00            	dc.b	0
+4616  0e58 00            	dc.b	0
+4617  0e59 06            	dc.b	6
+4618  0e5a 02            	dc.b	2
+4619  0e5b 00            	dc.b	0
+4620  0e5c 00            	dc.b	0
+4621  0e5d 00            	dc.b	0
+4622  0e5e 06            	dc.b	6
+4623  0e5f 03            	dc.b	3
+4624  0e60 00            	dc.b	0
+4625  0e61 00            	dc.b	0
+4626  0e62 00            	dc.b	0
+4627  0e63 05            	dc.b	5
+4628  0e64 04            	dc.b	4
+4629  0e65 00            	dc.b	0
+4630  0e66 00            	dc.b	0
+4631  0e67 00            	dc.b	0
+4632  0e68 04            	dc.b	4
+4633  0e69 04            	dc.b	4
+4634  0e6a 00            	dc.b	0
+4635  0e6b 00            	dc.b	0
+4636  0e6c 00            	dc.b	0
+4637  0e6d 04            	dc.b	4
+4638  0e6e 05            	dc.b	5
+4639  0e6f 00            	dc.b	0
+4640  0e70 00            	dc.b	0
+4641  0e71 00            	dc.b	0
+4642  0e72 03            	dc.b	3
+4643  0e73 05            	dc.b	5
+4644  0e74 00            	dc.b	0
+4645  0e75 00            	dc.b	0
+4646  0e76 00            	dc.b	0
+4647  0e77 03            	dc.b	3
+4648  0e78 06            	dc.b	6
+4649  0e79 00            	dc.b	0
+4650  0e7a 00            	dc.b	0
+4651  0e7b 00            	dc.b	0
+4652  0e7c 02            	dc.b	2
+4653  0e7d 06            	dc.b	6
+4654  0e7e 00            	dc.b	0
+4655  0e7f 00            	dc.b	0
+4656  0e80 00            	dc.b	0
+4657  0e81 02            	dc.b	2
+4658  0e82 07            	dc.b	7
+4659  0e83 00            	dc.b	0
+4660  0e84 00            	dc.b	0
+4661  0e85 00            	dc.b	0
+4662  0e86 01            	dc.b	1
+4663  0e87 07            	dc.b	7
+4664  0e88 00            	dc.b	0
+4665  0e89 00            	dc.b	0
+4666  0e8a 00            	dc.b	0
+4667  0e8b 01            	dc.b	1
+4668  0e8c 07            	dc.b	7
+4669  0e8d 00            	dc.b	0
+4670  0e8e 00            	dc.b	0
+4671  0e8f 00            	dc.b	0
+4672  0e90 01            	dc.b	1
+4673  0e91 08            	dc.b	8
+4674  0e92 00            	dc.b	0
+4675  0e93 00            	dc.b	0
+4676  0e94 00            	dc.b	0
+4677  0e95 00            	dc.b	0
+4678  0e96 08            	dc.b	8
+4679  0e97 00            	dc.b	0
+4680  0e98 00            	dc.b	0
+4681  0e99 00            	dc.b	0
+4682  0e9a 00            	dc.b	0
+4683  0e9b 08            	dc.b	8
+4684  0e9c 00            	dc.b	0
+4685  0e9d 00            	dc.b	0
+4686  0e9e 00            	dc.b	0
+4687  0e9f 00            	dc.b	0
+4688  0ea0 08            	dc.b	8
+4689  0ea1 00            	dc.b	0
+4690  0ea2 00            	dc.b	0
+4691  0ea3 00            	dc.b	0
+4692  0ea4 00            	dc.b	0
+4693  0ea5 08            	dc.b	8
+4694  0ea6 00            	dc.b	0
+4695  0ea7 00            	dc.b	0
+4696  0ea8 00            	dc.b	0
+4697  0ea9 00            	dc.b	0
+4698  0eaa 08            	dc.b	8
+4699  0eab 00            	dc.b	0
+4700  0eac 00            	dc.b	0
+4701  0ead 00            	dc.b	0
+4702  0eae 00            	dc.b	0
+4703  0eaf 07            	dc.b	7
+4704  0eb0 10            	dc.b	16
+4705  0eb1 00            	dc.b	0
+4706  0eb2 00            	dc.b	0
+4707  0eb3 00            	dc.b	0
+4708  0eb4 07            	dc.b	7
+4709  0eb5 10            	dc.b	16
+4710  0eb6 00            	dc.b	0
+4711  0eb7 00            	dc.b	0
+4712  0eb8 00            	dc.b	0
+4713  0eb9 07            	dc.b	7
+4714  0eba 10            	dc.b	16
+4715  0ebb 00            	dc.b	0
+4716  0ebc 00            	dc.b	0
+4717  0ebd 00            	dc.b	0
+4718  0ebe 06            	dc.b	6
+4719  0ebf 20            	dc.b	32
+4720  0ec0 00            	dc.b	0
+4721  0ec1 00            	dc.b	0
+4722  0ec2 00            	dc.b	0
+4723  0ec3 06            	dc.b	6
+4724  0ec4 20            	dc.b	32
+4725  0ec5 00            	dc.b	0
+4726  0ec6 00            	dc.b	0
+4727  0ec7 00            	dc.b	0
+4728  0ec8 05            	dc.b	5
+4729  0ec9 30            	dc.b	48
+4730  0eca 00            	dc.b	0
+4731  0ecb 00            	dc.b	0
+4732  0ecc 00            	dc.b	0
+4733  0ecd 05            	dc.b	5
+4734  0ece 30            	dc.b	48
+4735  0ecf 00            	dc.b	0
+4736  0ed0 00            	dc.b	0
+4737  0ed1 00            	dc.b	0
+4738  0ed2 04            	dc.b	4
+4739  0ed3 40            	dc.b	64
+4740  0ed4 00            	dc.b	0
+4741  0ed5 00            	dc.b	0
+4742  0ed6 00            	dc.b	0
+4743  0ed7 04            	dc.b	4
+4744  0ed8 40            	dc.b	64
+4745  0ed9 00            	dc.b	0
+4746  0eda 00            	dc.b	0
+4747  0edb 00            	dc.b	0
+4748  0edc 03            	dc.b	3
+4749  0edd 50            	dc.b	80
+4750  0ede 00            	dc.b	0
+4751  0edf 00            	dc.b	0
+4752  0ee0 00            	dc.b	0
+4753  0ee1 02            	dc.b	2
+4754  0ee2 60            	dc.b	96
+4755  0ee3 00            	dc.b	0
+4756  0ee4 00            	dc.b	0
+4757  0ee5 00            	dc.b	0
+4758  0ee6 02            	dc.b	2
+4759  0ee7 60            	dc.b	96
+4760  0ee8 00            	dc.b	0
+4761  0ee9 00            	dc.b	0
+4762  0eea 00            	dc.b	0
+4763  0eeb 01            	dc.b	1
+4764  0eec 70            	dc.b	112
+4765  0eed 00            	dc.b	0
+4766  0eee 00            	dc.b	0
+4767  0eef 00            	dc.b	0
+4768  0ef0 01            	dc.b	1
+4769  0ef1 70            	dc.b	112
+4770  0ef2 00            	dc.b	0
+4771  0ef3 00            	dc.b	0
+4772  0ef4 00            	dc.b	0
+4773  0ef5 01            	dc.b	1
+4774  0ef6 70            	dc.b	112
+4775  0ef7 00            	dc.b	0
+4776  0ef8 00            	dc.b	0
+4777  0ef9 00            	dc.b	0
+4778  0efa 00            	dc.b	0
+4779  0efb 80            	dc.b	128
+4780  0efc 00            	dc.b	0
+4781  0efd 00            	dc.b	0
+4782  0efe 00            	dc.b	0
+4783  0eff 00            	dc.b	0
+4784  0f00 80            	dc.b	128
+4785  0f01 00            	dc.b	0
+4786  0f02 00            	dc.b	0
+4787  0f03 00            	dc.b	0
+4788  0f04 00            	dc.b	0
+4789  0f05 80            	dc.b	128
+4790  0f06 00            	dc.b	0
+4791  0f07 00            	dc.b	0
+4792  0f08 00            	dc.b	0
+4793  0f09 01            	dc.b	1
+4794  0f0a 70            	dc.b	112
+4795  0f0b 00            	dc.b	0
+4796  0f0c 00            	dc.b	0
+4797  0f0d 00            	dc.b	0
+4798  0f0e 01            	dc.b	1
+4799  0f0f 70            	dc.b	112
+4800  0f10 00            	dc.b	0
+4801  0f11 00            	dc.b	0
+4802  0f12 00            	dc.b	0
+4803  0f13 01            	dc.b	1
+4804  0f14 70            	dc.b	112
+4805  0f15 00            	dc.b	0
+4806  0f16 00            	dc.b	0
+4807  0f17 00            	dc.b	0
+4808  0f18 01            	dc.b	1
+4809  0f19 70            	dc.b	112
+4810  0f1a 00            	dc.b	0
+4811  0f1b 00            	dc.b	0
+4812  0f1c 00            	dc.b	0
+4813  0f1d 02            	dc.b	2
+4814  0f1e 60            	dc.b	96
+4815  0f1f 00            	dc.b	0
+4816  0f20 00            	dc.b	0
+4817  0f21 00            	dc.b	0
+4818  0f22 02            	dc.b	2
+4819  0f23 60            	dc.b	96
+4820  0f24 00            	dc.b	0
+4821  0f25 00            	dc.b	0
+4822  0f26 00            	dc.b	0
+4823  0f27 02            	dc.b	2
+4824  0f28 60            	dc.b	96
+4825  0f29 00            	dc.b	0
+4826  0f2a 00            	dc.b	0
+4827  0f2b 00            	dc.b	0
+4828  0f2c 03            	dc.b	3
+4829  0f2d 50            	dc.b	80
+4830  0f2e 00            	dc.b	0
+4831  0f2f 00            	dc.b	0
+4832  0f30 00            	dc.b	0
+4833  0f31 03            	dc.b	3
+4834  0f32 50            	dc.b	80
+4835  0f33 00            	dc.b	0
+4836  0f34 00            	dc.b	0
+4837  0f35 00            	dc.b	0
+4838  0f36 03            	dc.b	3
+4839  0f37 50            	dc.b	80
+4840  0f38 00            	dc.b	0
+4841  0f39 00            	dc.b	0
+4842  0f3a 00            	dc.b	0
+4843  0f3b 04            	dc.b	4
+4844  0f3c 40            	dc.b	64
+4845  0f3d 00            	dc.b	0
+4846  0f3e 00            	dc.b	0
+4847  0f3f 00            	dc.b	0
+4848  0f40 04            	dc.b	4
+4849  0f41 40            	dc.b	64
+4850  0f42 00            	dc.b	0
+4851  0f43 00            	dc.b	0
+4852  0f44 00            	dc.b	0
+4853  0f45 05            	dc.b	5
+4854  0f46 30            	dc.b	48
+4855  0f47 00            	dc.b	0
+4856  0f48 00            	dc.b	0
+4857  0f49 00            	dc.b	0
+4858  0f4a 05            	dc.b	5
+4859  0f4b 30            	dc.b	48
+4860  0f4c 00            	dc.b	0
+4861  0f4d 00            	dc.b	0
+4862  0f4e 00            	dc.b	0
+4863  0f4f 05            	dc.b	5
+4864  0f50 30            	dc.b	48
+4865  0f51 00            	dc.b	0
+4866  0f52 00            	dc.b	0
+4867  0f53 00            	dc.b	0
+4868  0f54 06            	dc.b	6
+4869  0f55 20            	dc.b	32
+4870  0f56 00            	dc.b	0
+4871  0f57 00            	dc.b	0
+4872  0f58 00            	dc.b	0
+4873  0f59 06            	dc.b	6
+4874  0f5a 20            	dc.b	32
+4875  0f5b 00            	dc.b	0
+4876  0f5c 00            	dc.b	0
+4877  0f5d 00            	dc.b	0
+4878  0f5e 06            	dc.b	6
+4879  0f5f 20            	dc.b	32
+4880  0f60 00            	dc.b	0
+4881  0f61 00            	dc.b	0
+4882  0f62 00            	dc.b	0
+4883  0f63 07            	dc.b	7
+4884  0f64 10            	dc.b	16
+4885  0f65 00            	dc.b	0
+4886  0f66 00            	dc.b	0
+4887  0f67 00            	dc.b	0
+4888  0f68 07            	dc.b	7
+4889  0f69 10            	dc.b	16
+4890  0f6a 00            	dc.b	0
+4891  0f6b 00            	dc.b	0
+4892  0f6c 00            	dc.b	0
+4893  0f6d 07            	dc.b	7
+4894  0f6e 10            	dc.b	16
+4895  0f6f 00            	dc.b	0
+4896  0f70 00            	dc.b	0
+4897  0f71 00            	dc.b	0
+4898  0f72 07            	dc.b	7
+4899  0f73 10            	dc.b	16
+4900  0f74 00            	dc.b	0
+4901  0f75 00            	dc.b	0
+4902  0f76 00            	dc.b	0
+4903  0f77 08            	dc.b	8
+4904  0f78 00            	dc.b	0
+4905  0f79 00            	dc.b	0
+4906  0f7a 00            	dc.b	0
+4907  0f7b 00            	dc.b	0
+4908  0f7c 08            	dc.b	8
+4909  0f7d 00            	dc.b	0
+4910  0f7e 00            	dc.b	0
+4911  0f7f 00            	dc.b	0
+4912  0f80 00            	dc.b	0
+4913  0f81 08            	dc.b	8
+4914  0f82 00            	dc.b	0
+4915  0f83 00            	dc.b	0
+4916  0f84 00            	dc.b	0
+4917  0f85 00            	dc.b	0
+4918  0f86 08            	dc.b	8
+4919  0f87 00            	dc.b	0
+4920  0f88 00            	dc.b	0
+4921  0f89 00            	dc.b	0
+4922  0f8a 00            	dc.b	0
+4923  0f8b 08            	dc.b	8
+4924  0f8c 00            	dc.b	0
+4925  0f8d 00            	dc.b	0
+4926  0f8e 00            	dc.b	0
+4927  0f8f 00            	dc.b	0
+4928  0f90 08            	dc.b	8
+4929  0f91 00            	dc.b	0
+4930  0f92 00            	dc.b	0
+4931  0f93 00            	dc.b	0
+4932  0f94 00            	dc.b	0
+4933  0f95 08            	dc.b	8
+4934  0f96 00            	dc.b	0
+4935  0f97 00            	dc.b	0
+4936  0f98 00            	dc.b	0
+4937  0f99 00            	dc.b	0
+4938  0f9a 08            	dc.b	8
+4939  0f9b 00            	dc.b	0
+4940  0f9c 00            	dc.b	0
+4941  0f9d 00            	dc.b	0
+4942  0f9e 00            	dc.b	0
+4943  0f9f 08            	dc.b	8
+4944  0fa0 00            	dc.b	0
+4945  0fa1 00            	dc.b	0
+4946  0fa2 00            	dc.b	0
+4947  0fa3 00            	dc.b	0
+4948  0fa4 08            	dc.b	8
+4949  0fa5 00            	dc.b	0
+4950  0fa6 00            	dc.b	0
+4951  0fa7 00            	dc.b	0
+4952  0fa8 00            	dc.b	0
+4953  0fa9 07            	dc.b	7
+4954  0faa 00            	dc.b	0
+4955  0fab 00            	dc.b	0
+4956  0fac 00            	dc.b	0
+4957  0fad 01            	dc.b	1
+4958  0fae 07            	dc.b	7
+4959  0faf 00            	dc.b	0
+4960  0fb0 00            	dc.b	0
+4961  0fb1 00            	dc.b	0
+4962  0fb2 01            	dc.b	1
+4963  0fb3 07            	dc.b	7
+4964  0fb4 00            	dc.b	0
+4965  0fb5 00            	dc.b	0
+4966  0fb6 00            	dc.b	0
+4967  0fb7 01            	dc.b	1
+4968  0fb8 07            	dc.b	7
+4969  0fb9 00            	dc.b	0
+4970  0fba 00            	dc.b	0
+4971  0fbb 00            	dc.b	0
+4972  0fbc 01            	dc.b	1
+4973  0fbd 06            	dc.b	6
+4974  0fbe 00            	dc.b	0
+4975  0fbf 00            	dc.b	0
+4976  0fc0 00            	dc.b	0
+4977  0fc1 02            	dc.b	2
+4978  0fc2 06            	dc.b	6
+4979  0fc3 00            	dc.b	0
+4980  0fc4 00            	dc.b	0
+4981  0fc5 00            	dc.b	0
+4982  0fc6 02            	dc.b	2
+4983  0fc7 06            	dc.b	6
+4984  0fc8 00            	dc.b	0
+4985  0fc9 00            	dc.b	0
+4986  0fca 00            	dc.b	0
+4987  0fcb 02            	dc.b	2
+4988  0fcc 05            	dc.b	5
+4989  0fcd 00            	dc.b	0
+4990  0fce 00            	dc.b	0
+4991  0fcf 00            	dc.b	0
+4992  0fd0 03            	dc.b	3
+4993  0fd1 05            	dc.b	5
+4994  0fd2 00            	dc.b	0
+4995  0fd3 00            	dc.b	0
+4996  0fd4 00            	dc.b	0
+4997  0fd5 03            	dc.b	3
+4998  0fd6 05            	dc.b	5
+4999  0fd7 00            	dc.b	0
+5000  0fd8 00            	dc.b	0
+5001  0fd9 00            	dc.b	0
+5002  0fda 03            	dc.b	3
+5003  0fdb 04            	dc.b	4
+5004  0fdc 00            	dc.b	0
+5005  0fdd 00            	dc.b	0
+5006  0fde 00            	dc.b	0
+5007  0fdf 04            	dc.b	4
+5008  0fe0 04            	dc.b	4
+5009  0fe1 00            	dc.b	0
+5010  0fe2 00            	dc.b	0
+5011  0fe3 00            	dc.b	0
+5012  0fe4 04            	dc.b	4
+5013  0fe5 03            	dc.b	3
+5014  0fe6 00            	dc.b	0
+5015  0fe7 00            	dc.b	0
+5016  0fe8 00            	dc.b	0
+5017  0fe9 05            	dc.b	5
+5018  0fea 03            	dc.b	3
+5019  0feb 00            	dc.b	0
+5020  0fec 00            	dc.b	0
+5021  0fed 00            	dc.b	0
+5022  0fee 05            	dc.b	5
+5023  0fef 03            	dc.b	3
+5024  0ff0 00            	dc.b	0
+5025  0ff1 00            	dc.b	0
+5026  0ff2 00            	dc.b	0
+5027  0ff3 05            	dc.b	5
+5028  0ff4 02            	dc.b	2
+5029  0ff5 00            	dc.b	0
+5030  0ff6 00            	dc.b	0
+5031  0ff7 00            	dc.b	0
+5032  0ff8 06            	dc.b	6
+5033  0ff9 02            	dc.b	2
+5034  0ffa 00            	dc.b	0
+5035  0ffb 00            	dc.b	0
+5036  0ffc 00            	dc.b	0
+5037  0ffd 06            	dc.b	6
+5038  0ffe 02            	dc.b	2
+5039  0fff 00            	dc.b	0
+5040  1000 00            	dc.b	0
+5041  1001 00            	dc.b	0
+5042  1002 06            	dc.b	6
+5043  1003 01            	dc.b	1
+5044  1004 00            	dc.b	0
+5045  1005 00            	dc.b	0
+5046  1006 00            	dc.b	0
+5047  1007 07            	dc.b	7
+5048  1008 01            	dc.b	1
+5049  1009 00            	dc.b	0
+5050  100a 00            	dc.b	0
+5051  100b 00            	dc.b	0
+5052  100c 07            	dc.b	7
+5053  100d 01            	dc.b	1
+5054  100e 00            	dc.b	0
+5055  100f 00            	dc.b	0
+5056  1010 00            	dc.b	0
+5057  1011 07            	dc.b	7
+5058  1012 01            	dc.b	1
+5059  1013 00            	dc.b	0
+5060  1014 00            	dc.b	0
+5061  1015 00            	dc.b	0
+5062  1016 07            	dc.b	7
+5063  1017 00            	dc.b	0
+5064  1018 00            	dc.b	0
+5065  1019 00            	dc.b	0
+5066  101a 00            	dc.b	0
+5067  101b 08            	dc.b	8
+5068  101c 00            	dc.b	0
+5069  101d 00            	dc.b	0
+5070  101e 00            	dc.b	0
+5071  101f 00            	dc.b	0
+5072  1020 08            	dc.b	8
+5073  1021 00            	dc.b	0
+5074  1022 00            	dc.b	0
+5075  1023 00            	dc.b	0
+5076  1024 00            	dc.b	0
+5077  1025 08            	dc.b	8
+5078  1026 00            	dc.b	0
+5079  1027 00            	dc.b	0
+5080  1028 00            	dc.b	0
+5081  1029 00            	dc.b	0
+5082  102a 08            	dc.b	8
+5083  102b 00            	dc.b	0
+5084  102c 00            	dc.b	0
+5085  102d 00            	dc.b	0
+5086  102e 00            	dc.b	0
+5087  102f 08            	dc.b	8
+5088  1030 00            	dc.b	0
+5089  1031 00            	dc.b	0
+5090  1032 00            	dc.b	0
+5091  1033 00            	dc.b	0
+5092  1034 08            	dc.b	8
+5093  1035 00            	dc.b	0
+5094  1036 00            	dc.b	0
+5095  1037 00            	dc.b	0
+5096  1038 00            	dc.b	0
+5097  1039 08            	dc.b	8
+5098  103a 00            	dc.b	0
+5099  103b 00            	dc.b	0
+5100  103c 00            	dc.b	0
+5101  103d 00            	dc.b	0
+5102  103e 08            	dc.b	8
+5103  103f 00            	dc.b	0
+5104  1040 00            	dc.b	0
+5105  1041 00            	dc.b	0
+5106  1042 00            	dc.b	0
+5107  1043 08            	dc.b	8
+5108  1044 00            	dc.b	0
+5109  1045 00            	dc.b	0
+5110  1046 00            	dc.b	0
+5111  1047 00            	dc.b	0
+5112  1048 08            	dc.b	8
+5113  1049 00            	dc.b	0
+5114  104a 00            	dc.b	0
+5115  104b 00            	dc.b	0
+5116  104c 00            	dc.b	0
+5117  104d 17            	dc.b	23
+5118  104e 00            	dc.b	0
+5119  104f 00            	dc.b	0
+5120  1050 00            	dc.b	0
+5121  1051 00            	dc.b	0
+5122  1052 17            	dc.b	23
+5123  1053 00            	dc.b	0
+5124  1054 00            	dc.b	0
+5125  1055 00            	dc.b	0
+5126  1056 00            	dc.b	0
+5127  1057 17            	dc.b	23
+5128  1058 00            	dc.b	0
+5129  1059 00            	dc.b	0
+5130  105a 00            	dc.b	0
+5131  105b 00            	dc.b	0
+5132  105c 17            	dc.b	23
+5133  105d 00            	dc.b	0
+5134  105e 00            	dc.b	0
+5135  105f 00            	dc.b	0
+5136  1060 00            	dc.b	0
+5137  1061 26            	dc.b	38
+5138  1062 00            	dc.b	0
+5139  1063 00            	dc.b	0
+5140  1064 00            	dc.b	0
+5141  1065 00            	dc.b	0
+5142  1066 26            	dc.b	38
+5143  1067 00            	dc.b	0
+5144  1068 00            	dc.b	0
+5145  1069 00            	dc.b	0
+5146  106a 00            	dc.b	0
+5147  106b 26            	dc.b	38
+5148  106c 00            	dc.b	0
+5149  106d 00            	dc.b	0
+5150  106e 00            	dc.b	0
+5151  106f 00            	dc.b	0
+5152  1070 35            	dc.b	53
+5153  1071 00            	dc.b	0
+5154  1072 00            	dc.b	0
+5155  1073 00            	dc.b	0
+5156  1074 00            	dc.b	0
+5157  1075 35            	dc.b	53
+5158  1076 00            	dc.b	0
+5159  1077 00            	dc.b	0
+5160  1078 00            	dc.b	0
+5161  1079 00            	dc.b	0
+5162  107a 35            	dc.b	53
+5163  107b 00            	dc.b	0
+5164  107c 00            	dc.b	0
+5165  107d 00            	dc.b	0
+5166  107e 00            	dc.b	0
+5167  107f 44            	dc.b	68
+5168  1080 00            	dc.b	0
+5169  1081 00            	dc.b	0
+5170  1082 00            	dc.b	0
+5171  1083 00            	dc.b	0
+5172  1084 44            	dc.b	68
+5173  1085 00            	dc.b	0
+5174  1086 00            	dc.b	0
+5175  1087 00            	dc.b	0
+5176  1088 00            	dc.b	0
+5177  1089 53            	dc.b	83
+5178  108a 00            	dc.b	0
+5179  108b 00            	dc.b	0
+5180  108c 00            	dc.b	0
+5181  108d 00            	dc.b	0
+5182  108e 53            	dc.b	83
+5183  108f 00            	dc.b	0
+5184  1090 00            	dc.b	0
+5185  1091 00            	dc.b	0
+5186  1092 00            	dc.b	0
+5187  1093 53            	dc.b	83
+5188  1094 00            	dc.b	0
+5189  1095 00            	dc.b	0
+5190  1096 00            	dc.b	0
+5191  1097 00            	dc.b	0
+5192  1098 62            	dc.b	98
+5193  1099 00            	dc.b	0
+5194  109a 00            	dc.b	0
+5195  109b 00            	dc.b	0
+5196  109c 00            	dc.b	0
+5197  109d 62            	dc.b	98
+5198  109e 00            	dc.b	0
+5199  109f 00            	dc.b	0
+5200  10a0 00            	dc.b	0
+5201  10a1 00            	dc.b	0
+5202  10a2 62            	dc.b	98
+5203  10a3 00            	dc.b	0
+5204  10a4 00            	dc.b	0
+5205  10a5 00            	dc.b	0
+5206  10a6 00            	dc.b	0
+5207  10a7 71            	dc.b	113
+5208  10a8 00            	dc.b	0
+5209  10a9 00            	dc.b	0
+5210  10aa 00            	dc.b	0
+5211  10ab 00            	dc.b	0
+5212  10ac 71            	dc.b	113
+5213  10ad 00            	dc.b	0
+5214  10ae 00            	dc.b	0
+5215  10af 00            	dc.b	0
+5216  10b0 00            	dc.b	0
+5217  10b1 71            	dc.b	113
+5218  10b2 00            	dc.b	0
+5219  10b3 00            	dc.b	0
+5220  10b4 00            	dc.b	0
+5221  10b5 00            	dc.b	0
+5222  10b6 71            	dc.b	113
+5223  10b7 00            	dc.b	0
+5224  10b8 00            	dc.b	0
+5225  10b9 00            	dc.b	0
+5226  10ba 00            	dc.b	0
+5227  10bb 80            	dc.b	128
+5228  10bc 00            	dc.b	0
+5229  10bd 00            	dc.b	0
+5230  10be 00            	dc.b	0
+5231  10bf 00            	dc.b	0
+5232  10c0 80            	dc.b	128
+5233  10c1 00            	dc.b	0
+5234  10c2 00            	dc.b	0
+5235  10c3 00            	dc.b	0
+5236  10c4 00            	dc.b	0
+5237  10c5 80            	dc.b	128
+5238  10c6 00            	dc.b	0
+5239  10c7 00            	dc.b	0
+5240  10c8 00            	dc.b	0
+5241  10c9 00            	dc.b	0
+5242  10ca 80            	dc.b	128
+5243  10cb 00            	dc.b	0
+5244  10cc 00            	dc.b	0
+5245  10cd 00            	dc.b	0
+5246  10ce 00            	dc.b	0
+5247  10cf 80            	dc.b	128
+5248  10d0 00            	dc.b	0
+5249  10d1 00            	dc.b	0
+5250  10d2 00            	dc.b	0
+5251  10d3 00            	dc.b	0
+5252  10d4 80            	dc.b	128
+5253  10d5 00            	dc.b	0
+5254  10d6 00            	dc.b	0
+5255  10d7 00            	dc.b	0
+5256  10d8 00            	dc.b	0
+5257  10d9 80            	dc.b	128
+5258  10da 00            	dc.b	0
+5259  10db 00            	dc.b	0
+5260  10dc 00            	dc.b	0
+5261  10dd 00            	dc.b	0
+5262  10de 80            	dc.b	128
+5263  10df 00            	dc.b	0
+5264  10e0 00            	dc.b	0
+5265  10e1 00            	dc.b	0
+5266  10e2 00            	dc.b	0
+5267  10e3 80            	dc.b	128
+5268  10e4 00            	dc.b	0
+5269  10e5 00            	dc.b	0
+5270  10e6 00            	dc.b	0
+5271  10e7 00            	dc.b	0
+5272  10e8 80            	dc.b	128
+5273  10e9 00            	dc.b	0
+5274  10ea 00            	dc.b	0
+5275  10eb 00            	dc.b	0
+5276  10ec 01            	dc.b	1
+5277  10ed 70            	dc.b	112
+5278  10ee 00            	dc.b	0
+5279  10ef 00            	dc.b	0
+5280  10f0 00            	dc.b	0
+5281  10f1 01            	dc.b	1
+5282  10f2 70            	dc.b	112
+5283  10f3 00            	dc.b	0
+5284  10f4 00            	dc.b	0
+5285  10f5 00            	dc.b	0
+5286  10f6 01            	dc.b	1
+5287  10f7 70            	dc.b	112
+5288  10f8 00            	dc.b	0
+5289  10f9 00            	dc.b	0
+5290  10fa 00            	dc.b	0
+5291  10fb 01            	dc.b	1
+5292  10fc 70            	dc.b	112
+5293  10fd 00            	dc.b	0
+5294  10fe 00            	dc.b	0
+5295  10ff 00            	dc.b	0
+5296  1100 02            	dc.b	2
+5297  1101 60            	dc.b	96
+5298  1102 00            	dc.b	0
+5299  1103 00            	dc.b	0
+5300  1104 00            	dc.b	0
+5301  1105 02            	dc.b	2
+5302  1106 60            	dc.b	96
+5303  1107 00            	dc.b	0
+5304  1108 00            	dc.b	0
+5305  1109 00            	dc.b	0
+5306  110a 02            	dc.b	2
+5307  110b 60            	dc.b	96
+5308  110c 00            	dc.b	0
+5309  110d 00            	dc.b	0
+5310  110e 00            	dc.b	0
+5311  110f 03            	dc.b	3
+5312  1110 50            	dc.b	80
+5313  1111 00            	dc.b	0
+5314  1112 00            	dc.b	0
+5315  1113 00            	dc.b	0
+5316  1114 03            	dc.b	3
+5317  1115 50            	dc.b	80
+5318  1116 00            	dc.b	0
+5319  1117 00            	dc.b	0
+5320  1118 00            	dc.b	0
+5321  1119 03            	dc.b	3
+5322  111a 50            	dc.b	80
+5323  111b 00            	dc.b	0
+5324  111c 00            	dc.b	0
+5325  111d 00            	dc.b	0
+5326  111e 04            	dc.b	4
+5327  111f 40            	dc.b	64
+5328  1120 00            	dc.b	0
+5329  1121 00            	dc.b	0
+5330  1122 00            	dc.b	0
+5331  1123 04            	dc.b	4
+5332  1124 40            	dc.b	64
+5333  1125 00            	dc.b	0
+5334  1126 00            	dc.b	0
+5335  1127 00            	dc.b	0
+5336  1128 05            	dc.b	5
+5337  1129 30            	dc.b	48
+5338  112a 00            	dc.b	0
+5339  112b 00            	dc.b	0
+5340  112c 00            	dc.b	0
+5341  112d 05            	dc.b	5
+5342  112e 30            	dc.b	48
+5343  112f 00            	dc.b	0
+5344  1130 00            	dc.b	0
+5345  1131 00            	dc.b	0
+5346  1132 05            	dc.b	5
+5347  1133 30            	dc.b	48
+5348  1134 00            	dc.b	0
+5349  1135 00            	dc.b	0
+5350  1136 00            	dc.b	0
+5351  1137 06            	dc.b	6
+5352  1138 20            	dc.b	32
+5353  1139 00            	dc.b	0
+5354  113a 00            	dc.b	0
+5355  113b 00            	dc.b	0
+5356  113c 06            	dc.b	6
+5357  113d 20            	dc.b	32
+5358  113e 00            	dc.b	0
+5359  113f 00            	dc.b	0
+5360  1140 00            	dc.b	0
+5361  1141 06            	dc.b	6
+5362  1142 20            	dc.b	32
+5363  1143 00            	dc.b	0
+5364  1144 00            	dc.b	0
+5365  1145 00            	dc.b	0
+5366  1146 07            	dc.b	7
+5367  1147 10            	dc.b	16
+5368  1148 00            	dc.b	0
+5369  1149 00            	dc.b	0
+5370  114a 00            	dc.b	0
+5371  114b 07            	dc.b	7
+5372  114c 10            	dc.b	16
+5373  114d 00            	dc.b	0
+5374  114e 00            	dc.b	0
+5375  114f 00            	dc.b	0
+5376  1150 07            	dc.b	7
+5377  1151 10            	dc.b	16
+5378  1152 00            	dc.b	0
+5379  1153 00            	dc.b	0
+5380  1154 00            	dc.b	0
+5381  1155 07            	dc.b	7
+5382  1156 10            	dc.b	16
+5383  1157 00            	dc.b	0
+5384  1158 00            	dc.b	0
+5385  1159 00            	dc.b	0
+5386  115a 08            	dc.b	8
+5387  115b 00            	dc.b	0
+5388  115c 00            	dc.b	0
+5389  115d 00            	dc.b	0
+5390  115e 00            	dc.b	0
+5391  115f 08            	dc.b	8
+5392  1160 00            	dc.b	0
+5393  1161 00            	dc.b	0
+5394  1162 00            	dc.b	0
+5395  1163 00            	dc.b	0
+5396  1164 08            	dc.b	8
+5397  1165 00            	dc.b	0
+5398  1166 00            	dc.b	0
+5399  1167 00            	dc.b	0
+5400  1168 00            	dc.b	0
+5401  1169 08            	dc.b	8
+5402  116a 00            	dc.b	0
+5403  116b 00            	dc.b	0
+5404  116c 00            	dc.b	0
+5405  116d 00            	dc.b	0
+5406  116e 08            	dc.b	8
+5407  116f 00            	dc.b	0
+5408  1170 00            	dc.b	0
+5409  1171 00            	dc.b	0
+5410  1172 00            	dc.b	0
+5411  1173 08            	dc.b	8
+5412  1174 00            	dc.b	0
+5413  1175 00            	dc.b	0
+5414  1176 00            	dc.b	0
+5415  1177 00            	dc.b	0
+5416  1178 08            	dc.b	8
+5417  1179 00            	dc.b	0
+5418  117a 00            	dc.b	0
+5419  117b 00            	dc.b	0
+5420  117c 00            	dc.b	0
+5421  117d 08            	dc.b	8
+5422  117e 00            	dc.b	0
+5423  117f 00            	dc.b	0
+5424  1180 00            	dc.b	0
+5425  1181 00            	dc.b	0
+5426  1182 08            	dc.b	8
+5427  1183 00            	dc.b	0
+5428  1184 00            	dc.b	0
+5429  1185 00            	dc.b	0
+5430  1186 00            	dc.b	0
+5431  1187 08            	dc.b	8
+5432  1188 00            	dc.b	0
+5433  1189 00            	dc.b	0
+5434  118a 00            	dc.b	0
+5435  118b 00            	dc.b	0
+5436  118c 17            	dc.b	23
+5437  118d 00            	dc.b	0
+5438  118e 00            	dc.b	0
+5439  118f 00            	dc.b	0
+5440  1190 00            	dc.b	0
+5441  1191 17            	dc.b	23
+5442  1192 00            	dc.b	0
+5443  1193 00            	dc.b	0
+5444  1194 00            	dc.b	0
+5445  1195 00            	dc.b	0
+5446  1196 17            	dc.b	23
+5447  1197 00            	dc.b	0
+5448  1198 00            	dc.b	0
+5449  1199 00            	dc.b	0
+5450  119a 00            	dc.b	0
+5451  119b 17            	dc.b	23
+5452  119c 00            	dc.b	0
+5453  119d 00            	dc.b	0
+5454  119e 00            	dc.b	0
+5455  119f 00            	dc.b	0
+5456  11a0 26            	dc.b	38
+5457  11a1 00            	dc.b	0
+5458  11a2 00            	dc.b	0
+5459  11a3 00            	dc.b	0
+5460  11a4 00            	dc.b	0
+5461  11a5 26            	dc.b	38
+5462  11a6 00            	dc.b	0
+5463  11a7 00            	dc.b	0
+5464  11a8 00            	dc.b	0
+5465  11a9 00            	dc.b	0
+5466  11aa 26            	dc.b	38
+5467  11ab 00            	dc.b	0
+5468  11ac 00            	dc.b	0
+5469  11ad 00            	dc.b	0
+5470  11ae 00            	dc.b	0
+5471  11af 35            	dc.b	53
+5472  11b0 00            	dc.b	0
+5473  11b1 00            	dc.b	0
+5474  11b2 00            	dc.b	0
+5475  11b3 00            	dc.b	0
+5476  11b4 35            	dc.b	53
+5477  11b5 00            	dc.b	0
+5478  11b6 00            	dc.b	0
+5479  11b7 00            	dc.b	0
+5480  11b8 00            	dc.b	0
+5481  11b9 35            	dc.b	53
+5482  11ba 00            	dc.b	0
+5483  11bb 00            	dc.b	0
+5484  11bc 00            	dc.b	0
+5485  11bd 00            	dc.b	0
+5486  11be 44            	dc.b	68
+5487  11bf 00            	dc.b	0
+5488  11c0 00            	dc.b	0
+5489  11c1 00            	dc.b	0
+5490  11c2 00            	dc.b	0
+5491  11c3 44            	dc.b	68
+5492  11c4 00            	dc.b	0
+5493  11c5 00            	dc.b	0
+5494  11c6 00            	dc.b	0
+5495  11c7 00            	dc.b	0
+5496  11c8 53            	dc.b	83
+5497  11c9 00            	dc.b	0
+5498  11ca 00            	dc.b	0
+5499  11cb 00            	dc.b	0
+5500  11cc 00            	dc.b	0
+5501  11cd 53            	dc.b	83
+5502  11ce 00            	dc.b	0
+5503  11cf 00            	dc.b	0
+5504  11d0 00            	dc.b	0
+5505  11d1 00            	dc.b	0
+5506  11d2 53            	dc.b	83
+5507  11d3 00            	dc.b	0
+5508  11d4 00            	dc.b	0
+5509  11d5 00            	dc.b	0
+5510  11d6 00            	dc.b	0
+5511  11d7 62            	dc.b	98
+5512  11d8 00            	dc.b	0
+5513  11d9 00            	dc.b	0
+5514  11da 00            	dc.b	0
+5515  11db 00            	dc.b	0
+5516  11dc 62            	dc.b	98
+5517  11dd 00            	dc.b	0
+5518  11de 00            	dc.b	0
+5519  11df 00            	dc.b	0
+5520  11e0 00            	dc.b	0
+5521  11e1 62            	dc.b	98
+5522  11e2 00            	dc.b	0
+5523  11e3 00            	dc.b	0
+5524  11e4 00            	dc.b	0
+5525  11e5 00            	dc.b	0
+5526  11e6 71            	dc.b	113
+5527  11e7 00            	dc.b	0
+5528  11e8 00            	dc.b	0
+5529  11e9 00            	dc.b	0
+5530  11ea 00            	dc.b	0
+5531  11eb 71            	dc.b	113
+5532  11ec 00            	dc.b	0
+5533  11ed 00            	dc.b	0
+5534  11ee 00            	dc.b	0
+5535  11ef 00            	dc.b	0
+5536  11f0 71            	dc.b	113
+5537  11f1 00            	dc.b	0
+5538  11f2 00            	dc.b	0
+5539  11f3 00            	dc.b	0
+5540  11f4 00            	dc.b	0
+5541  11f5 71            	dc.b	113
+5542  11f6 00            	dc.b	0
+5543  11f7 00            	dc.b	0
+5544  11f8 00            	dc.b	0
+5545  11f9 00            	dc.b	0
+5546  11fa 80            	dc.b	128
+5547  11fb 00            	dc.b	0
+5548  11fc 00            	dc.b	0
+5549  11fd 00            	dc.b	0
+5550  11fe 00            	dc.b	0
+5551  11ff 80            	dc.b	128
+5552  1200 00            	dc.b	0
+5553  1201 00            	dc.b	0
+5554  1202 00            	dc.b	0
+5555  1203 00            	dc.b	0
+5556  1204 80            	dc.b	128
+5557  1205 00            	dc.b	0
+5558  1206 00            	dc.b	0
+5559  1207 00            	dc.b	0
+5560  1208 00            	dc.b	0
+5561  1209 71            	dc.b	113
+5562  120a 00            	dc.b	0
+5563  120b 00            	dc.b	0
+5564  120c 00            	dc.b	0
+5565  120d 00            	dc.b	0
+5566  120e 71            	dc.b	113
+5567  120f 00            	dc.b	0
+5568  1210 00            	dc.b	0
+5569  1211 00            	dc.b	0
+5570  1212 00            	dc.b	0
+5571  1213 71            	dc.b	113
+5572  1214 00            	dc.b	0
+5573  1215 00            	dc.b	0
+5574  1216 00            	dc.b	0
+5575  1217 00            	dc.b	0
+5576  1218 62            	dc.b	98
+5577  1219 00            	dc.b	0
+5578  121a 00            	dc.b	0
+5579  121b 00            	dc.b	0
+5580  121c 00            	dc.b	0
+5581  121d 62            	dc.b	98
+5582  121e 00            	dc.b	0
+5583  121f 00            	dc.b	0
+5584  1220 00            	dc.b	0
+5585  1221 00            	dc.b	0
+5586  1222 53            	dc.b	83
+5587  1223 00            	dc.b	0
+5588  1224 00            	dc.b	0
+5589  1225 00            	dc.b	0
+5590  1226 00            	dc.b	0
+5591  1227 44            	dc.b	68
+5592  1228 00            	dc.b	0
+5593  1229 00            	dc.b	0
+5594  122a 00            	dc.b	0
+5595  122b 00            	dc.b	0
+5596  122c 44            	dc.b	68
+5597  122d 00            	dc.b	0
+5598  122e 00            	dc.b	0
+5599  122f 00            	dc.b	0
+5600  1230 00            	dc.b	0
+5601  1231 35            	dc.b	53
+5602  1232 00            	dc.b	0
+5603  1233 00            	dc.b	0
+5604  1234 00            	dc.b	0
+5605  1235 00            	dc.b	0
+5606  1236 35            	dc.b	53
+5607  1237 00            	dc.b	0
+5608  1238 00            	dc.b	0
+5609  1239 00            	dc.b	0
+5610  123a 00            	dc.b	0
+5611  123b 26            	dc.b	38
+5612  123c 00            	dc.b	0
+5613  123d 00            	dc.b	0
+5614  123e 00            	dc.b	0
+5615  123f 00            	dc.b	0
+5616  1240 26            	dc.b	38
+5617  1241 00            	dc.b	0
+5618  1242 00            	dc.b	0
+5619  1243 00            	dc.b	0
+5620  1244 00            	dc.b	0
+5621  1245 17            	dc.b	23
+5622  1246 00            	dc.b	0
+5623  1247 00            	dc.b	0
+5624  1248 00            	dc.b	0
+5625  1249 00            	dc.b	0
+5626  124a 17            	dc.b	23
+5627  124b 00            	dc.b	0
+5628  124c 00            	dc.b	0
+5629  124d 00            	dc.b	0
+5630  124e 00            	dc.b	0
+5631  124f 17            	dc.b	23
+5632  1250 00            	dc.b	0
+5633  1251 00            	dc.b	0
+5634  1252 00            	dc.b	0
+5635  1253 00            	dc.b	0
+5636  1254 08            	dc.b	8
+5637  1255 00            	dc.b	0
+5638  1256 00            	dc.b	0
+5639  1257 00            	dc.b	0
+5640  1258 00            	dc.b	0
+5641  1259 08            	dc.b	8
+5642  125a 00            	dc.b	0
+5643  125b 00            	dc.b	0
+5644  125c 00            	dc.b	0
+5645  125d 00            	dc.b	0
+5646  125e 08            	dc.b	8
+5647  125f 00            	dc.b	0
+5648  1260 00            	dc.b	0
+5649  1261 00            	dc.b	0
+5650  1262 00            	dc.b	0
+5651  1263 08            	dc.b	8
+5652  1264 00            	dc.b	0
+5653  1265 00            	dc.b	0
+5654  1266 00            	dc.b	0
+5655  1267 00            	dc.b	0
+5656  1268 08            	dc.b	8
+5657  1269 00            	dc.b	0
+5658  126a 00            	dc.b	0
+5659  126b 00            	dc.b	0
+5660  126c 00            	dc.b	0
+5661  126d 08            	dc.b	8
+5662  126e 00            	dc.b	0
+5663  126f 00            	dc.b	0
+5664  1270 00            	dc.b	0
+5665  1271 00            	dc.b	0
+5666  1272 07            	dc.b	7
+5667  1273 10            	dc.b	16
+5668  1274 00            	dc.b	0
+5669  1275 00            	dc.b	0
+5670  1276 00            	dc.b	0
+5671  1277 07            	dc.b	7
+5672  1278 10            	dc.b	16
+5673  1279 00            	dc.b	0
+5674  127a 00            	dc.b	0
+5675  127b 00            	dc.b	0
+5676  127c 07            	dc.b	7
+5677  127d 10            	dc.b	16
+5678  127e 00            	dc.b	0
+5679  127f 00            	dc.b	0
+5680  1280 00            	dc.b	0
+5681  1281 06            	dc.b	6
+5682  1282 20            	dc.b	32
+5683  1283 00            	dc.b	0
+5684  1284 00            	dc.b	0
+5685  1285 00            	dc.b	0
+5686  1286 06            	dc.b	6
+5687  1287 20            	dc.b	32
+5688  1288 00            	dc.b	0
+5689  1289 00            	dc.b	0
+5690  128a 00            	dc.b	0
+5691  128b 05            	dc.b	5
+5692  128c 30            	dc.b	48
+5693  128d 00            	dc.b	0
+5694  128e 00            	dc.b	0
+5695  128f 00            	dc.b	0
+5696  1290 05            	dc.b	5
+5697  1291 30            	dc.b	48
+5698  1292 00            	dc.b	0
+5699  1293 00            	dc.b	0
+5700  1294 00            	dc.b	0
+5701  1295 04            	dc.b	4
+5702  1296 40            	dc.b	64
+5703  1297 00            	dc.b	0
+5704  1298 00            	dc.b	0
+5705  1299 00            	dc.b	0
+5706  129a 04            	dc.b	4
+5707  129b 40            	dc.b	64
+5708  129c 00            	dc.b	0
+5709  129d 00            	dc.b	0
+5710  129e 00            	dc.b	0
+5711  129f 03            	dc.b	3
+5712  12a0 50            	dc.b	80
+5713  12a1 00            	dc.b	0
+5714  12a2 00            	dc.b	0
+5715  12a3 00            	dc.b	0
+5716  12a4 02            	dc.b	2
+5717  12a5 60            	dc.b	96
+5718  12a6 00            	dc.b	0
+5719  12a7 00            	dc.b	0
+5720  12a8 00            	dc.b	0
+5721  12a9 02            	dc.b	2
+5722  12aa 60            	dc.b	96
+5723  12ab 00            	dc.b	0
+5724  12ac 00            	dc.b	0
+5725  12ad 00            	dc.b	0
+5726  12ae 01            	dc.b	1
+5727  12af 70            	dc.b	112
+5728  12b0 00            	dc.b	0
+5729  12b1 00            	dc.b	0
+5730  12b2 00            	dc.b	0
+5731  12b3 01            	dc.b	1
+5732  12b4 70            	dc.b	112
+5733  12b5 00            	dc.b	0
+5734  12b6 00            	dc.b	0
+5735  12b7 00            	dc.b	0
+5736  12b8 01            	dc.b	1
+5737  12b9 70            	dc.b	112
+5738  12ba 00            	dc.b	0
+5739  12bb 00            	dc.b	0
+5740  12bc 00            	dc.b	0
+5741  12bd 00            	dc.b	0
+5742  12be 80            	dc.b	128
+5743  12bf 00            	dc.b	0
+5744  12c0 00            	dc.b	0
+5745  12c1 00            	dc.b	0
+5746  12c2 00            	dc.b	0
+5747  12c3 80            	dc.b	128
+5748  12c4 00            	dc.b	0
+5749  12c5 00            	dc.b	0
+5750  12c6 00            	dc.b	0
+5751  12c7 00            	dc.b	0
+5752  12c8 80            	dc.b	128
+5753  12c9 00            	dc.b	0
+5754  12ca 00            	dc.b	0
+5755  12cb 00            	dc.b	0
+5756  12cc 00            	dc.b	0
+5757  12cd 80            	dc.b	128
+5758  12ce 00            	dc.b	0
+5759  12cf 00            	dc.b	0
+5760  12d0 00            	dc.b	0
+5761  12d1 00            	dc.b	0
+5762  12d2 80            	dc.b	128
+5763  12d3 00            	dc.b	0
+5764  12d4 00            	dc.b	0
+5765  12d5 00            	dc.b	0
+5766  12d6 00            	dc.b	0
+5767  12d7 80            	dc.b	128
+5768  12d8 00            	dc.b	0
+5769  12d9 00            	dc.b	0
+5770  12da 00            	dc.b	0
+5771  12db 00            	dc.b	0
+5772  12dc 80            	dc.b	128
+5773  12dd 00            	dc.b	0
+5774  12de 00            	dc.b	0
+5775  12df 00            	dc.b	0
+5776  12e0 00            	dc.b	0
+5777  12e1 71            	dc.b	113
+5778  12e2 00            	dc.b	0
+5779  12e3 00            	dc.b	0
+5780  12e4 00            	dc.b	0
+5781  12e5 00            	dc.b	0
+5782  12e6 71            	dc.b	113
+5783  12e7 00            	dc.b	0
+5784  12e8 00            	dc.b	0
+5785  12e9 00            	dc.b	0
+5786  12ea 00            	dc.b	0
+5787  12eb 62            	dc.b	98
+5788  12ec 00            	dc.b	0
+5789  12ed 00            	dc.b	0
+5790  12ee 00            	dc.b	0
+5791  12ef 00            	dc.b	0
+5792  12f0 62            	dc.b	98
+5793  12f1 00            	dc.b	0
+5794  12f2 00            	dc.b	0
+5795  12f3 00            	dc.b	0
+5796  12f4 00            	dc.b	0
+5797  12f5 53            	dc.b	83
+5798  12f6 00            	dc.b	0
+5799  12f7 00            	dc.b	0
+5800  12f8 00            	dc.b	0
+5801  12f9 00            	dc.b	0
+5802  12fa 53            	dc.b	83
+5803  12fb 00            	dc.b	0
+5804  12fc 00            	dc.b	0
+5805  12fd 00            	dc.b	0
+5806  12fe 00            	dc.b	0
+5807  12ff 44            	dc.b	68
+5808  1300 00            	dc.b	0
+5809  1301 00            	dc.b	0
+5810  1302 00            	dc.b	0
+5811  1303 00            	dc.b	0
+5812  1304 44            	dc.b	68
+5813  1305 00            	dc.b	0
+5814  1306 00            	dc.b	0
+5815  1307 00            	dc.b	0
+5816  1308 00            	dc.b	0
+5817  1309 35            	dc.b	53
+5818  130a 00            	dc.b	0
+5819  130b 00            	dc.b	0
+5820  130c 00            	dc.b	0
+5821  130d 00            	dc.b	0
+5822  130e 35            	dc.b	53
+5823  130f 00            	dc.b	0
+5824  1310 00            	dc.b	0
+5825  1311 00            	dc.b	0
+5826  1312 00            	dc.b	0
+5827  1313 26            	dc.b	38
+5828  1314 00            	dc.b	0
+5829  1315 00            	dc.b	0
+5830  1316 00            	dc.b	0
+5831  1317 00            	dc.b	0
+5832  1318 26            	dc.b	38
+5833  1319 00            	dc.b	0
+5834  131a 00            	dc.b	0
+5835  131b 00            	dc.b	0
+5836  131c 00            	dc.b	0
+5837  131d 17            	dc.b	23
+5838  131e 00            	dc.b	0
+5839  131f 00            	dc.b	0
+5840  1320 00            	dc.b	0
+5841  1321 00            	dc.b	0
+5842  1322 17            	dc.b	23
+5843  1323 00            	dc.b	0
+5844  1324 00            	dc.b	0
+5845  1325 00            	dc.b	0
+5846  1326 00            	dc.b	0
+5847  1327 08            	dc.b	8
+5848  1328 00            	dc.b	0
+5849  1329 00            	dc.b	0
+5850  132a 00            	dc.b	0
+5851  132b 00            	dc.b	0
+5852  132c 08            	dc.b	8
+5853  132d 00            	dc.b	0
+5854  132e 00            	dc.b	0
+5855  132f 00            	dc.b	0
+5856  1330 00            	dc.b	0
+5857  1331 08            	dc.b	8
+5858  1332 00            	dc.b	0
+5859  1333 00            	dc.b	0
+5860  1334 00            	dc.b	0
+5861  1335 00            	dc.b	0
+5862  1336 08            	dc.b	8
+5863  1337 00            	dc.b	0
+5864  1338 00            	dc.b	0
+5865  1339 00            	dc.b	0
+5866  133a 00            	dc.b	0
+5867  133b 08            	dc.b	8
+5868  133c 00            	dc.b	0
+5869  133d 00            	dc.b	0
+5870  133e 00            	dc.b	0
+5871  133f 00            	dc.b	0
+5872  1340 08            	dc.b	8
+5873  1341 00            	dc.b	0
+5874  1342 00            	dc.b	0
+5875  1343 00            	dc.b	0
+5876  1344 00            	dc.b	0
+5877  1345 08            	dc.b	8
+5878  1346 01            	dc.b	1
+5879  1347 00            	dc.b	0
+5880  1348 00            	dc.b	0
+5881  1349 00            	dc.b	0
+5882  134a 07            	dc.b	7
+5883  134b 01            	dc.b	1
+5884  134c 00            	dc.b	0
+5885  134d 00            	dc.b	0
+5886  134e 00            	dc.b	0
+5887  134f 07            	dc.b	7
+5888  1350 01            	dc.b	1
+5889  1351 00            	dc.b	0
+5890  1352 00            	dc.b	0
+5891  1353 00            	dc.b	0
+5892  1354 07            	dc.b	7
+5893  1355 02            	dc.b	2
+5894  1356 00            	dc.b	0
+5895  1357 00            	dc.b	0
+5896  1358 00            	dc.b	0
+5897  1359 06            	dc.b	6
+5898  135a 02            	dc.b	2
+5899  135b 00            	dc.b	0
+5900  135c 00            	dc.b	0
+5901  135d 00            	dc.b	0
+5902  135e 06            	dc.b	6
+5903  135f 03            	dc.b	3
+5904  1360 00            	dc.b	0
+5905  1361 00            	dc.b	0
+5906  1362 00            	dc.b	0
+5907  1363 05            	dc.b	5
+5908  1364 04            	dc.b	4
+5909  1365 00            	dc.b	0
+5910  1366 00            	dc.b	0
+5911  1367 00            	dc.b	0
+5912  1368 04            	dc.b	4
+5913  1369 04            	dc.b	4
+5914  136a 00            	dc.b	0
+5915  136b 00            	dc.b	0
+5916  136c 00            	dc.b	0
+5917  136d 04            	dc.b	4
+5918  136e 05            	dc.b	5
+5919  136f 00            	dc.b	0
+5920  1370 00            	dc.b	0
+5921  1371 00            	dc.b	0
+5922  1372 03            	dc.b	3
+5923  1373 05            	dc.b	5
+5924  1374 00            	dc.b	0
+5925  1375 00            	dc.b	0
+5926  1376 00            	dc.b	0
+5927  1377 03            	dc.b	3
+5928  1378 06            	dc.b	6
+5929  1379 00            	dc.b	0
+5930  137a 00            	dc.b	0
+5931  137b 00            	dc.b	0
+5932  137c 02            	dc.b	2
+5933  137d 06            	dc.b	6
+5934  137e 00            	dc.b	0
+5935  137f 00            	dc.b	0
+5936  1380 00            	dc.b	0
+5937  1381 02            	dc.b	2
+5938  1382 07            	dc.b	7
+5939  1383 00            	dc.b	0
+5940  1384 00            	dc.b	0
+5941  1385 00            	dc.b	0
+5942  1386 01            	dc.b	1
+5943  1387 07            	dc.b	7
+5944  1388 00            	dc.b	0
+5945  1389 00            	dc.b	0
+5946  138a 00            	dc.b	0
+5947  138b 01            	dc.b	1
+5948  138c 07            	dc.b	7
+5949  138d 00            	dc.b	0
+5950  138e 00            	dc.b	0
+5951  138f 00            	dc.b	0
+5952  1390 01            	dc.b	1
+5953  1391 08            	dc.b	8
+5954  1392 00            	dc.b	0
+5955  1393 00            	dc.b	0
+5956  1394 00            	dc.b	0
+5957  1395 00            	dc.b	0
+5958  1396 08            	dc.b	8
+5959  1397 00            	dc.b	0
+5960  1398 00            	dc.b	0
+5961  1399 00            	dc.b	0
+5962  139a 00            	dc.b	0
+5963  139b 08            	dc.b	8
+5964  139c 00            	dc.b	0
+5965  139d 00            	dc.b	0
+5966  139e 00            	dc.b	0
+5967  139f 00            	dc.b	0
+5968  13a0 08            	dc.b	8
+5969  13a1 00            	dc.b	0
+5970  13a2 00            	dc.b	0
+5971  13a3 00            	dc.b	0
+5972  13a4 00            	dc.b	0
+5973  13a5 08            	dc.b	8
+5974  13a6 00            	dc.b	0
+5975  13a7 00            	dc.b	0
+5976  13a8 00            	dc.b	0
+5977  13a9 00            	dc.b	0
+5978  13aa 08            	dc.b	8
+5979  13ab 00            	dc.b	0
+5980  13ac 00            	dc.b	0
+5981  13ad 00            	dc.b	0
+5982  13ae 00            	dc.b	0
+5983  13af 07            	dc.b	7
+5984  13b0 10            	dc.b	16
+5985  13b1 00            	dc.b	0
+5986  13b2 00            	dc.b	0
+5987  13b3 00            	dc.b	0
+5988  13b4 07            	dc.b	7
+5989  13b5 10            	dc.b	16
+5990  13b6 00            	dc.b	0
+5991  13b7 00            	dc.b	0
+5992  13b8 00            	dc.b	0
+5993  13b9 07            	dc.b	7
+5994  13ba 10            	dc.b	16
+5995  13bb 00            	dc.b	0
+5996  13bc 00            	dc.b	0
+5997  13bd 00            	dc.b	0
+5998  13be 06            	dc.b	6
+5999  13bf 20            	dc.b	32
+6000  13c0 00            	dc.b	0
+6001  13c1 00            	dc.b	0
+6002  13c2 00            	dc.b	0
+6003  13c3 06            	dc.b	6
+6004  13c4 20            	dc.b	32
+6005  13c5 00            	dc.b	0
+6006  13c6 00            	dc.b	0
+6007  13c7 00            	dc.b	0
+6008  13c8 05            	dc.b	5
+6009  13c9 30            	dc.b	48
+6010  13ca 00            	dc.b	0
+6011  13cb 00            	dc.b	0
+6012  13cc 00            	dc.b	0
+6013  13cd 05            	dc.b	5
+6014  13ce 30            	dc.b	48
+6015  13cf 00            	dc.b	0
+6016  13d0 00            	dc.b	0
+6017  13d1 00            	dc.b	0
+6018  13d2 04            	dc.b	4
+6019  13d3 40            	dc.b	64
+6020  13d4 00            	dc.b	0
+6021  13d5 00            	dc.b	0
+6022  13d6 00            	dc.b	0
+6023  13d7 04            	dc.b	4
+6024  13d8 40            	dc.b	64
+6025  13d9 00            	dc.b	0
+6026  13da 00            	dc.b	0
+6027  13db 00            	dc.b	0
+6028  13dc 03            	dc.b	3
+6029  13dd 50            	dc.b	80
+6030  13de 00            	dc.b	0
+6031  13df 00            	dc.b	0
+6032  13e0 00            	dc.b	0
+6033  13e1 02            	dc.b	2
+6034  13e2 60            	dc.b	96
+6035  13e3 00            	dc.b	0
+6036  13e4 00            	dc.b	0
+6037  13e5 00            	dc.b	0
+6038  13e6 02            	dc.b	2
+6039  13e7 60            	dc.b	96
+6040  13e8 00            	dc.b	0
+6041  13e9 00            	dc.b	0
+6042  13ea 00            	dc.b	0
+6043  13eb 01            	dc.b	1
+6044  13ec 70            	dc.b	112
+6045  13ed 00            	dc.b	0
+6046  13ee 00            	dc.b	0
+6047  13ef 00            	dc.b	0
+6048  13f0 01            	dc.b	1
+6049  13f1 70            	dc.b	112
+6050  13f2 00            	dc.b	0
+6051  13f3 00            	dc.b	0
+6052  13f4 00            	dc.b	0
+6053  13f5 01            	dc.b	1
+6054  13f6 70            	dc.b	112
+6055  13f7 00            	dc.b	0
+6056  13f8 00            	dc.b	0
+6057  13f9 00            	dc.b	0
+6058  13fa 00            	dc.b	0
+6059  13fb 80            	dc.b	128
+6060  13fc 00            	dc.b	0
+6061  13fd 00            	dc.b	0
+6062  13fe 00            	dc.b	0
+6063  13ff 00            	dc.b	0
+6064  1400 80            	dc.b	128
+6065  1401 00            	dc.b	0
+6066  1402 00            	dc.b	0
+6067  1403 00            	dc.b	0
+6068  1404 00            	dc.b	0
+6069  1405 80            	dc.b	128
+6070  1406 00            	dc.b	0
+6071  1407 00            	dc.b	0
+6072  1408 00            	dc.b	0
+6073  1409 01            	dc.b	1
+6074  140a 70            	dc.b	112
+6075  140b 00            	dc.b	0
+6076  140c 00            	dc.b	0
+6077  140d 00            	dc.b	0
+6078  140e 01            	dc.b	1
+6079  140f 70            	dc.b	112
+6080  1410 00            	dc.b	0
+6081  1411 00            	dc.b	0
+6082  1412 00            	dc.b	0
+6083  1413 01            	dc.b	1
+6084  1414 70            	dc.b	112
+6085  1415 00            	dc.b	0
+6086  1416 00            	dc.b	0
+6087  1417 00            	dc.b	0
+6088  1418 01            	dc.b	1
+6089  1419 70            	dc.b	112
+6090  141a 00            	dc.b	0
+6091  141b 00            	dc.b	0
+6092  141c 00            	dc.b	0
+6093  141d 02            	dc.b	2
+6094  141e 60            	dc.b	96
+6095  141f 00            	dc.b	0
+6096  1420 00            	dc.b	0
+6097  1421 00            	dc.b	0
+6098  1422 02            	dc.b	2
+6099  1423 60            	dc.b	96
+6100  1424 00            	dc.b	0
+6101  1425 00            	dc.b	0
+6102  1426 00            	dc.b	0
+6103  1427 02            	dc.b	2
+6104  1428 60            	dc.b	96
+6105  1429 00            	dc.b	0
+6106  142a 00            	dc.b	0
+6107  142b 00            	dc.b	0
+6108  142c 03            	dc.b	3
+6109  142d 50            	dc.b	80
+6110  142e 00            	dc.b	0
+6111  142f 00            	dc.b	0
+6112  1430 00            	dc.b	0
+6113  1431 03            	dc.b	3
+6114  1432 50            	dc.b	80
+6115  1433 00            	dc.b	0
+6116  1434 00            	dc.b	0
+6117  1435 00            	dc.b	0
+6118  1436 03            	dc.b	3
+6119  1437 50            	dc.b	80
+6120  1438 00            	dc.b	0
+6121  1439 00            	dc.b	0
+6122  143a 00            	dc.b	0
+6123  143b 04            	dc.b	4
+6124  143c 40            	dc.b	64
+6125  143d 00            	dc.b	0
+6126  143e 00            	dc.b	0
+6127  143f 00            	dc.b	0
+6128  1440 04            	dc.b	4
+6129  1441 40            	dc.b	64
+6130  1442 00            	dc.b	0
+6131  1443 00            	dc.b	0
+6132  1444 00            	dc.b	0
+6133  1445 05            	dc.b	5
+6134  1446 30            	dc.b	48
+6135  1447 00            	dc.b	0
+6136  1448 00            	dc.b	0
+6137  1449 00            	dc.b	0
+6138  144a 05            	dc.b	5
+6139  144b 30            	dc.b	48
+6140  144c 00            	dc.b	0
+6141  144d 00            	dc.b	0
+6142  144e 00            	dc.b	0
+6143  144f 05            	dc.b	5
+6144  1450 30            	dc.b	48
+6145  1451 00            	dc.b	0
+6146  1452 00            	dc.b	0
+6147  1453 00            	dc.b	0
+6148  1454 06            	dc.b	6
+6149  1455 20            	dc.b	32
+6150  1456 00            	dc.b	0
+6151  1457 00            	dc.b	0
+6152  1458 00            	dc.b	0
+6153  1459 06            	dc.b	6
+6154  145a 20            	dc.b	32
+6155  145b 00            	dc.b	0
+6156  145c 00            	dc.b	0
+6157  145d 00            	dc.b	0
+6158  145e 06            	dc.b	6
+6159  145f 20            	dc.b	32
+6160  1460 00            	dc.b	0
+6161  1461 00            	dc.b	0
+6162  1462 00            	dc.b	0
+6163  1463 07            	dc.b	7
+6164  1464 10            	dc.b	16
+6165  1465 00            	dc.b	0
+6166  1466 00            	dc.b	0
+6167  1467 00            	dc.b	0
+6168  1468 07            	dc.b	7
+6169  1469 10            	dc.b	16
+6170  146a 00            	dc.b	0
+6171  146b 00            	dc.b	0
+6172  146c 00            	dc.b	0
+6173  146d 07            	dc.b	7
+6174  146e 10            	dc.b	16
+6175  146f 00            	dc.b	0
+6176  1470 00            	dc.b	0
+6177  1471 00            	dc.b	0
+6178  1472 07            	dc.b	7
+6179  1473 10            	dc.b	16
+6180  1474 00            	dc.b	0
+6181  1475 00            	dc.b	0
+6182  1476 00            	dc.b	0
+6183  1477 08            	dc.b	8
+6184  1478 00            	dc.b	0
+6185  1479 00            	dc.b	0
+6186  147a 00            	dc.b	0
+6187  147b 00            	dc.b	0
+6188  147c 08            	dc.b	8
+6189  147d 00            	dc.b	0
+6190  147e 00            	dc.b	0
+6191  147f 00            	dc.b	0
+6192  1480 00            	dc.b	0
+6193  1481 08            	dc.b	8
+6194  1482 00            	dc.b	0
+6195  1483 00            	dc.b	0
+6196  1484 00            	dc.b	0
+6197  1485 00            	dc.b	0
+6198  1486 08            	dc.b	8
+6199  1487 00            	dc.b	0
+6200  1488 00            	dc.b	0
+6201  1489 00            	dc.b	0
+6202  148a 00            	dc.b	0
+6203  148b 08            	dc.b	8
+6204  148c 00            	dc.b	0
+6205  148d 00            	dc.b	0
+6206  148e 00            	dc.b	0
+6207  148f 00            	dc.b	0
+6208  1490 08            	dc.b	8
+6209  1491 00            	dc.b	0
+6210  1492 00            	dc.b	0
+6211  1493 00            	dc.b	0
+6212  1494 00            	dc.b	0
+6213  1495 08            	dc.b	8
+6214  1496 00            	dc.b	0
+6215  1497 00            	dc.b	0
+6216  1498 00            	dc.b	0
+6217  1499 00            	dc.b	0
+6218  149a 08            	dc.b	8
+6219  149b 00            	dc.b	0
+6220  149c 00            	dc.b	0
+6221  149d 00            	dc.b	0
+6222  149e 00            	dc.b	0
+6223  149f 08            	dc.b	8
+6224  14a0 00            	dc.b	0
+6225  14a1 00            	dc.b	0
+6226  14a2 00            	dc.b	0
+6227  14a3 00            	dc.b	0
+6228  14a4 08            	dc.b	8
+6229  14a5 00            	dc.b	0
+6230  14a6 00            	dc.b	0
+6231  14a7 00            	dc.b	0
+6232  14a8 00            	dc.b	0
+6233  14a9 07            	dc.b	7
+6234  14aa 00            	dc.b	0
+6235  14ab 00            	dc.b	0
+6236  14ac 00            	dc.b	0
+6237  14ad 01            	dc.b	1
+6238  14ae 07            	dc.b	7
+6239  14af 00            	dc.b	0
+6240  14b0 00            	dc.b	0
+6241  14b1 00            	dc.b	0
+6242  14b2 01            	dc.b	1
+6243  14b3 07            	dc.b	7
+6244  14b4 00            	dc.b	0
+6245  14b5 00            	dc.b	0
+6246  14b6 00            	dc.b	0
+6247  14b7 01            	dc.b	1
+6248  14b8 07            	dc.b	7
+6249  14b9 00            	dc.b	0
+6250  14ba 00            	dc.b	0
+6251  14bb 00            	dc.b	0
+6252  14bc 01            	dc.b	1
+6253  14bd 06            	dc.b	6
+6254  14be 00            	dc.b	0
+6255  14bf 00            	dc.b	0
+6256  14c0 00            	dc.b	0
+6257  14c1 02            	dc.b	2
+6258  14c2 06            	dc.b	6
+6259  14c3 00            	dc.b	0
+6260  14c4 00            	dc.b	0
+6261  14c5 00            	dc.b	0
+6262  14c6 02            	dc.b	2
+6263  14c7 06            	dc.b	6
+6264  14c8 00            	dc.b	0
+6265  14c9 00            	dc.b	0
+6266  14ca 00            	dc.b	0
+6267  14cb 02            	dc.b	2
+6268  14cc 05            	dc.b	5
+6269  14cd 00            	dc.b	0
+6270  14ce 00            	dc.b	0
+6271  14cf 00            	dc.b	0
+6272  14d0 03            	dc.b	3
+6273  14d1 05            	dc.b	5
+6274  14d2 00            	dc.b	0
+6275  14d3 00            	dc.b	0
+6276  14d4 00            	dc.b	0
+6277  14d5 03            	dc.b	3
+6278  14d6 05            	dc.b	5
+6279  14d7 00            	dc.b	0
+6280  14d8 00            	dc.b	0
+6281  14d9 00            	dc.b	0
+6282  14da 03            	dc.b	3
+6283  14db 04            	dc.b	4
+6284  14dc 00            	dc.b	0
+6285  14dd 00            	dc.b	0
+6286  14de 00            	dc.b	0
+6287  14df 04            	dc.b	4
+6288  14e0 04            	dc.b	4
+6289  14e1 00            	dc.b	0
+6290  14e2 00            	dc.b	0
+6291  14e3 00            	dc.b	0
+6292  14e4 04            	dc.b	4
+6293  14e5 03            	dc.b	3
+6294  14e6 00            	dc.b	0
+6295  14e7 00            	dc.b	0
+6296  14e8 00            	dc.b	0
+6297  14e9 05            	dc.b	5
+6298  14ea 03            	dc.b	3
+6299  14eb 00            	dc.b	0
+6300  14ec 00            	dc.b	0
+6301  14ed 00            	dc.b	0
+6302  14ee 05            	dc.b	5
+6303  14ef 03            	dc.b	3
+6304  14f0 00            	dc.b	0
+6305  14f1 00            	dc.b	0
+6306  14f2 00            	dc.b	0
+6307  14f3 05            	dc.b	5
+6308  14f4 02            	dc.b	2
+6309  14f5 00            	dc.b	0
+6310  14f6 00            	dc.b	0
+6311  14f7 00            	dc.b	0
+6312  14f8 06            	dc.b	6
+6313  14f9 02            	dc.b	2
+6314  14fa 00            	dc.b	0
+6315  14fb 00            	dc.b	0
+6316  14fc 00            	dc.b	0
+6317  14fd 06            	dc.b	6
+6318  14fe 02            	dc.b	2
+6319  14ff 00            	dc.b	0
+6320  1500 00            	dc.b	0
+6321  1501 00            	dc.b	0
+6322  1502 06            	dc.b	6
+6323  1503 01            	dc.b	1
+6324  1504 00            	dc.b	0
+6325  1505 00            	dc.b	0
+6326  1506 00            	dc.b	0
+6327  1507 07            	dc.b	7
+6328  1508 01            	dc.b	1
+6329  1509 00            	dc.b	0
+6330  150a 00            	dc.b	0
+6331  150b 00            	dc.b	0
+6332  150c 07            	dc.b	7
+6333  150d 01            	dc.b	1
+6334  150e 00            	dc.b	0
+6335  150f 00            	dc.b	0
+6336  1510 00            	dc.b	0
+6337  1511 07            	dc.b	7
+6338  1512 01            	dc.b	1
+6339  1513 00            	dc.b	0
+6340  1514 00            	dc.b	0
+6341  1515 00            	dc.b	0
+6342  1516 07            	dc.b	7
+6343  1517 00            	dc.b	0
+6344  1518 00            	dc.b	0
+6345  1519 00            	dc.b	0
+6346  151a 00            	dc.b	0
+6347  151b 08            	dc.b	8
+6348  151c 00            	dc.b	0
+6349  151d 00            	dc.b	0
+6350  151e 00            	dc.b	0
+6351  151f 00            	dc.b	0
+6352  1520 08            	dc.b	8
+6353  1521 00            	dc.b	0
+6354  1522 00            	dc.b	0
+6355  1523 00            	dc.b	0
+6356  1524 00            	dc.b	0
+6357  1525 08            	dc.b	8
+6358  1526 00            	dc.b	0
+6359  1527 00            	dc.b	0
+6360  1528 00            	dc.b	0
+6361  1529 00            	dc.b	0
+6362  152a 08            	dc.b	8
+6363  152b 00            	dc.b	0
+6364  152c 00            	dc.b	0
+6365  152d 00            	dc.b	0
+6366  152e 00            	dc.b	0
+6367  152f 08            	dc.b	8
+6368  1530 00            	dc.b	0
+6369  1531 00            	dc.b	0
+6370  1532 00            	dc.b	0
+6371  1533 00            	dc.b	0
+6372  1534 08            	dc.b	8
+6373  1535 00            	dc.b	0
+6374  1536 00            	dc.b	0
+6375  1537 00            	dc.b	0
+6376  1538 00            	dc.b	0
+6377  1539 08            	dc.b	8
+6378  153a 00            	dc.b	0
+6379  153b 00            	dc.b	0
+6380  153c 00            	dc.b	0
+6381  153d 00            	dc.b	0
+6382  153e 08            	dc.b	8
+6383  153f 00            	dc.b	0
+6384  1540 00            	dc.b	0
+6385  1541 00            	dc.b	0
+6386  1542 00            	dc.b	0
+6387  1543 08            	dc.b	8
+6388  1544 00            	dc.b	0
+6389  1545 00            	dc.b	0
+6390  1546 00            	dc.b	0
+6391  1547 00            	dc.b	0
+6392  1548 08            	dc.b	8
+6393  1549 00            	dc.b	0
+6394  154a 00            	dc.b	0
+6395  154b 00            	dc.b	0
+6396  154c 00            	dc.b	0
+6397  154d 17            	dc.b	23
+6398  154e 00            	dc.b	0
+6399  154f 00            	dc.b	0
+6400  1550 00            	dc.b	0
+6401  1551 00            	dc.b	0
+6402  1552 17            	dc.b	23
+6403  1553 00            	dc.b	0
+6404  1554 00            	dc.b	0
+6405  1555 00            	dc.b	0
+6406  1556 00            	dc.b	0
+6407  1557 17            	dc.b	23
+6408  1558 00            	dc.b	0
+6409  1559 00            	dc.b	0
+6410  155a 00            	dc.b	0
+6411  155b 00            	dc.b	0
+6412  155c 17            	dc.b	23
+6413  155d 00            	dc.b	0
+6414  155e 00            	dc.b	0
+6415  155f 00            	dc.b	0
+6416  1560 00            	dc.b	0
+6417  1561 26            	dc.b	38
+6418  1562 00            	dc.b	0
+6419  1563 00            	dc.b	0
+6420  1564 00            	dc.b	0
+6421  1565 00            	dc.b	0
+6422  1566 26            	dc.b	38
+6423  1567 00            	dc.b	0
+6424  1568 00            	dc.b	0
+6425  1569 00            	dc.b	0
+6426  156a 00            	dc.b	0
+6427  156b 26            	dc.b	38
+6428  156c 00            	dc.b	0
+6429  156d 00            	dc.b	0
+6430  156e 00            	dc.b	0
+6431  156f 00            	dc.b	0
+6432  1570 35            	dc.b	53
+6433  1571 00            	dc.b	0
+6434  1572 00            	dc.b	0
+6435  1573 00            	dc.b	0
+6436  1574 00            	dc.b	0
+6437  1575 35            	dc.b	53
+6438  1576 00            	dc.b	0
+6439  1577 00            	dc.b	0
+6440  1578 00            	dc.b	0
+6441  1579 00            	dc.b	0
+6442  157a 35            	dc.b	53
+6443  157b 00            	dc.b	0
+6444  157c 00            	dc.b	0
+6445  157d 00            	dc.b	0
+6446  157e 00            	dc.b	0
+6447  157f 44            	dc.b	68
+6448  1580 00            	dc.b	0
+6449  1581 00            	dc.b	0
+6450  1582 00            	dc.b	0
+6451  1583 00            	dc.b	0
+6452  1584 44            	dc.b	68
+6453  1585 00            	dc.b	0
+6454  1586 00            	dc.b	0
+6455  1587 00            	dc.b	0
+6456  1588 00            	dc.b	0
+6457  1589 53            	dc.b	83
+6458  158a 00            	dc.b	0
+6459  158b 00            	dc.b	0
+6460  158c 00            	dc.b	0
+6461  158d 00            	dc.b	0
+6462  158e 53            	dc.b	83
+6463  158f 00            	dc.b	0
+6464  1590 00            	dc.b	0
+6465  1591 00            	dc.b	0
+6466  1592 00            	dc.b	0
+6467  1593 53            	dc.b	83
+6468  1594 00            	dc.b	0
+6469  1595 00            	dc.b	0
+6470  1596 00            	dc.b	0
+6471  1597 00            	dc.b	0
+6472  1598 62            	dc.b	98
+6473  1599 00            	dc.b	0
+6474  159a 00            	dc.b	0
+6475  159b 00            	dc.b	0
+6476  159c 00            	dc.b	0
+6477  159d 62            	dc.b	98
+6478  159e 00            	dc.b	0
+6479  159f 00            	dc.b	0
+6480  15a0 00            	dc.b	0
+6481  15a1 00            	dc.b	0
+6482  15a2 62            	dc.b	98
+6483  15a3 00            	dc.b	0
+6484  15a4 00            	dc.b	0
+6485  15a5 00            	dc.b	0
+6486  15a6 00            	dc.b	0
+6487  15a7 71            	dc.b	113
+6488  15a8 00            	dc.b	0
+6489  15a9 00            	dc.b	0
+6490  15aa 00            	dc.b	0
+6491  15ab 00            	dc.b	0
+6492  15ac 71            	dc.b	113
+6493  15ad 00            	dc.b	0
+6494  15ae 00            	dc.b	0
+6495  15af 00            	dc.b	0
+6496  15b0 00            	dc.b	0
+6497  15b1 71            	dc.b	113
+6498  15b2 00            	dc.b	0
+6499  15b3 00            	dc.b	0
+6500  15b4 00            	dc.b	0
+6501  15b5 00            	dc.b	0
+6502  15b6 71            	dc.b	113
+6503  15b7 00            	dc.b	0
+6504  15b8 00            	dc.b	0
+6505  15b9 00            	dc.b	0
+6506  15ba 00            	dc.b	0
+6507  15bb 80            	dc.b	128
+6508  15bc 00            	dc.b	0
+6509  15bd 00            	dc.b	0
+6510  15be 00            	dc.b	0
+6511  15bf 00            	dc.b	0
+6512  15c0 80            	dc.b	128
+6513  15c1 00            	dc.b	0
+6514  15c2 00            	dc.b	0
+6515  15c3 00            	dc.b	0
+6516  15c4 00            	dc.b	0
+6517  15c5 80            	dc.b	128
+6518  15c6 00            	dc.b	0
+6519  15c7 00            	dc.b	0
+6520  15c8 00            	dc.b	0
+6521  15c9 00            	dc.b	0
+6522  15ca 80            	dc.b	128
+6523  15cb 00            	dc.b	0
+6524  15cc 00            	dc.b	0
+6525  15cd 00            	dc.b	0
+6526  15ce 00            	dc.b	0
+6527  15cf 80            	dc.b	128
+6528  15d0 00            	dc.b	0
+6529  15d1 00            	dc.b	0
+6530  15d2 00            	dc.b	0
+6531  15d3 00            	dc.b	0
+6532  15d4 80            	dc.b	128
+6533  15d5 00            	dc.b	0
+6534  15d6 00            	dc.b	0
+6535  15d7 00            	dc.b	0
+6536  15d8 00            	dc.b	0
+6537  15d9 80            	dc.b	128
+6538  15da 00            	dc.b	0
+6539  15db 00            	dc.b	0
+6540  15dc 00            	dc.b	0
+6541  15dd 00            	dc.b	0
+6542  15de 80            	dc.b	128
+6543  15df 00            	dc.b	0
+6544  15e0 00            	dc.b	0
+6545  15e1 00            	dc.b	0
+6546  15e2 00            	dc.b	0
+6547  15e3 80            	dc.b	128
+6548  15e4 00            	dc.b	0
+6549  15e5 00            	dc.b	0
+6550  15e6 00            	dc.b	0
+6551  15e7 00            	dc.b	0
+6552  15e8 80            	dc.b	128
+6553  15e9 00            	dc.b	0
+6554  15ea 00            	dc.b	0
+6555  15eb 00            	dc.b	0
+6556  15ec 01            	dc.b	1
+6557  15ed 70            	dc.b	112
+6558  15ee 00            	dc.b	0
+6559  15ef 00            	dc.b	0
+6560  15f0 00            	dc.b	0
+6561  15f1 01            	dc.b	1
+6562  15f2 70            	dc.b	112
+6563  15f3 00            	dc.b	0
+6564  15f4 00            	dc.b	0
+6565  15f5 00            	dc.b	0
+6566  15f6 01            	dc.b	1
+6567  15f7 70            	dc.b	112
+6568  15f8 00            	dc.b	0
+6569  15f9 00            	dc.b	0
+6570  15fa 00            	dc.b	0
+6571  15fb 01            	dc.b	1
+6572  15fc 70            	dc.b	112
+6573  15fd 00            	dc.b	0
+6574  15fe 00            	dc.b	0
+6575  15ff 00            	dc.b	0
+6576  1600 02            	dc.b	2
+6577  1601 60            	dc.b	96
+6578  1602 00            	dc.b	0
+6579  1603 00            	dc.b	0
+6580  1604 00            	dc.b	0
+6581  1605 02            	dc.b	2
+6582  1606 60            	dc.b	96
+6583  1607 00            	dc.b	0
+6584  1608 00            	dc.b	0
+6585  1609 00            	dc.b	0
+6586  160a 02            	dc.b	2
+6587  160b 60            	dc.b	96
+6588  160c 00            	dc.b	0
+6589  160d 00            	dc.b	0
+6590  160e 00            	dc.b	0
+6591  160f 03            	dc.b	3
+6592  1610 50            	dc.b	80
+6593  1611 00            	dc.b	0
+6594  1612 00            	dc.b	0
+6595  1613 00            	dc.b	0
+6596  1614 03            	dc.b	3
+6597  1615 50            	dc.b	80
+6598  1616 00            	dc.b	0
+6599  1617 00            	dc.b	0
+6600  1618 00            	dc.b	0
+6601  1619 03            	dc.b	3
+6602  161a 50            	dc.b	80
+6603  161b 00            	dc.b	0
+6604  161c 00            	dc.b	0
+6605  161d 00            	dc.b	0
+6606  161e 04            	dc.b	4
+6607  161f 40            	dc.b	64
+6608  1620 00            	dc.b	0
+6609  1621 00            	dc.b	0
+6610  1622 00            	dc.b	0
+6611  1623 04            	dc.b	4
+6612  1624 40            	dc.b	64
+6613  1625 00            	dc.b	0
+6614  1626 00            	dc.b	0
+6615  1627 00            	dc.b	0
+6616  1628 05            	dc.b	5
+6617  1629 30            	dc.b	48
+6618  162a 00            	dc.b	0
+6619  162b 00            	dc.b	0
+6620  162c 00            	dc.b	0
+6621  162d 05            	dc.b	5
+6622  162e 30            	dc.b	48
+6623  162f 00            	dc.b	0
+6624  1630 00            	dc.b	0
+6625  1631 00            	dc.b	0
+6626  1632 05            	dc.b	5
+6627  1633 30            	dc.b	48
+6628  1634 00            	dc.b	0
+6629  1635 00            	dc.b	0
+6630  1636 00            	dc.b	0
+6631  1637 06            	dc.b	6
+6632  1638 20            	dc.b	32
+6633  1639 00            	dc.b	0
+6634  163a 00            	dc.b	0
+6635  163b 00            	dc.b	0
+6636  163c 06            	dc.b	6
+6637  163d 20            	dc.b	32
+6638  163e 00            	dc.b	0
+6639  163f 00            	dc.b	0
+6640  1640 00            	dc.b	0
+6641  1641 06            	dc.b	6
+6642  1642 20            	dc.b	32
+6643  1643 00            	dc.b	0
+6644  1644 00            	dc.b	0
+6645  1645 00            	dc.b	0
+6646  1646 07            	dc.b	7
+6647  1647 10            	dc.b	16
+6648  1648 00            	dc.b	0
+6649  1649 00            	dc.b	0
+6650  164a 00            	dc.b	0
+6651  164b 07            	dc.b	7
+6652  164c 10            	dc.b	16
+6653  164d 00            	dc.b	0
+6654  164e 00            	dc.b	0
+6655  164f 00            	dc.b	0
+6656  1650 07            	dc.b	7
+6657  1651 10            	dc.b	16
+6658  1652 00            	dc.b	0
+6659  1653 00            	dc.b	0
+6660  1654 00            	dc.b	0
+6661  1655 07            	dc.b	7
+6662  1656 10            	dc.b	16
+6663  1657 00            	dc.b	0
+6664  1658 00            	dc.b	0
+6665  1659 00            	dc.b	0
+6666  165a 08            	dc.b	8
+6667  165b 00            	dc.b	0
+6668  165c 00            	dc.b	0
+6669  165d 00            	dc.b	0
+6670  165e 00            	dc.b	0
+6671  165f 08            	dc.b	8
+6672  1660 00            	dc.b	0
+6673  1661 00            	dc.b	0
+6674  1662 00            	dc.b	0
+6675  1663 00            	dc.b	0
+6676  1664 08            	dc.b	8
+6677  1665 00            	dc.b	0
+6678  1666 00            	dc.b	0
+6679  1667 00            	dc.b	0
+6680  1668 00            	dc.b	0
+6681  1669 08            	dc.b	8
+6682  166a 00            	dc.b	0
+6683  166b 00            	dc.b	0
+6684  166c 00            	dc.b	0
+6685  166d 00            	dc.b	0
+6686  166e 08            	dc.b	8
+6687  166f 00            	dc.b	0
+6688  1670 00            	dc.b	0
+6689  1671 00            	dc.b	0
+6690  1672 00            	dc.b	0
+6691  1673 08            	dc.b	8
+6692  1674 00            	dc.b	0
+6693  1675 00            	dc.b	0
+6694  1676 00            	dc.b	0
+6695  1677 00            	dc.b	0
+6696  1678 08            	dc.b	8
+6697  1679 00            	dc.b	0
+6698  167a 00            	dc.b	0
+6699  167b 00            	dc.b	0
+6700  167c 00            	dc.b	0
+6701  167d 08            	dc.b	8
+6702  167e 00            	dc.b	0
+6703  167f 00            	dc.b	0
+6704  1680 00            	dc.b	0
+6705  1681 00            	dc.b	0
+6706  1682 08            	dc.b	8
+6707  1683 00            	dc.b	0
+6708  1684 00            	dc.b	0
+6709  1685 00            	dc.b	0
+6710  1686 00            	dc.b	0
+6711  1687 08            	dc.b	8
+6712  1688 00            	dc.b	0
+6713  1689 00            	dc.b	0
+6714  168a 00            	dc.b	0
+6715  168b 00            	dc.b	0
+6716  168c 17            	dc.b	23
+6717  168d 00            	dc.b	0
+6718  168e 00            	dc.b	0
+6719  168f 00            	dc.b	0
+6720  1690 00            	dc.b	0
+6721  1691 17            	dc.b	23
+6722  1692 00            	dc.b	0
+6723  1693 00            	dc.b	0
+6724  1694 00            	dc.b	0
+6725  1695 00            	dc.b	0
+6726  1696 17            	dc.b	23
+6727  1697 00            	dc.b	0
+6728  1698 00            	dc.b	0
+6729  1699 00            	dc.b	0
+6730  169a 00            	dc.b	0
+6731  169b 17            	dc.b	23
+6732  169c 00            	dc.b	0
+6733  169d 00            	dc.b	0
+6734  169e 00            	dc.b	0
+6735  169f 00            	dc.b	0
+6736  16a0 26            	dc.b	38
+6737  16a1 00            	dc.b	0
+6738  16a2 00            	dc.b	0
+6739  16a3 00            	dc.b	0
+6740  16a4 00            	dc.b	0
+6741  16a5 26            	dc.b	38
+6742  16a6 00            	dc.b	0
+6743  16a7 00            	dc.b	0
+6744  16a8 00            	dc.b	0
+6745  16a9 00            	dc.b	0
+6746  16aa 26            	dc.b	38
+6747  16ab 00            	dc.b	0
+6748  16ac 00            	dc.b	0
+6749  16ad 00            	dc.b	0
+6750  16ae 00            	dc.b	0
+6751  16af 35            	dc.b	53
+6752  16b0 00            	dc.b	0
+6753  16b1 00            	dc.b	0
+6754  16b2 00            	dc.b	0
+6755  16b3 00            	dc.b	0
+6756  16b4 35            	dc.b	53
+6757  16b5 00            	dc.b	0
+6758  16b6 00            	dc.b	0
+6759  16b7 00            	dc.b	0
+6760  16b8 00            	dc.b	0
+6761  16b9 35            	dc.b	53
+6762  16ba 00            	dc.b	0
+6763  16bb 00            	dc.b	0
+6764  16bc 00            	dc.b	0
+6765  16bd 00            	dc.b	0
+6766  16be 44            	dc.b	68
+6767  16bf 00            	dc.b	0
+6768  16c0 00            	dc.b	0
+6769  16c1 00            	dc.b	0
+6770  16c2 00            	dc.b	0
+6771  16c3 44            	dc.b	68
+6772  16c4 00            	dc.b	0
+6773  16c5 00            	dc.b	0
+6774  16c6 00            	dc.b	0
+6775  16c7 00            	dc.b	0
+6776  16c8 53            	dc.b	83
+6777  16c9 00            	dc.b	0
+6778  16ca 00            	dc.b	0
+6779  16cb 00            	dc.b	0
+6780  16cc 00            	dc.b	0
+6781  16cd 53            	dc.b	83
+6782  16ce 00            	dc.b	0
+6783  16cf 00            	dc.b	0
+6784  16d0 00            	dc.b	0
+6785  16d1 00            	dc.b	0
+6786  16d2 53            	dc.b	83
+6787  16d3 00            	dc.b	0
+6788  16d4 00            	dc.b	0
+6789  16d5 00            	dc.b	0
+6790  16d6 00            	dc.b	0
+6791  16d7 62            	dc.b	98
+6792  16d8 00            	dc.b	0
+6793  16d9 00            	dc.b	0
+6794  16da 00            	dc.b	0
+6795  16db 00            	dc.b	0
+6796  16dc 62            	dc.b	98
+6797  16dd 00            	dc.b	0
+6798  16de 00            	dc.b	0
+6799  16df 00            	dc.b	0
+6800  16e0 00            	dc.b	0
+6801  16e1 62            	dc.b	98
+6802  16e2 00            	dc.b	0
+6803  16e3 00            	dc.b	0
+6804  16e4 00            	dc.b	0
+6805  16e5 00            	dc.b	0
+6806  16e6 71            	dc.b	113
+6807  16e7 00            	dc.b	0
+6808  16e8 00            	dc.b	0
+6809  16e9 00            	dc.b	0
+6810  16ea 00            	dc.b	0
+6811  16eb 71            	dc.b	113
+6812  16ec 00            	dc.b	0
+6813  16ed 00            	dc.b	0
+6814  16ee 00            	dc.b	0
+6815  16ef 00            	dc.b	0
+6816  16f0 71            	dc.b	113
+6817  16f1 00            	dc.b	0
+6818  16f2 00            	dc.b	0
+6819  16f3 00            	dc.b	0
+6820  16f4 00            	dc.b	0
+6821  16f5 71            	dc.b	113
+6822  16f6 00            	dc.b	0
+6823  16f7 00            	dc.b	0
+6824  16f8 00            	dc.b	0
+6825  16f9 00            	dc.b	0
+6826  16fa 80            	dc.b	128
+6827  16fb 00            	dc.b	0
+6828  16fc 00            	dc.b	0
+6829  16fd 00            	dc.b	0
+6830  16fe 00            	dc.b	0
+6831  16ff 80            	dc.b	128
+6832  1700 00            	dc.b	0
+6833  1701 00            	dc.b	0
+6834  1702 00            	dc.b	0
+6835  1703 00            	dc.b	0
+6836  1704 80            	dc.b	128
+6837  1705 00            	dc.b	0
+6838  1706 00            	dc.b	0
+6839  1707 00            	dc.b	0
+6840  1708 00            	dc.b	0
+6841  1709 71            	dc.b	113
+6842  170a 00            	dc.b	0
+6843  170b 00            	dc.b	0
+6844  170c 00            	dc.b	0
+6845  170d 00            	dc.b	0
+6846  170e 71            	dc.b	113
+6847  170f 00            	dc.b	0
+6848  1710 00            	dc.b	0
+6849  1711 00            	dc.b	0
+6850  1712 00            	dc.b	0
+6851  1713 71            	dc.b	113
+6852  1714 00            	dc.b	0
+6853  1715 00            	dc.b	0
+6854  1716 00            	dc.b	0
+6855  1717 00            	dc.b	0
+6856  1718 62            	dc.b	98
+6857  1719 00            	dc.b	0
+6858  171a 00            	dc.b	0
+6859  171b 00            	dc.b	0
+6860  171c 00            	dc.b	0
+6861  171d 62            	dc.b	98
+6862  171e 00            	dc.b	0
+6863  171f 00            	dc.b	0
+6864  1720 00            	dc.b	0
+6865  1721 00            	dc.b	0
+6866  1722 53            	dc.b	83
+6867  1723 00            	dc.b	0
+6868  1724 00            	dc.b	0
+6869  1725 00            	dc.b	0
+6870  1726 00            	dc.b	0
+6871  1727 44            	dc.b	68
+6872  1728 00            	dc.b	0
+6873  1729 00            	dc.b	0
+6874  172a 00            	dc.b	0
+6875  172b 00            	dc.b	0
+6876  172c 44            	dc.b	68
+6877  172d 00            	dc.b	0
+6878  172e 00            	dc.b	0
+6879  172f 00            	dc.b	0
+6880  1730 00            	dc.b	0
+6881  1731 35            	dc.b	53
+6882  1732 00            	dc.b	0
+6883  1733 00            	dc.b	0
+6884  1734 00            	dc.b	0
+6885  1735 00            	dc.b	0
+6886  1736 35            	dc.b	53
+6887  1737 00            	dc.b	0
+6888  1738 00            	dc.b	0
+6889  1739 00            	dc.b	0
+6890  173a 00            	dc.b	0
+6891  173b 26            	dc.b	38
+6892  173c 00            	dc.b	0
+6893  173d 00            	dc.b	0
+6894  173e 00            	dc.b	0
+6895  173f 00            	dc.b	0
+6896  1740 26            	dc.b	38
+6897  1741 00            	dc.b	0
+6898  1742 00            	dc.b	0
+6899  1743 00            	dc.b	0
+6900  1744 00            	dc.b	0
+6901  1745 17            	dc.b	23
+6902  1746 00            	dc.b	0
+6903  1747 00            	dc.b	0
+6904  1748 00            	dc.b	0
+6905  1749 00            	dc.b	0
+6906  174a 17            	dc.b	23
+6907  174b 00            	dc.b	0
+6908  174c 00            	dc.b	0
+6909  174d 00            	dc.b	0
+6910  174e 00            	dc.b	0
+6911  174f 17            	dc.b	23
+6912  1750 00            	dc.b	0
+6913  1751 00            	dc.b	0
+6914  1752 00            	dc.b	0
+6915  1753 00            	dc.b	0
+6916  1754 08            	dc.b	8
+6917  1755 00            	dc.b	0
+6918  1756 00            	dc.b	0
+6919  1757 00            	dc.b	0
+6920  1758 00            	dc.b	0
+6921  1759 08            	dc.b	8
+6922  175a 00            	dc.b	0
+6923  175b 00            	dc.b	0
+6924  175c 00            	dc.b	0
+6925  175d 00            	dc.b	0
+6926  175e 08            	dc.b	8
+6927  175f 00            	dc.b	0
+6928  1760 00            	dc.b	0
+6929  1761 00            	dc.b	0
+6930  1762 00            	dc.b	0
+6931  1763 08            	dc.b	8
+6932  1764 00            	dc.b	0
+6933  1765 00            	dc.b	0
+6934  1766 00            	dc.b	0
+6935  1767 00            	dc.b	0
+6936  1768 08            	dc.b	8
+6937  1769 00            	dc.b	0
+6938  176a 00            	dc.b	0
+6939  176b 00            	dc.b	0
+6940  176c 00            	dc.b	0
+6941  176d 08            	dc.b	8
+6942  176e 00            	dc.b	0
+6943  176f 00            	dc.b	0
+6944  1770 00            	dc.b	0
+6945  1771 00            	dc.b	0
+6946  1772 07            	dc.b	7
+6947  1773 10            	dc.b	16
+6948  1774 00            	dc.b	0
+6949  1775 00            	dc.b	0
+6950  1776 00            	dc.b	0
+6951  1777 07            	dc.b	7
+6952  1778 10            	dc.b	16
+6953  1779 00            	dc.b	0
+6954  177a 00            	dc.b	0
+6955  177b 00            	dc.b	0
+6956  177c 07            	dc.b	7
+6957  177d 10            	dc.b	16
+6958  177e 00            	dc.b	0
+6959  177f 00            	dc.b	0
+6960  1780 00            	dc.b	0
+6961  1781 06            	dc.b	6
+6962  1782 20            	dc.b	32
+6963  1783 00            	dc.b	0
+6964  1784 00            	dc.b	0
+6965  1785 00            	dc.b	0
+6966  1786 06            	dc.b	6
+6967  1787 20            	dc.b	32
+6968  1788 00            	dc.b	0
+6969  1789 00            	dc.b	0
+6970  178a 00            	dc.b	0
+6971  178b 05            	dc.b	5
+6972  178c 30            	dc.b	48
+6973  178d 00            	dc.b	0
+6974  178e 00            	dc.b	0
+6975  178f 00            	dc.b	0
+6976  1790 05            	dc.b	5
+6977  1791 30            	dc.b	48
+6978  1792 00            	dc.b	0
+6979  1793 00            	dc.b	0
+6980  1794 00            	dc.b	0
+6981  1795 04            	dc.b	4
+6982  1796 40            	dc.b	64
+6983  1797 00            	dc.b	0
+6984  1798 00            	dc.b	0
+6985  1799 00            	dc.b	0
+6986  179a 04            	dc.b	4
+6987  179b 40            	dc.b	64
+6988  179c 00            	dc.b	0
+6989  179d 00            	dc.b	0
+6990  179e 00            	dc.b	0
+6991  179f 03            	dc.b	3
+6992  17a0 50            	dc.b	80
+6993  17a1 00            	dc.b	0
+6994  17a2 00            	dc.b	0
+6995  17a3 00            	dc.b	0
+6996  17a4 02            	dc.b	2
+6997  17a5 60            	dc.b	96
+6998  17a6 00            	dc.b	0
+6999  17a7 00            	dc.b	0
+7000  17a8 00            	dc.b	0
+7001  17a9 02            	dc.b	2
+7002  17aa 60            	dc.b	96
+7003  17ab 00            	dc.b	0
+7004  17ac 00            	dc.b	0
+7005  17ad 00            	dc.b	0
+7006  17ae 01            	dc.b	1
+7007  17af 70            	dc.b	112
+7008  17b0 00            	dc.b	0
+7009  17b1 00            	dc.b	0
+7010  17b2 00            	dc.b	0
+7011  17b3 01            	dc.b	1
+7012  17b4 70            	dc.b	112
+7013  17b5 00            	dc.b	0
+7014  17b6 00            	dc.b	0
+7015  17b7 00            	dc.b	0
+7016  17b8 01            	dc.b	1
+7017  17b9 70            	dc.b	112
+7018  17ba 00            	dc.b	0
+7019  17bb 00            	dc.b	0
+7020  17bc 00            	dc.b	0
+7021  17bd 00            	dc.b	0
+7022  17be 80            	dc.b	128
+7023  17bf 00            	dc.b	0
+7024  17c0 00            	dc.b	0
+7025  17c1 00            	dc.b	0
+7026  17c2 00            	dc.b	0
+7027  17c3 80            	dc.b	128
+7028  17c4 00            	dc.b	0
+7029  17c5 00            	dc.b	0
+7030  17c6 00            	dc.b	0
+7031  17c7 00            	dc.b	0
+7032  17c8 80            	dc.b	128
+7033  17c9 00            	dc.b	0
+7034  17ca 00            	dc.b	0
+7035  17cb 00            	dc.b	0
+7036  17cc 00            	dc.b	0
+7037  17cd 80            	dc.b	128
+7038  17ce 00            	dc.b	0
+7039  17cf 00            	dc.b	0
+7040  17d0 00            	dc.b	0
+7041  17d1 00            	dc.b	0
+7042  17d2 80            	dc.b	128
+7043  17d3 00            	dc.b	0
+7044  17d4 00            	dc.b	0
+7045  17d5 00            	dc.b	0
+7046  17d6 00            	dc.b	0
+7047  17d7 80            	dc.b	128
+7048  17d8 00            	dc.b	0
+7049  17d9 00            	dc.b	0
+7050  17da 00            	dc.b	0
+7051  17db 00            	dc.b	0
+7052  17dc 80            	dc.b	128
+7053  17dd 00            	dc.b	0
+7054  17de 00            	dc.b	0
+7055  17df 00            	dc.b	0
+7056  17e0 00            	dc.b	0
+7057  17e1 71            	dc.b	113
+7058  17e2 00            	dc.b	0
+7059  17e3 00            	dc.b	0
+7060  17e4 00            	dc.b	0
+7061  17e5 00            	dc.b	0
+7062  17e6 71            	dc.b	113
+7063  17e7 00            	dc.b	0
+7064  17e8 00            	dc.b	0
+7065  17e9 00            	dc.b	0
+7066  17ea 00            	dc.b	0
+7067  17eb 62            	dc.b	98
+7068  17ec 00            	dc.b	0
+7069  17ed 00            	dc.b	0
+7070  17ee 00            	dc.b	0
+7071  17ef 00            	dc.b	0
+7072  17f0 62            	dc.b	98
+7073  17f1 00            	dc.b	0
+7074  17f2 00            	dc.b	0
+7075  17f3 00            	dc.b	0
+7076  17f4 00            	dc.b	0
+7077  17f5 53            	dc.b	83
+7078  17f6 00            	dc.b	0
+7079  17f7 00            	dc.b	0
+7080  17f8 00            	dc.b	0
+7081  17f9 00            	dc.b	0
+7082  17fa 53            	dc.b	83
+7083  17fb 00            	dc.b	0
+7084  17fc 00            	dc.b	0
+7085  17fd 00            	dc.b	0
+7086  17fe 00            	dc.b	0
+7087  17ff 44            	dc.b	68
+7088  1800 00            	dc.b	0
+7089  1801 00            	dc.b	0
+7090  1802 00            	dc.b	0
+7091  1803 00            	dc.b	0
+7092  1804 08            	dc.b	8
+7093  1805 00            	dc.b	0
+7094  1806 00            	dc.b	0
+7095  1807 00            	dc.b	0
+7096  1808 00            	dc.b	0
+7097  1809 08            	dc.b	8
+7098  180a 00            	dc.b	0
+7099  180b 00            	dc.b	0
+7100  180c 00            	dc.b	0
+7101  180d 00            	dc.b	0
+7102  180e 08            	dc.b	8
+7103  180f 00            	dc.b	0
+7104  1810 00            	dc.b	0
+7105  1811 00            	dc.b	0
+7106  1812 00            	dc.b	0
+7107  1813 08            	dc.b	8
+7108  1814 00            	dc.b	0
+7109  1815 00            	dc.b	0
+7110  1816 00            	dc.b	0
+7111  1817 00            	dc.b	0
+7112  1818 08            	dc.b	8
+7113  1819 01            	dc.b	1
+7114  181a 00            	dc.b	0
+7115  181b 00            	dc.b	0
+7116  181c 00            	dc.b	0
+7117  181d 07            	dc.b	7
+7118  181e 01            	dc.b	1
+7119  181f 00            	dc.b	0
+7120  1820 00            	dc.b	0
+7121  1821 00            	dc.b	0
+7122  1822 07            	dc.b	7
+7123  1823 01            	dc.b	1
+7124  1824 00            	dc.b	0
+7125  1825 00            	dc.b	0
+7126  1826 00            	dc.b	0
+7127  1827 07            	dc.b	7
+7128  1828 01            	dc.b	1
+7129  1829 00            	dc.b	0
+7130  182a 00            	dc.b	0
+7131  182b 00            	dc.b	0
+7132  182c 07            	dc.b	7
+7133  182d 02            	dc.b	2
+7134  182e 00            	dc.b	0
+7135  182f 00            	dc.b	0
+7136  1830 00            	dc.b	0
+7137  1831 06            	dc.b	6
+7138  1832 02            	dc.b	2
+7139  1833 00            	dc.b	0
+7140  1834 00            	dc.b	0
+7141  1835 00            	dc.b	0
+7142  1836 06            	dc.b	6
+7143  1837 02            	dc.b	2
+7144  1838 00            	dc.b	0
+7145  1839 00            	dc.b	0
+7146  183a 00            	dc.b	0
+7147  183b 06            	dc.b	6
+7148  183c 03            	dc.b	3
+7149  183d 00            	dc.b	0
+7150  183e 00            	dc.b	0
+7151  183f 00            	dc.b	0
+7152  1840 05            	dc.b	5
+7153  1841 03            	dc.b	3
+7154  1842 00            	dc.b	0
+7155  1843 00            	dc.b	0
+7156  1844 00            	dc.b	0
+7157  1845 05            	dc.b	5
+7158  1846 03            	dc.b	3
+7159  1847 00            	dc.b	0
+7160  1848 00            	dc.b	0
+7161  1849 00            	dc.b	0
+7162  184a 05            	dc.b	5
+7163  184b 04            	dc.b	4
+7164  184c 00            	dc.b	0
+7165  184d 00            	dc.b	0
+7166  184e 00            	dc.b	0
+7167  184f 04            	dc.b	4
+7168  1850 04            	dc.b	4
+7169  1851 00            	dc.b	0
+7170  1852 00            	dc.b	0
+7171  1853 00            	dc.b	0
+7172  1854 04            	dc.b	4
+7173  1855 05            	dc.b	5
+7174  1856 00            	dc.b	0
+7175  1857 00            	dc.b	0
+7176  1858 00            	dc.b	0
+7177  1859 03            	dc.b	3
+7178  185a 05            	dc.b	5
+7179  185b 00            	dc.b	0
+7180  185c 00            	dc.b	0
+7181  185d 00            	dc.b	0
+7182  185e 03            	dc.b	3
+7183  185f 05            	dc.b	5
+7184  1860 00            	dc.b	0
+7185  1861 00            	dc.b	0
+7186  1862 00            	dc.b	0
+7187  1863 03            	dc.b	3
+7188  1864 06            	dc.b	6
+7189  1865 00            	dc.b	0
+7190  1866 00            	dc.b	0
+7191  1867 00            	dc.b	0
+7192  1868 02            	dc.b	2
+7193  1869 06            	dc.b	6
+7194  186a 00            	dc.b	0
+7195  186b 00            	dc.b	0
+7196  186c 00            	dc.b	0
+7197  186d 02            	dc.b	2
+7198  186e 06            	dc.b	6
+7199  186f 00            	dc.b	0
+7200  1870 00            	dc.b	0
+7201  1871 00            	dc.b	0
+7202  1872 02            	dc.b	2
+7203  1873 07            	dc.b	7
+7204  1874 00            	dc.b	0
+7205  1875 00            	dc.b	0
+7206  1876 00            	dc.b	0
+7207  1877 01            	dc.b	1
+7208  1878 07            	dc.b	7
+7209  1879 00            	dc.b	0
+7210  187a 00            	dc.b	0
+7211  187b 00            	dc.b	0
+7212  187c 01            	dc.b	1
+7213  187d 07            	dc.b	7
+7214  187e 00            	dc.b	0
+7215  187f 00            	dc.b	0
+7216  1880 00            	dc.b	0
+7217  1881 01            	dc.b	1
+7218  1882 07            	dc.b	7
+7219  1883 00            	dc.b	0
+7220  1884 00            	dc.b	0
+7221  1885 00            	dc.b	0
+7222  1886 01            	dc.b	1
+7223  1887 08            	dc.b	8
+7224  1888 00            	dc.b	0
+7225  1889 00            	dc.b	0
+7226  188a 00            	dc.b	0
+7227  188b 00            	dc.b	0
+7228  188c 08            	dc.b	8
+7229  188d 00            	dc.b	0
+7230  188e 00            	dc.b	0
+7231  188f 00            	dc.b	0
+7232  1890 00            	dc.b	0
+7233  1891 08            	dc.b	8
+7234  1892 00            	dc.b	0
+7235  1893 00            	dc.b	0
+7236  1894 00            	dc.b	0
+7237  1895 00            	dc.b	0
+7238  1896 08            	dc.b	8
+7239  1897 00            	dc.b	0
+7240  1898 00            	dc.b	0
+7241  1899 00            	dc.b	0
+7242  189a 00            	dc.b	0
+7243  189b 08            	dc.b	8
+7244  189c 00            	dc.b	0
+7245  189d 00            	dc.b	0
+7246  189e 00            	dc.b	0
+7247  189f 00            	dc.b	0
+7248  18a0 08            	dc.b	8
+7249  18a1 00            	dc.b	0
+7250  18a2 00            	dc.b	0
+7251  18a3 00            	dc.b	0
+7252  18a4 00            	dc.b	0
+7253  18a5 08            	dc.b	8
+7254  18a6 00            	dc.b	0
+7255  18a7 00            	dc.b	0
+7256  18a8 00            	dc.b	0
+7257  18a9 00            	dc.b	0
+7258  18aa 08            	dc.b	8
+7259  18ab 00            	dc.b	0
+7260  18ac 00            	dc.b	0
+7261  18ad 00            	dc.b	0
+7262  18ae 00            	dc.b	0
+7263  18af 08            	dc.b	8
+7264  18b0 00            	dc.b	0
+7265  18b1 00            	dc.b	0
+7266  18b2 00            	dc.b	0
+7267  18b3 00            	dc.b	0
+7268  18b4 08            	dc.b	8
+7269  18b5 00            	dc.b	0
+7270  18b6 00            	dc.b	0
+7271  18b7 00            	dc.b	0
+7272  18b8 00            	dc.b	0
+7273  18b9 07            	dc.b	7
+7274  18ba 10            	dc.b	16
+7275  18bb 00            	dc.b	0
+7276  18bc 00            	dc.b	0
+7277  18bd 00            	dc.b	0
+7278  18be 07            	dc.b	7
+7279  18bf 10            	dc.b	16
+7280  18c0 00            	dc.b	0
+7281  18c1 00            	dc.b	0
+7282  18c2 00            	dc.b	0
+7283  18c3 07            	dc.b	7
+7284  18c4 10            	dc.b	16
+7285  18c5 00            	dc.b	0
+7286  18c6 00            	dc.b	0
+7287  18c7 00            	dc.b	0
+7288  18c8 07            	dc.b	7
+7289  18c9 10            	dc.b	16
+7290  18ca 00            	dc.b	0
+7291  18cb 00            	dc.b	0
+7292  18cc 00            	dc.b	0
+7293  18cd 06            	dc.b	6
+7294  18ce 20            	dc.b	32
+7295  18cf 00            	dc.b	0
+7296  18d0 00            	dc.b	0
+7297  18d1 00            	dc.b	0
+7298  18d2 06            	dc.b	6
+7299  18d3 20            	dc.b	32
+7300  18d4 00            	dc.b	0
+7301  18d5 00            	dc.b	0
+7302  18d6 00            	dc.b	0
+7303  18d7 06            	dc.b	6
+7304  18d8 20            	dc.b	32
+7305  18d9 00            	dc.b	0
+7306  18da 00            	dc.b	0
+7307  18db 00            	dc.b	0
+7308  18dc 05            	dc.b	5
+7309  18dd 30            	dc.b	48
+7310  18de 00            	dc.b	0
+7311  18df 00            	dc.b	0
+7312  18e0 00            	dc.b	0
+7313  18e1 05            	dc.b	5
+7314  18e2 30            	dc.b	48
+7315  18e3 00            	dc.b	0
+7316  18e4 00            	dc.b	0
+7317  18e5 00            	dc.b	0
+7318  18e6 05            	dc.b	5
+7319  18e7 30            	dc.b	48
+7320  18e8 00            	dc.b	0
+7321  18e9 00            	dc.b	0
+7322  18ea 00            	dc.b	0
+7323  18eb 04            	dc.b	4
+7324  18ec 40            	dc.b	64
+7325  18ed 00            	dc.b	0
+7326  18ee 00            	dc.b	0
+7327  18ef 00            	dc.b	0
+7328  18f0 04            	dc.b	4
+7329  18f1 40            	dc.b	64
+7330  18f2 00            	dc.b	0
+7331  18f3 00            	dc.b	0
+7332  18f4 00            	dc.b	0
+7333  18f5 03            	dc.b	3
+7334  18f6 50            	dc.b	80
+7335  18f7 00            	dc.b	0
+7336  18f8 00            	dc.b	0
+7337  18f9 00            	dc.b	0
+7338  18fa 03            	dc.b	3
+7339  18fb 50            	dc.b	80
+7340  18fc 00            	dc.b	0
+7341  18fd 00            	dc.b	0
+7342  18fe 00            	dc.b	0
+7343  18ff 03            	dc.b	3
+7344  1900 50            	dc.b	80
+7345  1901 00            	dc.b	0
+7346  1902 00            	dc.b	0
+7347  1903 00            	dc.b	0
+7348  1904 02            	dc.b	2
+7349  1905 60            	dc.b	96
+7350  1906 00            	dc.b	0
+7351  1907 00            	dc.b	0
+7352  1908 00            	dc.b	0
+7353  1909 02            	dc.b	2
+7354  190a 60            	dc.b	96
+7355  190b 00            	dc.b	0
+7356  190c 00            	dc.b	0
+7357  190d 00            	dc.b	0
+7358  190e 02            	dc.b	2
+7359  190f 60            	dc.b	96
+7360  1910 00            	dc.b	0
+7361  1911 00            	dc.b	0
+7362  1912 00            	dc.b	0
+7363  1913 01            	dc.b	1
+7364  1914 70            	dc.b	112
+7365  1915 00            	dc.b	0
+7366  1916 00            	dc.b	0
+7367  1917 00            	dc.b	0
+7368  1918 01            	dc.b	1
+7369  1919 70            	dc.b	112
+7370  191a 00            	dc.b	0
+7371  191b 00            	dc.b	0
+7372  191c 00            	dc.b	0
+7373  191d 01            	dc.b	1
+7374  191e 70            	dc.b	112
+7375  191f 00            	dc.b	0
+7376  1920 00            	dc.b	0
+7377  1921 00            	dc.b	0
+7378  1922 01            	dc.b	1
+7379  1923 70            	dc.b	112
+7380  1924 00            	dc.b	0
+7381  1925 00            	dc.b	0
+7382  1926 00            	dc.b	0
+7383  1927 00            	dc.b	0
+7384  1928 80            	dc.b	128
+7385  1929 00            	dc.b	0
+7386  192a 00            	dc.b	0
+7387  192b 00            	dc.b	0
+7388  192c 00            	dc.b	0
+7389  192d 80            	dc.b	128
+7390  192e 00            	dc.b	0
+7391  192f 00            	dc.b	0
+7392  1930 00            	dc.b	0
+7393  1931 00            	dc.b	0
+7394  1932 80            	dc.b	128
+7395  1933 00            	dc.b	0
+7396  1934 00            	dc.b	0
+7397  1935 00            	dc.b	0
+7398  1936 00            	dc.b	0
+7399  1937 80            	dc.b	128
+7400  1938 00            	dc.b	0
+7401  1939 00            	dc.b	0
+7402  193a 00            	dc.b	0
+7403  193b 00            	dc.b	0
+7404  193c 80            	dc.b	128
+7405  193d 00            	dc.b	0
+7406  193e 00            	dc.b	0
+7407  193f 00            	dc.b	0
+7408  1940 00            	dc.b	0
+7409  1941 80            	dc.b	128
+7410  1942 00            	dc.b	0
+7411  1943 00            	dc.b	0
+7412  1944 00            	dc.b	0
+7413  1945 00            	dc.b	0
+7414  1946 80            	dc.b	128
+7415  1947 00            	dc.b	0
+7416  1948 00            	dc.b	0
+7417  1949 00            	dc.b	0
+7418  194a 00            	dc.b	0
+7419  194b 80            	dc.b	128
+7420  194c 00            	dc.b	0
+7421  194d 00            	dc.b	0
+7422  194e 00            	dc.b	0
+7423  194f 00            	dc.b	0
+7424  1950 80            	dc.b	128
+7425  1951 00            	dc.b	0
+7426  1952 00            	dc.b	0
+7427  1953 00            	dc.b	0
+7428  1954 00            	dc.b	0
+7429  1955 80            	dc.b	128
+7430  1956 00            	dc.b	0
+7431  1957 00            	dc.b	0
+7432  1958 00            	dc.b	0
+7433  1959 01            	dc.b	1
+7434  195a 70            	dc.b	112
+7435  195b 00            	dc.b	0
+7436  195c 00            	dc.b	0
+7437  195d 00            	dc.b	0
+7438  195e 01            	dc.b	1
+7439  195f 70            	dc.b	112
+7440  1960 00            	dc.b	0
+7441  1961 00            	dc.b	0
+7442  1962 00            	dc.b	0
+7443  1963 01            	dc.b	1
+7444  1964 70            	dc.b	112
+7445  1965 00            	dc.b	0
+7446  1966 00            	dc.b	0
+7447  1967 00            	dc.b	0
+7448  1968 01            	dc.b	1
+7449  1969 70            	dc.b	112
+7450  196a 00            	dc.b	0
+7451  196b 00            	dc.b	0
+7452  196c 00            	dc.b	0
+7453  196d 02            	dc.b	2
+7454  196e 60            	dc.b	96
+7455  196f 00            	dc.b	0
+7456  1970 00            	dc.b	0
+7457  1971 00            	dc.b	0
+7458  1972 02            	dc.b	2
+7459  1973 60            	dc.b	96
+7460  1974 00            	dc.b	0
+7461  1975 00            	dc.b	0
+7462  1976 00            	dc.b	0
+7463  1977 02            	dc.b	2
+7464  1978 60            	dc.b	96
+7465  1979 00            	dc.b	0
+7466  197a 00            	dc.b	0
+7467  197b 00            	dc.b	0
+7468  197c 03            	dc.b	3
+7469  197d 50            	dc.b	80
+7470  197e 00            	dc.b	0
+7471  197f 00            	dc.b	0
+7472  1980 00            	dc.b	0
+7473  1981 03            	dc.b	3
+7474  1982 50            	dc.b	80
+7475  1983 00            	dc.b	0
+7476  1984 00            	dc.b	0
+7477  1985 00            	dc.b	0
+7478  1986 03            	dc.b	3
+7479  1987 50            	dc.b	80
+7480  1988 00            	dc.b	0
+7481  1989 00            	dc.b	0
+7482  198a 00            	dc.b	0
+7483  198b 04            	dc.b	4
+7484  198c 40            	dc.b	64
+7485  198d 00            	dc.b	0
+7486  198e 00            	dc.b	0
+7487  198f 00            	dc.b	0
+7488  1990 04            	dc.b	4
+7489  1991 40            	dc.b	64
+7490  1992 00            	dc.b	0
+7491  1993 00            	dc.b	0
+7492  1994 00            	dc.b	0
+7493  1995 05            	dc.b	5
+7494  1996 30            	dc.b	48
+7495  1997 00            	dc.b	0
+7496  1998 00            	dc.b	0
+7497  1999 00            	dc.b	0
+7498  199a 05            	dc.b	5
+7499  199b 30            	dc.b	48
+7500  199c 00            	dc.b	0
+7501  199d 00            	dc.b	0
+7502  199e 00            	dc.b	0
+7503  199f 05            	dc.b	5
+7504  19a0 30            	dc.b	48
+7505  19a1 00            	dc.b	0
+7506  19a2 00            	dc.b	0
+7507  19a3 00            	dc.b	0
+7508  19a4 06            	dc.b	6
+7509  19a5 20            	dc.b	32
+7510  19a6 00            	dc.b	0
+7511  19a7 00            	dc.b	0
+7512  19a8 00            	dc.b	0
+7513  19a9 06            	dc.b	6
+7514  19aa 20            	dc.b	32
+7515  19ab 00            	dc.b	0
+7516  19ac 00            	dc.b	0
+7517  19ad 00            	dc.b	0
+7518  19ae 06            	dc.b	6
+7519  19af 20            	dc.b	32
+7520  19b0 00            	dc.b	0
+7521  19b1 00            	dc.b	0
+7522  19b2 00            	dc.b	0
+7523  19b3 07            	dc.b	7
+7524  19b4 10            	dc.b	16
+7525  19b5 00            	dc.b	0
+7526  19b6 00            	dc.b	0
+7527  19b7 00            	dc.b	0
+7528  19b8 07            	dc.b	7
+7529  19b9 10            	dc.b	16
+7530  19ba 00            	dc.b	0
+7531  19bb 00            	dc.b	0
+7532  19bc 00            	dc.b	0
+7533  19bd 07            	dc.b	7
+7534  19be 10            	dc.b	16
+7535  19bf 00            	dc.b	0
+7536  19c0 00            	dc.b	0
+7537  19c1 00            	dc.b	0
+7538  19c2 07            	dc.b	7
+7539  19c3 10            	dc.b	16
+7540  19c4 00            	dc.b	0
+7541  19c5 00            	dc.b	0
+7542  19c6 00            	dc.b	0
+7543  19c7 08            	dc.b	8
+7544  19c8 00            	dc.b	0
+7545  19c9 00            	dc.b	0
+7546  19ca 00            	dc.b	0
+7547  19cb 00            	dc.b	0
+7548  19cc 08            	dc.b	8
+7549  19cd 00            	dc.b	0
+7550  19ce 00            	dc.b	0
+7551  19cf 00            	dc.b	0
+7552  19d0 00            	dc.b	0
+7553  19d1 08            	dc.b	8
+7554  19d2 00            	dc.b	0
+7555  19d3 00            	dc.b	0
+7556  19d4 00            	dc.b	0
+7557  19d5 00            	dc.b	0
+7558  19d6 08            	dc.b	8
+7559  19d7 00            	dc.b	0
+7560  19d8 00            	dc.b	0
+7561  19d9 00            	dc.b	0
+7562  19da 00            	dc.b	0
+7563  19db 08            	dc.b	8
+7564  19dc 00            	dc.b	0
+7565  19dd 00            	dc.b	0
+7566  19de 00            	dc.b	0
+7567  19df 00            	dc.b	0
+7568  19e0 08            	dc.b	8
+7569  19e1 00            	dc.b	0
+7570  19e2 00            	dc.b	0
+7571  19e3 00            	dc.b	0
+7572  19e4 00            	dc.b	0
+7573  19e5 08            	dc.b	8
+7574  19e6 00            	dc.b	0
+7575  19e7 00            	dc.b	0
+7576  19e8 00            	dc.b	0
+7577  19e9 00            	dc.b	0
+7578  19ea 08            	dc.b	8
+7579  19eb 00            	dc.b	0
+7580  19ec 00            	dc.b	0
+7581  19ed 00            	dc.b	0
+7582  19ee 00            	dc.b	0
+7583  19ef 08            	dc.b	8
+7584  19f0 00            	dc.b	0
+7585  19f1 00            	dc.b	0
+7586  19f2 00            	dc.b	0
+7587  19f3 00            	dc.b	0
+7588  19f4 08            	dc.b	8
+7589  19f5 00            	dc.b	0
+7590  19f6 00            	dc.b	0
+7591  19f7 00            	dc.b	0
+7592  19f8 00            	dc.b	0
+7593  19f9 07            	dc.b	7
+7594  19fa 00            	dc.b	0
+7595  19fb 00            	dc.b	0
+7596  19fc 00            	dc.b	0
+7597  19fd 01            	dc.b	1
+7598  19fe 07            	dc.b	7
+7599  19ff 00            	dc.b	0
+7600  1a00 00            	dc.b	0
+7601  1a01 00            	dc.b	0
+7602  1a02 01            	dc.b	1
+7603  1a03 07            	dc.b	7
+7604  1a04 00            	dc.b	0
+7605  1a05 00            	dc.b	0
+7606  1a06 00            	dc.b	0
+7607  1a07 01            	dc.b	1
+7608  1a08 07            	dc.b	7
+7609  1a09 00            	dc.b	0
+7610  1a0a 00            	dc.b	0
+7611  1a0b 00            	dc.b	0
+7612  1a0c 01            	dc.b	1
+7613  1a0d 06            	dc.b	6
+7614  1a0e 00            	dc.b	0
+7615  1a0f 00            	dc.b	0
+7616  1a10 00            	dc.b	0
+7617  1a11 02            	dc.b	2
+7618  1a12 06            	dc.b	6
+7619  1a13 00            	dc.b	0
+7620  1a14 00            	dc.b	0
+7621  1a15 00            	dc.b	0
+7622  1a16 02            	dc.b	2
+7623  1a17 06            	dc.b	6
+7624  1a18 00            	dc.b	0
+7625  1a19 00            	dc.b	0
+7626  1a1a 00            	dc.b	0
+7627  1a1b 02            	dc.b	2
+7628  1a1c 05            	dc.b	5
+7629  1a1d 00            	dc.b	0
+7630  1a1e 00            	dc.b	0
+7631  1a1f 00            	dc.b	0
+7632  1a20 03            	dc.b	3
+7633  1a21 05            	dc.b	5
+7634  1a22 00            	dc.b	0
+7635  1a23 00            	dc.b	0
+7636  1a24 00            	dc.b	0
+7637  1a25 03            	dc.b	3
+7638  1a26 05            	dc.b	5
+7639  1a27 00            	dc.b	0
+7640  1a28 00            	dc.b	0
+7641  1a29 00            	dc.b	0
+7642  1a2a 03            	dc.b	3
+7643  1a2b 04            	dc.b	4
+7644  1a2c 00            	dc.b	0
+7645  1a2d 00            	dc.b	0
+7646  1a2e 00            	dc.b	0
+7647  1a2f 04            	dc.b	4
+7648  1a30 04            	dc.b	4
+7649  1a31 00            	dc.b	0
+7650  1a32 00            	dc.b	0
+7651  1a33 00            	dc.b	0
+7652  1a34 04            	dc.b	4
+7653  1a35 03            	dc.b	3
+7654  1a36 00            	dc.b	0
+7655  1a37 00            	dc.b	0
+7656  1a38 00            	dc.b	0
+7657  1a39 05            	dc.b	5
+7658  1a3a 03            	dc.b	3
+7659  1a3b 00            	dc.b	0
+7660  1a3c 00            	dc.b	0
+7661  1a3d 00            	dc.b	0
+7662  1a3e 05            	dc.b	5
+7663  1a3f 03            	dc.b	3
+7664  1a40 00            	dc.b	0
+7665  1a41 00            	dc.b	0
+7666  1a42 00            	dc.b	0
+7667  1a43 05            	dc.b	5
+7668  1a44 02            	dc.b	2
+7669  1a45 00            	dc.b	0
+7670  1a46 00            	dc.b	0
+7671  1a47 00            	dc.b	0
+7672  1a48 06            	dc.b	6
+7673  1a49 02            	dc.b	2
+7674  1a4a 00            	dc.b	0
+7675  1a4b 00            	dc.b	0
+7676  1a4c 00            	dc.b	0
+7677  1a4d 06            	dc.b	6
+7678  1a4e 02            	dc.b	2
+7679  1a4f 00            	dc.b	0
+7680  1a50 00            	dc.b	0
+7681  1a51 00            	dc.b	0
+7682  1a52 06            	dc.b	6
+7683  1a53 01            	dc.b	1
+7684  1a54 00            	dc.b	0
+7685  1a55 00            	dc.b	0
+7686  1a56 00            	dc.b	0
+7687  1a57 07            	dc.b	7
+7688  1a58 01            	dc.b	1
+7689  1a59 00            	dc.b	0
+7690  1a5a 00            	dc.b	0
+7691  1a5b 00            	dc.b	0
+7692  1a5c 07            	dc.b	7
+7693  1a5d 01            	dc.b	1
+7694  1a5e 00            	dc.b	0
+7695  1a5f 00            	dc.b	0
+7696  1a60 00            	dc.b	0
+7697  1a61 07            	dc.b	7
+7698  1a62 01            	dc.b	1
+7699  1a63 00            	dc.b	0
+7700  1a64 00            	dc.b	0
+7701  1a65 00            	dc.b	0
+7702  1a66 07            	dc.b	7
+7703  1a67 00            	dc.b	0
+7704  1a68 00            	dc.b	0
+7705  1a69 00            	dc.b	0
+7706  1a6a 00            	dc.b	0
+7707  1a6b 08            	dc.b	8
+7708  1a6c 00            	dc.b	0
+7709  1a6d 00            	dc.b	0
+7710  1a6e 00            	dc.b	0
+7711  1a6f 00            	dc.b	0
+7712  1a70 08            	dc.b	8
+7713  1a71 00            	dc.b	0
+7714  1a72 00            	dc.b	0
+7715  1a73 00            	dc.b	0
+7716  1a74 00            	dc.b	0
+7717  1a75 08            	dc.b	8
+7718  1a76 00            	dc.b	0
+7719  1a77 00            	dc.b	0
+7720  1a78 00            	dc.b	0
+7721  1a79 00            	dc.b	0
+7722  1a7a 08            	dc.b	8
+7723  1a7b 00            	dc.b	0
+7724  1a7c 00            	dc.b	0
+7725  1a7d 00            	dc.b	0
+7726  1a7e 00            	dc.b	0
+7727  1a7f 08            	dc.b	8
+7728  1a80 00            	dc.b	0
+7729  1a81 00            	dc.b	0
+7730  1a82 00            	dc.b	0
+7731  1a83 00            	dc.b	0
+7732  1a84 08            	dc.b	8
+7733  1a85 00            	dc.b	0
+7734  1a86 00            	dc.b	0
+7735  1a87 00            	dc.b	0
+7736  1a88 00            	dc.b	0
+7737  1a89 08            	dc.b	8
+7738  1a8a 00            	dc.b	0
+7739  1a8b 00            	dc.b	0
+7740  1a8c 00            	dc.b	0
+7741  1a8d 00            	dc.b	0
+7742  1a8e 08            	dc.b	8
+7743  1a8f 00            	dc.b	0
+7744  1a90 00            	dc.b	0
+7745  1a91 00            	dc.b	0
+7746  1a92 00            	dc.b	0
+7747  1a93 08            	dc.b	8
+7748  1a94 00            	dc.b	0
+7749  1a95 00            	dc.b	0
+7750  1a96 00            	dc.b	0
+7751  1a97 00            	dc.b	0
+7752  1a98 08            	dc.b	8
+7753  1a99 00            	dc.b	0
+7754  1a9a 00            	dc.b	0
+7755  1a9b 00            	dc.b	0
+7756  1a9c 00            	dc.b	0
+7757  1a9d 17            	dc.b	23
+7758  1a9e 00            	dc.b	0
+7759  1a9f 00            	dc.b	0
+7760  1aa0 00            	dc.b	0
+7761  1aa1 00            	dc.b	0
+7762  1aa2 17            	dc.b	23
+7763  1aa3 00            	dc.b	0
+7764  1aa4 00            	dc.b	0
+7765  1aa5 00            	dc.b	0
+7766  1aa6 00            	dc.b	0
+7767  1aa7 17            	dc.b	23
+7768  1aa8 00            	dc.b	0
+7769  1aa9 00            	dc.b	0
+7770  1aaa 00            	dc.b	0
+7771  1aab 00            	dc.b	0
+7772  1aac 17            	dc.b	23
+7773  1aad 00            	dc.b	0
+7774  1aae 00            	dc.b	0
+7775  1aaf 00            	dc.b	0
+7776  1ab0 00            	dc.b	0
+7777  1ab1 26            	dc.b	38
+7778  1ab2 00            	dc.b	0
+7779  1ab3 00            	dc.b	0
+7780  1ab4 00            	dc.b	0
+7781  1ab5 00            	dc.b	0
+7782  1ab6 26            	dc.b	38
+7783  1ab7 00            	dc.b	0
+7784  1ab8 00            	dc.b	0
+7785  1ab9 00            	dc.b	0
+7786  1aba 00            	dc.b	0
+7787  1abb 26            	dc.b	38
+7788  1abc 00            	dc.b	0
+7789  1abd 00            	dc.b	0
+7790  1abe 00            	dc.b	0
+7791  1abf 00            	dc.b	0
+7792  1ac0 35            	dc.b	53
+7793  1ac1 00            	dc.b	0
+7794  1ac2 00            	dc.b	0
+7795  1ac3 00            	dc.b	0
+7796  1ac4 00            	dc.b	0
+7797  1ac5 35            	dc.b	53
+7798  1ac6 00            	dc.b	0
+7799  1ac7 00            	dc.b	0
+7800  1ac8 00            	dc.b	0
+7801  1ac9 00            	dc.b	0
+7802  1aca 35            	dc.b	53
+7803  1acb 00            	dc.b	0
+7804  1acc 00            	dc.b	0
+7805  1acd 00            	dc.b	0
+7806  1ace 00            	dc.b	0
+7807  1acf 44            	dc.b	68
+7808  1ad0 00            	dc.b	0
+7809  1ad1 00            	dc.b	0
+7810  1ad2 00            	dc.b	0
+7811  1ad3 00            	dc.b	0
+7812  1ad4 44            	dc.b	68
+7813  1ad5 00            	dc.b	0
+7814  1ad6 00            	dc.b	0
+7815  1ad7 00            	dc.b	0
+7816  1ad8 00            	dc.b	0
+7817  1ad9 53            	dc.b	83
+7818  1ada 00            	dc.b	0
+7819  1adb 00            	dc.b	0
+7820  1adc 00            	dc.b	0
+7821  1add 00            	dc.b	0
+7822  1ade 53            	dc.b	83
+7823  1adf 00            	dc.b	0
+7824  1ae0 00            	dc.b	0
+7825  1ae1 00            	dc.b	0
+7826  1ae2 00            	dc.b	0
+7827  1ae3 53            	dc.b	83
+7828  1ae4 00            	dc.b	0
+7829  1ae5 00            	dc.b	0
+7830  1ae6 00            	dc.b	0
+7831  1ae7 00            	dc.b	0
+7832  1ae8 62            	dc.b	98
+7833  1ae9 00            	dc.b	0
+7834  1aea 00            	dc.b	0
+7835  1aeb 00            	dc.b	0
+7836  1aec 00            	dc.b	0
+7837  1aed 62            	dc.b	98
+7838  1aee 00            	dc.b	0
+7839  1aef 00            	dc.b	0
+7840  1af0 00            	dc.b	0
+7841  1af1 00            	dc.b	0
+7842  1af2 62            	dc.b	98
+7843  1af3 00            	dc.b	0
+7844  1af4 00            	dc.b	0
+7845  1af5 00            	dc.b	0
+7846  1af6 00            	dc.b	0
+7847  1af7 71            	dc.b	113
+7848  1af8 00            	dc.b	0
+7849  1af9 00            	dc.b	0
+7850  1afa 00            	dc.b	0
+7851  1afb 00            	dc.b	0
+7852  1afc 71            	dc.b	113
+7853  1afd 00            	dc.b	0
+7854  1afe 00            	dc.b	0
+7855  1aff 00            	dc.b	0
+7856  1b00 00            	dc.b	0
+7857  1b01 71            	dc.b	113
+7858  1b02 00            	dc.b	0
+7859  1b03 00            	dc.b	0
+7860  1b04 00            	dc.b	0
+7861  1b05 00            	dc.b	0
+7862  1b06 71            	dc.b	113
+7863  1b07 00            	dc.b	0
+7864  1b08 00            	dc.b	0
+7865  1b09 00            	dc.b	0
+7866  1b0a 00            	dc.b	0
+7867  1b0b 80            	dc.b	128
+7868  1b0c 00            	dc.b	0
+7869  1b0d 00            	dc.b	0
+7870  1b0e 00            	dc.b	0
+7871  1b0f 00            	dc.b	0
+7872  1b10 80            	dc.b	128
+7873  1b11 00            	dc.b	0
+7874  1b12 00            	dc.b	0
+7875  1b13 00            	dc.b	0
+7876  1b14 00            	dc.b	0
+7877  1b15 80            	dc.b	128
+7878  1b16 00            	dc.b	0
+7879  1b17 00            	dc.b	0
+7880  1b18 00            	dc.b	0
+7881  1b19 00            	dc.b	0
+7882  1b1a 80            	dc.b	128
+7883  1b1b 00            	dc.b	0
+7884  1b1c 00            	dc.b	0
+7885  1b1d 00            	dc.b	0
+7886  1b1e 00            	dc.b	0
+7887  1b1f 80            	dc.b	128
+7888  1b20 00            	dc.b	0
+7889  1b21 00            	dc.b	0
+7890  1b22 00            	dc.b	0
+7891  1b23 00            	dc.b	0
+7892  1b24 80            	dc.b	128
+7893  1b25 00            	dc.b	0
+7894  1b26 00            	dc.b	0
+7895  1b27 00            	dc.b	0
+7896  1b28 00            	dc.b	0
+7897  1b29 80            	dc.b	128
+7898  1b2a 00            	dc.b	0
+7899  1b2b 00            	dc.b	0
+7900  1b2c 00            	dc.b	0
+7901  1b2d 00            	dc.b	0
+7902  1b2e 80            	dc.b	128
+7903  1b2f 00            	dc.b	0
+7904  1b30 00            	dc.b	0
+7905  1b31 00            	dc.b	0
+7906  1b32 00            	dc.b	0
+7907  1b33 80            	dc.b	128
+7908  1b34 00            	dc.b	0
+7909  1b35 00            	dc.b	0
+7910  1b36 00            	dc.b	0
+7911  1b37 00            	dc.b	0
+7912  1b38 80            	dc.b	128
+7913  1b39 00            	dc.b	0
+7914  1b3a 00            	dc.b	0
+7915  1b3b 00            	dc.b	0
+7916  1b3c 01            	dc.b	1
+7917  1b3d 70            	dc.b	112
+7918  1b3e 00            	dc.b	0
+7919  1b3f 00            	dc.b	0
+7920  1b40 00            	dc.b	0
+7921  1b41 01            	dc.b	1
+7922  1b42 70            	dc.b	112
+7923  1b43 00            	dc.b	0
+7924  1b44 00            	dc.b	0
+7925  1b45 00            	dc.b	0
+7926  1b46 01            	dc.b	1
+7927  1b47 70            	dc.b	112
+7928  1b48 00            	dc.b	0
+7929  1b49 00            	dc.b	0
+7930  1b4a 00            	dc.b	0
+7931  1b4b 01            	dc.b	1
+7932  1b4c 70            	dc.b	112
+7933  1b4d 00            	dc.b	0
+7934  1b4e 00            	dc.b	0
+7935  1b4f 00            	dc.b	0
+7936  1b50 02            	dc.b	2
+7937  1b51 60            	dc.b	96
+7938  1b52 00            	dc.b	0
+7939  1b53 00            	dc.b	0
+7940  1b54 00            	dc.b	0
+7941  1b55 02            	dc.b	2
+7942  1b56 60            	dc.b	96
+7943  1b57 00            	dc.b	0
+7944  1b58 00            	dc.b	0
+7945  1b59 00            	dc.b	0
+7946  1b5a 02            	dc.b	2
+7947  1b5b 60            	dc.b	96
+7948  1b5c 00            	dc.b	0
+7949  1b5d 00            	dc.b	0
+7950  1b5e 00            	dc.b	0
+7951  1b5f 03            	dc.b	3
+7952  1b60 50            	dc.b	80
+7953  1b61 00            	dc.b	0
+7954  1b62 00            	dc.b	0
+7955  1b63 00            	dc.b	0
+7956  1b64 03            	dc.b	3
+7957  1b65 50            	dc.b	80
+7958  1b66 00            	dc.b	0
+7959  1b67 00            	dc.b	0
+7960  1b68 00            	dc.b	0
+7961  1b69 03            	dc.b	3
+7962  1b6a 50            	dc.b	80
+7963  1b6b 00            	dc.b	0
+7964  1b6c 00            	dc.b	0
+7965  1b6d 00            	dc.b	0
+7966  1b6e 04            	dc.b	4
+7967  1b6f 40            	dc.b	64
+7968  1b70 00            	dc.b	0
+7969  1b71 00            	dc.b	0
+7970  1b72 00            	dc.b	0
+7971  1b73 04            	dc.b	4
+7972  1b74 40            	dc.b	64
+7973  1b75 00            	dc.b	0
+7974  1b76 00            	dc.b	0
+7975  1b77 00            	dc.b	0
+7976  1b78 05            	dc.b	5
+7977  1b79 30            	dc.b	48
+7978  1b7a 00            	dc.b	0
+7979  1b7b 00            	dc.b	0
+7980  1b7c 00            	dc.b	0
+7981  1b7d 05            	dc.b	5
+7982  1b7e 30            	dc.b	48
+7983  1b7f 00            	dc.b	0
+7984  1b80 00            	dc.b	0
+7985  1b81 00            	dc.b	0
+7986  1b82 05            	dc.b	5
+7987  1b83 30            	dc.b	48
+7988  1b84 00            	dc.b	0
+7989  1b85 00            	dc.b	0
+7990  1b86 00            	dc.b	0
+7991  1b87 06            	dc.b	6
+7992  1b88 20            	dc.b	32
+7993  1b89 00            	dc.b	0
+7994  1b8a 00            	dc.b	0
+7995  1b8b 00            	dc.b	0
+7996  1b8c 06            	dc.b	6
+7997  1b8d 20            	dc.b	32
+7998  1b8e 00            	dc.b	0
+7999  1b8f 00            	dc.b	0
+8000  1b90 00            	dc.b	0
+8001  1b91 06            	dc.b	6
+8002  1b92 20            	dc.b	32
+8003  1b93 00            	dc.b	0
+8004  1b94 00            	dc.b	0
+8005  1b95 00            	dc.b	0
+8006  1b96 07            	dc.b	7
+8007  1b97 10            	dc.b	16
+8008  1b98 00            	dc.b	0
+8009  1b99 00            	dc.b	0
+8010  1b9a 00            	dc.b	0
+8011  1b9b 07            	dc.b	7
+8012  1b9c 10            	dc.b	16
+8013  1b9d 00            	dc.b	0
+8014  1b9e 00            	dc.b	0
+8015  1b9f 00            	dc.b	0
+8016  1ba0 07            	dc.b	7
+8017  1ba1 10            	dc.b	16
+8018  1ba2 00            	dc.b	0
+8019  1ba3 00            	dc.b	0
+8020  1ba4 00            	dc.b	0
+8021  1ba5 07            	dc.b	7
+8022  1ba6 10            	dc.b	16
+8023  1ba7 00            	dc.b	0
+8024  1ba8 00            	dc.b	0
+8025  1ba9 00            	dc.b	0
+8026  1baa 08            	dc.b	8
+8027  1bab 00            	dc.b	0
+8028  1bac 00            	dc.b	0
+8029  1bad 00            	dc.b	0
+8030  1bae 00            	dc.b	0
+8031  1baf 08            	dc.b	8
+8032  1bb0 00            	dc.b	0
+8033  1bb1 00            	dc.b	0
+8034  1bb2 00            	dc.b	0
+8035  1bb3 00            	dc.b	0
+8036  1bb4 08            	dc.b	8
+8037  1bb5 00            	dc.b	0
+8038  1bb6 00            	dc.b	0
+8039  1bb7 00            	dc.b	0
+8040  1bb8 00            	dc.b	0
+8041  1bb9 08            	dc.b	8
+8042  1bba 00            	dc.b	0
+8043  1bbb 00            	dc.b	0
+8044  1bbc 00            	dc.b	0
+8045  1bbd 00            	dc.b	0
+8046  1bbe 08            	dc.b	8
+8047  1bbf 00            	dc.b	0
+8048  1bc0 00            	dc.b	0
+8049  1bc1 00            	dc.b	0
+8050  1bc2 00            	dc.b	0
+8051  1bc3 08            	dc.b	8
+8052  1bc4 00            	dc.b	0
+8053  1bc5 00            	dc.b	0
+8054  1bc6 00            	dc.b	0
+8055  1bc7 00            	dc.b	0
+8056  1bc8 08            	dc.b	8
+8057  1bc9 00            	dc.b	0
+8058  1bca 00            	dc.b	0
+8059  1bcb 00            	dc.b	0
+8060  1bcc 00            	dc.b	0
+8061  1bcd 08            	dc.b	8
+8062  1bce 00            	dc.b	0
+8063  1bcf 00            	dc.b	0
+8064  1bd0 00            	dc.b	0
+8065  1bd1 00            	dc.b	0
+8066  1bd2 08            	dc.b	8
+8067  1bd3 00            	dc.b	0
+8068  1bd4 00            	dc.b	0
+8069  1bd5 00            	dc.b	0
+8070  1bd6 00            	dc.b	0
+8071  1bd7 08            	dc.b	8
+8072  1bd8 00            	dc.b	0
+8073  1bd9 00            	dc.b	0
+8074  1bda 00            	dc.b	0
+8075  1bdb 00            	dc.b	0
+8076  1bdc 07            	dc.b	7
+8077  1bdd 10            	dc.b	16
+8078  1bde 00            	dc.b	0
+8079  1bdf 00            	dc.b	0
+8080  1be0 00            	dc.b	0
+8081  1be1 07            	dc.b	7
+8082  1be2 10            	dc.b	16
+8083  1be3 00            	dc.b	0
+8084  1be4 00            	dc.b	0
+8085  1be5 00            	dc.b	0
+8086  1be6 07            	dc.b	7
+8087  1be7 10            	dc.b	16
+8088  1be8 00            	dc.b	0
+8089  1be9 00            	dc.b	0
+8090  1bea 00            	dc.b	0
+8091  1beb 07            	dc.b	7
+8092  1bec 10            	dc.b	16
+8093  1bed 00            	dc.b	0
+8094  1bee 00            	dc.b	0
+8095  1bef 00            	dc.b	0
+8096  1bf0 06            	dc.b	6
+8097  1bf1 20            	dc.b	32
+8098  1bf2 00            	dc.b	0
+8099  1bf3 00            	dc.b	0
+8100  1bf4 00            	dc.b	0
+8101  1bf5 06            	dc.b	6
+8102  1bf6 20            	dc.b	32
+8103  1bf7 00            	dc.b	0
+8104  1bf8 00            	dc.b	0
+8105  1bf9 00            	dc.b	0
+8106  1bfa 06            	dc.b	6
+8107  1bfb 20            	dc.b	32
+8108  1bfc 00            	dc.b	0
+8109  1bfd 00            	dc.b	0
+8110  1bfe 00            	dc.b	0
+8111  1bff 05            	dc.b	5
+8112  1c00 30            	dc.b	48
+8113  1c01 00            	dc.b	0
+8114  1c02 00            	dc.b	0
+8115  1c03 00            	dc.b	0
+8116  1c04 05            	dc.b	5
+8117  1c05 30            	dc.b	48
+8118  1c06 00            	dc.b	0
+8119  1c07 00            	dc.b	0
+8120  1c08 00            	dc.b	0
+8121  1c09 05            	dc.b	5
+8122  1c0a 30            	dc.b	48
+8123  1c0b 00            	dc.b	0
+8124  1c0c 00            	dc.b	0
+8125  1c0d 00            	dc.b	0
+8126  1c0e 04            	dc.b	4
+8127  1c0f 40            	dc.b	64
+8128  1c10 00            	dc.b	0
+8129  1c11 00            	dc.b	0
+8130  1c12 00            	dc.b	0
+8131  1c13 04            	dc.b	4
+8132  1c14 40            	dc.b	64
+8133  1c15 00            	dc.b	0
+8134  1c16 00            	dc.b	0
+8135  1c17 00            	dc.b	0
+8136  1c18 03            	dc.b	3
+8137  1c19 50            	dc.b	80
+8138  1c1a 00            	dc.b	0
+8139  1c1b 00            	dc.b	0
+8140  1c1c 00            	dc.b	0
+8141  1c1d 03            	dc.b	3
+8142  1c1e 50            	dc.b	80
+8143  1c1f 00            	dc.b	0
+8144  1c20 00            	dc.b	0
+8145  1c21 00            	dc.b	0
+8146  1c22 03            	dc.b	3
+8147  1c23 50            	dc.b	80
+8148  1c24 00            	dc.b	0
+8149  1c25 00            	dc.b	0
+8150  1c26 00            	dc.b	0
+8151  1c27 02            	dc.b	2
+8152  1c28 60            	dc.b	96
+8153  1c29 00            	dc.b	0
+8154  1c2a 00            	dc.b	0
+8155  1c2b 00            	dc.b	0
+8156  1c2c 02            	dc.b	2
+8157  1c2d 60            	dc.b	96
+8158  1c2e 00            	dc.b	0
+8159  1c2f 00            	dc.b	0
+8160  1c30 00            	dc.b	0
+8161  1c31 02            	dc.b	2
+8162  1c32 60            	dc.b	96
+8163  1c33 00            	dc.b	0
+8164  1c34 00            	dc.b	0
+8165  1c35 00            	dc.b	0
+8166  1c36 01            	dc.b	1
+8167  1c37 70            	dc.b	112
+8168  1c38 00            	dc.b	0
+8169  1c39 00            	dc.b	0
+8170  1c3a 00            	dc.b	0
+8171  1c3b 01            	dc.b	1
+8172  1c3c 70            	dc.b	112
+8173  1c3d 00            	dc.b	0
+8174  1c3e 00            	dc.b	0
+8175  1c3f 00            	dc.b	0
+8176  1c40 01            	dc.b	1
+8177  1c41 70            	dc.b	112
+8178  1c42 00            	dc.b	0
+8179  1c43 00            	dc.b	0
+8180  1c44 00            	dc.b	0
+8181  1c45 01            	dc.b	1
+8182  1c46 70            	dc.b	112
+8183  1c47 00            	dc.b	0
+8184  1c48 00            	dc.b	0
+8185  1c49 00            	dc.b	0
+8186  1c4a 00            	dc.b	0
+8187  1c4b 80            	dc.b	128
+8188  1c4c 00            	dc.b	0
+8189  1c4d 00            	dc.b	0
+8190  1c4e 00            	dc.b	0
+8191  1c4f 00            	dc.b	0
+8192  1c50 80            	dc.b	128
+8193  1c51 00            	dc.b	0
+8194  1c52 00            	dc.b	0
+8195  1c53 00            	dc.b	0
+8196  1c54 00            	dc.b	0
+8197  1c55 80            	dc.b	128
+8198  1c56 00            	dc.b	0
+8199  1c57 00            	dc.b	0
+8200  1c58 00            	dc.b	0
+8201  1c59 00            	dc.b	0
+8202  1c5a 80            	dc.b	128
+8203  1c5b 00            	dc.b	0
+8204  1c5c 00            	dc.b	0
+8205  1c5d 00            	dc.b	0
+8206  1c5e 00            	dc.b	0
+8207  1c5f 80            	dc.b	128
+8208  1c60 00            	dc.b	0
+8209  1c61 00            	dc.b	0
+8210  1c62 00            	dc.b	0
+8211  1c63 00            	dc.b	0
+8212  1c64 80            	dc.b	128
+8213  1c65 00            	dc.b	0
+8214  1c66 00            	dc.b	0
+8215  1c67 00            	dc.b	0
+8216  1c68 00            	dc.b	0
+8217  1c69 80            	dc.b	128
+8218  1c6a 00            	dc.b	0
+8219  1c6b 00            	dc.b	0
+8220  1c6c 00            	dc.b	0
+8221  1c6d 00            	dc.b	0
+8222  1c6e 80            	dc.b	128
+8223  1c6f 00            	dc.b	0
+8224  1c70 00            	dc.b	0
+8225  1c71 00            	dc.b	0
+8226  1c72 00            	dc.b	0
+8227  1c73 80            	dc.b	128
+8228  1c74 00            	dc.b	0
+8229  1c75 00            	dc.b	0
+8230  1c76 00            	dc.b	0
+8231  1c77 00            	dc.b	0
+8232  1c78 80            	dc.b	128
+8233  1c79 00            	dc.b	0
+8234  1c7a 00            	dc.b	0
+8235  1c7b 00            	dc.b	0
+8236  1c7c 00            	dc.b	0
+8237  1c7d 71            	dc.b	113
+8238  1c7e 00            	dc.b	0
+8239  1c7f 00            	dc.b	0
+8240  1c80 00            	dc.b	0
+8241  1c81 00            	dc.b	0
+8242  1c82 71            	dc.b	113
+8243  1c83 00            	dc.b	0
+8244  1c84 00            	dc.b	0
+8245  1c85 00            	dc.b	0
+8246  1c86 00            	dc.b	0
+8247  1c87 71            	dc.b	113
+8248  1c88 00            	dc.b	0
+8249  1c89 00            	dc.b	0
+8250  1c8a 00            	dc.b	0
+8251  1c8b 00            	dc.b	0
+8252  1c8c 71            	dc.b	113
+8253  1c8d 00            	dc.b	0
+8254  1c8e 00            	dc.b	0
+8255  1c8f 00            	dc.b	0
+8256  1c90 00            	dc.b	0
+8257  1c91 62            	dc.b	98
+8258  1c92 00            	dc.b	0
+8259  1c93 00            	dc.b	0
+8260  1c94 00            	dc.b	0
+8261  1c95 00            	dc.b	0
+8262  1c96 62            	dc.b	98
+8263  1c97 00            	dc.b	0
+8264  1c98 00            	dc.b	0
+8265  1c99 00            	dc.b	0
+8266  1c9a 00            	dc.b	0
+8267  1c9b 62            	dc.b	98
+8268  1c9c 00            	dc.b	0
+8269  1c9d 00            	dc.b	0
+8270  1c9e 00            	dc.b	0
+8271  1c9f 00            	dc.b	0
+8272  1ca0 53            	dc.b	83
+8273  1ca1 00            	dc.b	0
+8274  1ca2 00            	dc.b	0
+8275  1ca3 00            	dc.b	0
+8276  1ca4 00            	dc.b	0
+8277  1ca5 53            	dc.b	83
+8278  1ca6 00            	dc.b	0
+8279  1ca7 00            	dc.b	0
+8280  1ca8 00            	dc.b	0
+8281  1ca9 00            	dc.b	0
+8282  1caa 53            	dc.b	83
+8283  1cab 00            	dc.b	0
+8284  1cac 00            	dc.b	0
+8285  1cad 00            	dc.b	0
+8286  1cae 00            	dc.b	0
+8287  1caf 44            	dc.b	68
+8288  1cb0 00            	dc.b	0
+8289  1cb1 00            	dc.b	0
+8290  1cb2 00            	dc.b	0
+8291  1cb3 00            	dc.b	0
+8292  1cb4 44            	dc.b	68
+8293  1cb5 00            	dc.b	0
+8294  1cb6 00            	dc.b	0
+8295  1cb7 00            	dc.b	0
+8296  1cb8 00            	dc.b	0
+8297  1cb9 35            	dc.b	53
+8298  1cba 00            	dc.b	0
+8299  1cbb 00            	dc.b	0
+8300  1cbc 00            	dc.b	0
+8301  1cbd 00            	dc.b	0
+8302  1cbe 35            	dc.b	53
+8303  1cbf 00            	dc.b	0
+8304  1cc0 00            	dc.b	0
+8305  1cc1 00            	dc.b	0
+8306  1cc2 00            	dc.b	0
+8307  1cc3 35            	dc.b	53
+8308  1cc4 00            	dc.b	0
+8309  1cc5 00            	dc.b	0
+8310  1cc6 00            	dc.b	0
+8311  1cc7 00            	dc.b	0
+8312  1cc8 26            	dc.b	38
+8313  1cc9 00            	dc.b	0
+8314  1cca 00            	dc.b	0
+8315  1ccb 00            	dc.b	0
+8316  1ccc 00            	dc.b	0
+8317  1ccd 26            	dc.b	38
+8318  1cce 00            	dc.b	0
+8319  1ccf 00            	dc.b	0
+8320  1cd0 00            	dc.b	0
+8321  1cd1 00            	dc.b	0
+8322  1cd2 26            	dc.b	38
+8323  1cd3 00            	dc.b	0
+8324  1cd4 00            	dc.b	0
+8325  1cd5 00            	dc.b	0
+8326  1cd6 00            	dc.b	0
+8327  1cd7 17            	dc.b	23
+8328  1cd8 00            	dc.b	0
+8329  1cd9 00            	dc.b	0
+8330  1cda 00            	dc.b	0
+8331  1cdb 00            	dc.b	0
+8332  1cdc 17            	dc.b	23
+8333  1cdd 00            	dc.b	0
+8334  1cde 00            	dc.b	0
+8335  1cdf 00            	dc.b	0
+8336  1ce0 00            	dc.b	0
+8337  1ce1 17            	dc.b	23
+8338  1ce2 00            	dc.b	0
+8339  1ce3 00            	dc.b	0
+8340  1ce4 00            	dc.b	0
+8341  1ce5 00            	dc.b	0
+8342  1ce6 17            	dc.b	23
+8343  1ce7 00            	dc.b	0
+8344  1ce8 00            	dc.b	0
+8345  1ce9 00            	dc.b	0
+8346  1cea 00            	dc.b	0
+8347  1ceb 08            	dc.b	8
+8348  1cec 00            	dc.b	0
+8349  1ced 00            	dc.b	0
+8350  1cee 00            	dc.b	0
+8351  1cef 00            	dc.b	0
+8352  1cf0 08            	dc.b	8
+8353  1cf1 00            	dc.b	0
+8354  1cf2 00            	dc.b	0
+8355  1cf3 00            	dc.b	0
+8356  1cf4 00            	dc.b	0
+8357  1cf5 08            	dc.b	8
+8358  1cf6 00            	dc.b	0
+8359  1cf7 00            	dc.b	0
+8360  1cf8 00            	dc.b	0
+8361  1cf9 00            	dc.b	0
+8362  1cfa 08            	dc.b	8
+8363  1cfb 00            	dc.b	0
+8364  1cfc 00            	dc.b	0
+8365  1cfd 00            	dc.b	0
+8366  1cfe 00            	dc.b	0
+8367  1cff 08            	dc.b	8
+8407                     ; 327 void SWI2C_WriteWeavingTable(u8 index)
+8407                     ; 328 {
+8408                     	switch	.text
+8409  02c8               f_SWI2C_WriteWeavingTable:
+8411  02c8 88            	push	a
+8412  02c9 89            	pushw	x
+8413       00000002      OFST:	set	2
+8416                     ; 331 	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
+8418  02ca 4b25          	push	#37
+8419  02cc ae004a        	ldw	x,#74
+8420  02cf a6ba          	ld	a,#186
+8421  02d1 95            	ld	xh,a
+8422  02d2 8dcf03cf      	callf	f_SWI2C_WriteByte
+8424  02d6 84            	pop	a
+8425                     ; 332 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
+8427  02d7 4b01          	push	#1
+8428  02d9 ae00c6        	ldw	x,#198
+8429  02dc a6ba          	ld	a,#186
+8430  02de 95            	ld	xh,a
+8431  02df 8dcf03cf      	callf	f_SWI2C_WriteByte
+8433  02e3 84            	pop	a
+8434                     ; 333 	for (i = 0; i < 1028; i++)
+8436  02e4 5f            	clrw	x
+8437  02e5 1f01          	ldw	(OFST-1,sp),x
+8438  02e7               L713:
+8439                     ; 335 		SWI2C_WriteByte(FPGA_ADDRESS, 0xC7, test_weaving_table[index][i]);
+8441  02e7 7b03          	ld	a,(OFST+1,sp)
+8442  02e9 5f            	clrw	x
+8443  02ea 97            	ld	xl,a
+8444  02eb 90ae0500      	ldw	y,#1280
+8445  02ef 8d000000      	callf	d_imul
+8447  02f3 72fb01        	addw	x,(OFST-1,sp)
+8448  02f6 d60900        	ld	a,(L772_test_weaving_table,x)
+8449  02f9 88            	push	a
+8450  02fa ae00c7        	ldw	x,#199
+8451  02fd a6ba          	ld	a,#186
+8452  02ff 95            	ld	xh,a
+8453  0300 8dcf03cf      	callf	f_SWI2C_WriteByte
+8455  0304 84            	pop	a
+8456                     ; 333 	for (i = 0; i < 1028; i++)
+8458  0305 1e01          	ldw	x,(OFST-1,sp)
+8459  0307 1c0001        	addw	x,#1
+8460  030a 1f01          	ldw	(OFST-1,sp),x
+8463  030c 1e01          	ldw	x,(OFST-1,sp)
+8464  030e a30404        	cpw	x,#1028
+8465  0311 25d4          	jrult	L713
+8466                     ; 337 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
+8468  0313 4b02          	push	#2
+8469  0315 ae00c6        	ldw	x,#198
+8470  0318 a6ba          	ld	a,#186
+8471  031a 95            	ld	xh,a
+8472  031b 8dcf03cf      	callf	f_SWI2C_WriteByte
+8474  031f 84            	pop	a
+8475                     ; 338 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+8477  0320 4b11          	push	#17
+8478  0322 ae00e0        	ldw	x,#224
+8479  0325 a6ba          	ld	a,#186
+8480  0327 95            	ld	xh,a
+8481  0328 8dcf03cf      	callf	f_SWI2C_WriteByte
+8483  032c 84            	pop	a
+8484                     ; 339 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
+8486  032d 4b07          	push	#7
+8487  032f ae00e4        	ldw	x,#228
+8488  0332 a6ba          	ld	a,#186
+8489  0334 95            	ld	xh,a
+8490  0335 8dcf03cf      	callf	f_SWI2C_WriteByte
+8492  0339 84            	pop	a
+8493                     ; 340 }
+8496  033a 5b03          	addw	sp,#3
+8497  033c 87            	retf
+8538                     ; 343 u8 SWI2C_TestDevice(u8 addr)
+8538                     ; 344 {
+8539                     	switch	.text
+8540  033d               f_SWI2C_TestDevice:
+8542  033d 88            	push	a
+8543  033e 88            	push	a
+8544       00000001      OFST:	set	1
+8547                     ; 346 	_SWI2C_Start();
+8549  033f 8d0d000d      	callf	L17f__SWI2C_Start
+8551                     ; 347 	result = _SWI2C_SendByte(addr);
+8553  0343 7b02          	ld	a,(OFST+1,sp)
+8554  0345 8d650065      	callf	L511f__SWI2C_SendByte
+8556  0349 6b01          	ld	(OFST+0,sp),a
+8557                     ; 348 	_SWI2C_Stop();
+8559  034b 8d3e003e      	callf	L301f__SWI2C_Stop
+8561                     ; 350 	return result;
+8563  034f 7b01          	ld	a,(OFST+0,sp)
+8566  0351 85            	popw	x
+8567  0352 87            	retf
+8616                     ; 353 u8 SWI2C_ReadByte(u8 addr, u8 subaddr, u8 * pValue)
+8616                     ; 354 {
+8617                     	switch	.text
+8618  0353               f_SWI2C_ReadByte:
+8620  0353 89            	pushw	x
+8621       00000000      OFST:	set	0
+8624                     ; 355 	return SWI2C_ReadBytes(addr, subaddr, 1, pValue);
+8626  0354 1e06          	ldw	x,(OFST+6,sp)
+8627  0356 89            	pushw	x
+8628  0357 4b01          	push	#1
+8629  0359 7b05          	ld	a,(OFST+5,sp)
+8630  035b 97            	ld	xl,a
+8631  035c 7b04          	ld	a,(OFST+4,sp)
+8632  035e 95            	ld	xh,a
+8633  035f 8d670367      	callf	f_SWI2C_ReadBytes
+8635  0363 5b03          	addw	sp,#3
+8638  0365 85            	popw	x
+8639  0366 87            	retf
+8705                     ; 358 u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
+8705                     ; 359 {	
+8706                     	switch	.text
+8707  0367               f_SWI2C_ReadBytes:
+8709  0367 89            	pushw	x
+8710  0368 88            	push	a
+8711       00000001      OFST:	set	1
+8714                     ; 361 	_SWI2C_Start();
+8716  0369 8d0d000d      	callf	L17f__SWI2C_Start
+8718                     ; 362 	result = _SWI2C_SendByte(addr);
+8720  036d 7b02          	ld	a,(OFST+1,sp)
+8721  036f 8d650065      	callf	L511f__SWI2C_SendByte
+8723  0373 6b01          	ld	(OFST+0,sp),a
+8724                     ; 363 	if (result == IIC_FAIL)
+8726  0375 0d01          	tnz	(OFST+0,sp)
+8727  0377 2608          	jrne	L314
+8728                     ; 365 		_SWI2C_Stop();
+8730  0379 8d3e003e      	callf	L301f__SWI2C_Stop
+8732                     ; 366 		return result;
+8734  037d 7b01          	ld	a,(OFST+0,sp)
+8736  037f 2012          	jra	L04
+8737  0381               L314:
+8738                     ; 368 	result = _SWI2C_SendByte(subaddr);
+8740  0381 7b03          	ld	a,(OFST+2,sp)
+8741  0383 8d650065      	callf	L511f__SWI2C_SendByte
+8743  0387 6b01          	ld	(OFST+0,sp),a
+8744                     ; 369 	if (result == IIC_FAIL)
+8746  0389 0d01          	tnz	(OFST+0,sp)
+8747  038b 2609          	jrne	L514
+8748                     ; 371 		_SWI2C_Stop();
+8750  038d 8d3e003e      	callf	L301f__SWI2C_Stop
+8752                     ; 372 		return result;
+8754  0391 7b01          	ld	a,(OFST+0,sp)
+8756  0393               L04:
+8758  0393 5b03          	addw	sp,#3
+8759  0395 87            	retf
+8760  0396               L514:
+8761                     ; 374 	_SWI2C_Start();
+8763  0396 8d0d000d      	callf	L17f__SWI2C_Start
+8765                     ; 375 	result = _SWI2C_SendByte(addr|0x01);
+8767  039a 7b02          	ld	a,(OFST+1,sp)
+8768  039c aa01          	or	a,#1
+8769  039e 8d650065      	callf	L511f__SWI2C_SendByte
+8771  03a2 6b01          	ld	(OFST+0,sp),a
+8772                     ; 376 	if (result == IIC_FAIL)
+8774  03a4 0d01          	tnz	(OFST+0,sp)
+8775  03a6 2618          	jrne	L324
+8776                     ; 378 		_SWI2C_Stop();
+8778  03a8 8d3e003e      	callf	L301f__SWI2C_Stop
+8780                     ; 379 		return result;
+8782  03ac 7b01          	ld	a,(OFST+0,sp)
+8784  03ae 20e3          	jra	L04
+8785  03b0               L124:
+8786                     ; 383 		*p_data = _SWI2C_ReceiveByte(number);
+8788  03b0 7b07          	ld	a,(OFST+6,sp)
+8789  03b2 8d1a011a      	callf	L751f__SWI2C_ReceiveByte
+8791  03b6 1e08          	ldw	x,(OFST+7,sp)
+8792  03b8 f7            	ld	(x),a
+8793                     ; 384 		p_data++;
+8795  03b9 1e08          	ldw	x,(OFST+7,sp)
+8796  03bb 1c0001        	addw	x,#1
+8797  03be 1f08          	ldw	(OFST+7,sp),x
+8798  03c0               L324:
+8799                     ; 381 	while (number--)
+8801  03c0 7b07          	ld	a,(OFST+6,sp)
+8802  03c2 0a07          	dec	(OFST+6,sp)
+8803  03c4 4d            	tnz	a
+8804  03c5 26e9          	jrne	L124
+8805                     ; 386 	_SWI2C_Stop();
+8807  03c7 8d3e003e      	callf	L301f__SWI2C_Stop
+8809                     ; 388 	return IIC_OK;
+8811  03cb a601          	ld	a,#1
+8813  03cd 20c4          	jra	L04
+8859                     ; 391 u8 SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value)
+8859                     ; 392 {	
+8860                     	switch	.text
+8861  03cf               f_SWI2C_WriteByte:
+8863  03cf 89            	pushw	x
+8864       00000000      OFST:	set	0
+8867                     ; 393 	return SWI2C_WriteBytes(addr, subaddr, 1, &value);
+8869  03d0 96            	ldw	x,sp
+8870  03d1 1c0006        	addw	x,#OFST+6
+8871  03d4 89            	pushw	x
+8872  03d5 4b01          	push	#1
+8873  03d7 7b05          	ld	a,(OFST+5,sp)
+8874  03d9 97            	ld	xl,a
+8875  03da 7b04          	ld	a,(OFST+4,sp)
+8876  03dc 95            	ld	xh,a
+8877  03dd 8d440444      	callf	f_SWI2C_WriteBytes
+8879  03e1 5b03          	addw	sp,#3
+8882  03e3 85            	popw	x
+8883  03e4 87            	retf
+8938                     ; 396 u8 SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data) 
+8938                     ; 397 {
+8939                     	switch	.text
+8940  03e5               f_SWI2C_Write2Byte:
+8942  03e5 89            	pushw	x
+8943  03e6 88            	push	a
+8944       00000001      OFST:	set	1
+8947                     ; 399 	_SWI2C_Start();                              
+8949  03e7 8d0d000d      	callf	L17f__SWI2C_Start
+8951                     ; 400 	result = _SWI2C_SendByte(addr);  
+8953  03eb 7b02          	ld	a,(OFST+1,sp)
+8954  03ed 8d650065      	callf	L511f__SWI2C_SendByte
+8956  03f1 6b01          	ld	(OFST+0,sp),a
+8957                     ; 401 	if (result == IIC_FAIL)
+8959  03f3 0d01          	tnz	(OFST+0,sp)
+8960  03f5 2608          	jrne	L174
+8961                     ; 403 		_SWI2C_Stop();
+8963  03f7 8d3e003e      	callf	L301f__SWI2C_Stop
+8965                     ; 404 		return result;
+8967  03fb 7b01          	ld	a,(OFST+0,sp)
+8969  03fd 2012          	jra	L64
+8970  03ff               L174:
+8971                     ; 406 	result = _SWI2C_SendByte(subaddr);     
+8973  03ff 7b03          	ld	a,(OFST+2,sp)
+8974  0401 8d650065      	callf	L511f__SWI2C_SendByte
+8976  0405 6b01          	ld	(OFST+0,sp),a
+8977                     ; 407 	if (result == IIC_FAIL)
+8979  0407 0d01          	tnz	(OFST+0,sp)
+8980  0409 2609          	jrne	L374
+8981                     ; 409 		_SWI2C_Stop();
+8983  040b 8d3e003e      	callf	L301f__SWI2C_Stop
+8985                     ; 410 		return result;
+8987  040f 7b01          	ld	a,(OFST+0,sp)
+8989  0411               L64:
+8991  0411 5b03          	addw	sp,#3
+8992  0413 87            	retf
+8993  0414               L374:
+8994                     ; 412 	result = _SWI2C_SendByte(data>>8);     
+8996  0414 7b07          	ld	a,(OFST+6,sp)
+8997  0416 8d650065      	callf	L511f__SWI2C_SendByte
+8999  041a 6b01          	ld	(OFST+0,sp),a
+9000                     ; 413 	if (result == IIC_FAIL)
+9002  041c 0d01          	tnz	(OFST+0,sp)
+9003  041e 2608          	jrne	L574
+9004                     ; 415 		_SWI2C_Stop();
+9006  0420 8d3e003e      	callf	L301f__SWI2C_Stop
+9008                     ; 416 		return result;
+9010  0424 7b01          	ld	a,(OFST+0,sp)
+9012  0426 20e9          	jra	L64
+9013  0428               L574:
+9014                     ; 418 	result = _SWI2C_SendByte(data);   
+9016  0428 7b08          	ld	a,(OFST+7,sp)
+9017  042a 8d650065      	callf	L511f__SWI2C_SendByte
+9019  042e 6b01          	ld	(OFST+0,sp),a
+9020                     ; 419 	if (result == IIC_FAIL)
+9022  0430 0d01          	tnz	(OFST+0,sp)
+9023  0432 2608          	jrne	L774
+9024                     ; 421 		_SWI2C_Stop();
+9026  0434 8d3e003e      	callf	L301f__SWI2C_Stop
+9028                     ; 422 		return result;
+9030  0438 7b01          	ld	a,(OFST+0,sp)
+9032  043a 20d5          	jra	L64
+9033  043c               L774:
+9034                     ; 424 	_SWI2C_Stop();    
+9036  043c 8d3e003e      	callf	L301f__SWI2C_Stop
+9038                     ; 425 	return IIC_OK;
+9040  0440 a601          	ld	a,#1
+9042  0442 20cd          	jra	L64
+9107                     ; 428 u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
+9107                     ; 429 {
+9108                     	switch	.text
+9109  0444               f_SWI2C_WriteBytes:
+9111  0444 89            	pushw	x
+9112  0445 88            	push	a
+9113       00000001      OFST:	set	1
+9116                     ; 431 	_SWI2C_Start();
+9118  0446 8d0d000d      	callf	L17f__SWI2C_Start
+9120                     ; 432 	result = _SWI2C_SendByte(addr);
+9122  044a 7b02          	ld	a,(OFST+1,sp)
+9123  044c 8d650065      	callf	L511f__SWI2C_SendByte
+9125  0450 6b01          	ld	(OFST+0,sp),a
+9126                     ; 433 	if (result == IIC_FAIL)
+9128  0452 0d01          	tnz	(OFST+0,sp)
+9129  0454 2608          	jrne	L725
+9130                     ; 435 		_SWI2C_Stop();
+9132  0456 8d3e003e      	callf	L301f__SWI2C_Stop
+9134                     ; 436 		return result;
+9136  045a 7b01          	ld	a,(OFST+0,sp)
+9138  045c 2012          	jra	L25
+9139  045e               L725:
+9140                     ; 438 	result = _SWI2C_SendByte(subaddr);
+9142  045e 7b03          	ld	a,(OFST+2,sp)
+9143  0460 8d650065      	callf	L511f__SWI2C_SendByte
+9145  0464 6b01          	ld	(OFST+0,sp),a
+9146                     ; 439 	if (result == IIC_FAIL)
+9148  0466 0d01          	tnz	(OFST+0,sp)
+9149  0468 2625          	jrne	L535
+9150                     ; 441 		_SWI2C_Stop();
+9152  046a 8d3e003e      	callf	L301f__SWI2C_Stop
+9154                     ; 442 		return result;
+9156  046e 7b01          	ld	a,(OFST+0,sp)
+9158  0470               L25:
+9160  0470 5b03          	addw	sp,#3
+9161  0472 87            	retf
+9162  0473               L335:
+9163                     ; 446 		result = _SWI2C_SendByte(*p_data);
+9165  0473 1e08          	ldw	x,(OFST+7,sp)
+9166  0475 f6            	ld	a,(x)
+9167  0476 8d650065      	callf	L511f__SWI2C_SendByte
+9169  047a 6b01          	ld	(OFST+0,sp),a
+9170                     ; 447 		if (result == IIC_FAIL)
+9172  047c 0d01          	tnz	(OFST+0,sp)
+9173  047e 2608          	jrne	L145
+9174                     ; 449 		_SWI2C_Stop();
+9176  0480 8d3e003e      	callf	L301f__SWI2C_Stop
+9178                     ; 450 		return result;
+9180  0484 7b01          	ld	a,(OFST+0,sp)
+9182  0486 20e8          	jra	L25
+9183  0488               L145:
+9184                     ; 452 		p_data++;
+9186  0488 1e08          	ldw	x,(OFST+7,sp)
+9187  048a 1c0001        	addw	x,#1
+9188  048d 1f08          	ldw	(OFST+7,sp),x
+9189  048f               L535:
+9190                     ; 444 	while (number--)
+9192  048f 7b07          	ld	a,(OFST+6,sp)
+9193  0491 0a07          	dec	(OFST+6,sp)
+9194  0493 4d            	tnz	a
+9195  0494 26dd          	jrne	L335
+9196                     ; 454 	_SWI2C_Stop();
+9198  0496 8d3e003e      	callf	L301f__SWI2C_Stop
+9200                     ; 455 	return IIC_OK;
+9202  049a a601          	ld	a,#1
+9204  049c 20d2          	jra	L25
+9263                     ; 458 void SWI2C_VerifyKey(void)
+9263                     ; 459 {
+9264                     	switch	.text
+9265  049e               f_SWI2C_VerifyKey:
+9267  049e 5209          	subw	sp,#9
+9268       00000009      OFST:	set	9
+9271                     ; 461 	SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
+9273  04a0 96            	ldw	x,sp
+9274  04a1 1c0009        	addw	x,#OFST+0
+9275  04a4 89            	pushw	x
+9276  04a5 ae0019        	ldw	x,#25
+9277  04a8 a6ba          	ld	a,#186
+9278  04aa 95            	ld	xh,a
+9279  04ab 8d530353      	callf	f_SWI2C_ReadByte
+9281  04af 85            	popw	x
+9282                     ; 462 	if ((secret_status&0x03) == 1)
+9284  04b0 7b09          	ld	a,(OFST+0,sp)
+9285  04b2 a403          	and	a,#3
+9286  04b4 a101          	cp	a,#1
+9287  04b6 265e          	jrne	L765
+9288                     ; 464 		SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
+9290  04b8 96            	ldw	x,sp
+9291  04b9 1c0001        	addw	x,#OFST-8
+9292  04bc 89            	pushw	x
+9293  04bd 4b04          	push	#4
+9294  04bf ae0010        	ldw	x,#16
+9295  04c2 a6ba          	ld	a,#186
+9296  04c4 95            	ld	xh,a
+9297  04c5 8d670367      	callf	f_SWI2C_ReadBytes
+9299  04c9 5b03          	addw	sp,#3
+9300                     ; 465 		convert_key[0] = secret_key_table1[secret_key[0]];
+9302  04cb 7b01          	ld	a,(OFST-8,sp)
+9303  04cd 5f            	clrw	x
+9304  04ce 97            	ld	xl,a
+9305  04cf d60000        	ld	a,(L72_secret_key_table1,x)
+9306  04d2 6b05          	ld	(OFST-4,sp),a
+9307                     ; 466 		convert_key[1] = secret_key_table2[secret_key[1]];
+9309  04d4 7b02          	ld	a,(OFST-7,sp)
+9310  04d6 5f            	clrw	x
+9311  04d7 97            	ld	xl,a
+9312  04d8 d60100        	ld	a,(L13_secret_key_table2,x)
+9313  04db 6b06          	ld	(OFST-3,sp),a
+9314                     ; 467 		convert_key[2] = secret_key_table3[secret_key[2]];
+9316  04dd 7b03          	ld	a,(OFST-6,sp)
+9317  04df 5f            	clrw	x
+9318  04e0 97            	ld	xl,a
+9319  04e1 d60200        	ld	a,(L33_secret_key_table3,x)
+9320  04e4 6b07          	ld	(OFST-2,sp),a
+9321                     ; 468 		convert_key[3] = secret_key_table4[secret_key[3]];
+9323  04e6 7b04          	ld	a,(OFST-5,sp)
+9324  04e8 5f            	clrw	x
+9325  04e9 97            	ld	xl,a
+9326  04ea d60300        	ld	a,(L53_secret_key_table4,x)
+9327  04ed 6b08          	ld	(OFST-1,sp),a
+9328                     ; 469 		SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, convert_key);
+9330  04ef 96            	ldw	x,sp
+9331  04f0 1c0005        	addw	x,#OFST-4
+9332  04f3 89            	pushw	x
+9333  04f4 4b04          	push	#4
+9334  04f6 ae0014        	ldw	x,#20
+9335  04f9 a6ba          	ld	a,#186
+9336  04fb 95            	ld	xh,a
+9337  04fc 8d440444      	callf	f_SWI2C_WriteBytes
+9339  0500 5b03          	addw	sp,#3
+9340                     ; 470 		secret_status = secret_status|0x07;
+9342  0502 7b09          	ld	a,(OFST+0,sp)
+9343  0504 aa07          	or	a,#7
+9344  0506 6b09          	ld	(OFST+0,sp),a
+9345                     ; 471 		SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
+9347  0508 7b09          	ld	a,(OFST+0,sp)
+9348  050a 88            	push	a
+9349  050b ae0019        	ldw	x,#25
+9350  050e a6ba          	ld	a,#186
+9351  0510 95            	ld	xh,a
+9352  0511 8dcf03cf      	callf	f_SWI2C_WriteByte
+9354  0515 84            	pop	a
+9355  0516               L765:
+9356                     ; 473 }
+9359  0516 5b09          	addw	sp,#9
+9360  0518 87            	retf
+9388                     ; 475 void SWI2C_Init(void)
+9388                     ; 476 {
+9389                     	switch	.text
+9390  0519               f_SWI2C_Init:
+9394                     ; 477 	GPIO_Init(IIC_SCL_PORT, IIC_SCL_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+9396  0519 4bb0          	push	#176
+9397  051b 4b10          	push	#16
+9398  051d ae5005        	ldw	x,#20485
+9399  0520 8d000000      	callf	f_GPIO_Init
+9401  0524 85            	popw	x
+9402                     ; 478 	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+9404  0525 4bb0          	push	#176
+9405  0527 4b20          	push	#32
+9406  0529 ae5005        	ldw	x,#20485
+9407  052c 8d000000      	callf	f_GPIO_Init
+9409  0530 85            	popw	x
+9410                     ; 479 	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+9412  0531 4b10          	push	#16
+9413  0533 ae5005        	ldw	x,#20485
+9414  0536 8d000000      	callf	f_GPIO_WriteHigh
+9416  053a 84            	pop	a
+9417                     ; 480 	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+9419  053b 4b20          	push	#32
+9420  053d ae5005        	ldw	x,#20485
+9421  0540 8d000000      	callf	f_GPIO_WriteHigh
+9423  0544 84            	pop	a
+9424                     ; 482 	GPIO_Init(POWER_ONOFF_PORT, POWER_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+9426  0545 4bf0          	push	#240
+9427  0547 4b20          	push	#32
+9428  0549 ae500a        	ldw	x,#20490
+9429  054c 8d000000      	callf	f_GPIO_Init
+9431  0550 85            	popw	x
+9432                     ; 484 	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+9434  0551 4bf0          	push	#240
+9435  0553 4b10          	push	#16
+9436  0555 ae500a        	ldw	x,#20490
+9437  0558 8d000000      	callf	f_GPIO_Init
+9439  055c 85            	popw	x
+9440                     ; 485 	GPIO_Init(IT680X_RESET_PORT, IT680X_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+9442  055d 4bf0          	push	#240
+9443  055f 4b01          	push	#1
+9444  0561 ae5005        	ldw	x,#20485
+9445  0564 8d000000      	callf	f_GPIO_Init
+9447  0568 85            	popw	x
+9448                     ; 487 	GPIO_Init(LED_R_PORT, LED_R_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	
+9450  0569 4bf0          	push	#240
+9451  056b 4b01          	push	#1
+9452  056d ae5014        	ldw	x,#20500
+9453  0570 8d000000      	callf	f_GPIO_Init
+9455  0574 85            	popw	x
+9456                     ; 488 	GPIO_Init(LED_G_PORT, LED_G_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+9458  0575 4be0          	push	#224
+9459  0577 4b08          	push	#8
+9460  0579 ae500f        	ldw	x,#20495
+9461  057c 8d000000      	callf	f_GPIO_Init
+9463  0580 85            	popw	x
+9464                     ; 490 	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+9466  0581 4bf0          	push	#240
+9467  0583 4b40          	push	#64
+9468  0585 ae5005        	ldw	x,#20485
+9469  0588 8d000000      	callf	f_GPIO_Init
+9471  058c 85            	popw	x
+9472                     ; 492 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+9474  058d 4bf0          	push	#240
+9475  058f 4b80          	push	#128
+9476  0591 ae500a        	ldw	x,#20490
+9477  0594 8d000000      	callf	f_GPIO_Init
+9479  0598 85            	popw	x
+9480                     ; 493 	GPIO_Init(BACKLIGHT_PWM_PORT, BACKLIGHT_PWM_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+9482  0599 4bf0          	push	#240
+9483  059b 4b40          	push	#64
+9484  059d ae500a        	ldw	x,#20490
+9485  05a0 8d000000      	callf	f_GPIO_Init
+9487  05a4 85            	popw	x
+9488                     ; 494 	GPIO_Init(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+9490  05a5 4be0          	push	#224
+9491  05a7 4b01          	push	#1
+9492  05a9 ae501e        	ldw	x,#20510
+9493  05ac 8d000000      	callf	f_GPIO_Init
+9495  05b0 85            	popw	x
+9496                     ; 496 	TIM1_TimeBaseInit(0, TIM1_COUNTERMODE_UP, 4095, 0);
+9498  05b1 4b00          	push	#0
+9499  05b3 ae0fff        	ldw	x,#4095
+9500  05b6 89            	pushw	x
+9501  05b7 4b00          	push	#0
+9502  05b9 5f            	clrw	x
+9503  05ba 8d000000      	callf	f_TIM1_TimeBaseInit
+9505  05be 5b04          	addw	sp,#4
+9506                     ; 497 	TIM1_OC1Init(TIM1_OCMODE_PWM2, TIM1_OUTPUTSTATE_ENABLE, TIM1_OUTPUTNSTATE_DISABLE,
+9506                     ; 498 	           0, TIM1_OCPOLARITY_LOW, TIM1_OCNPOLARITY_HIGH, TIM1_OCIDLESTATE_SET,
+9506                     ; 499 	           TIM1_OCNIDLESTATE_RESET);
+9508  05c0 4b00          	push	#0
+9509  05c2 4b55          	push	#85
+9510  05c4 4b00          	push	#0
+9511  05c6 4b22          	push	#34
+9512  05c8 5f            	clrw	x
+9513  05c9 89            	pushw	x
+9514  05ca 4b00          	push	#0
+9515  05cc ae0011        	ldw	x,#17
+9516  05cf a670          	ld	a,#112
+9517  05d1 95            	ld	xh,a
+9518  05d2 8d000000      	callf	f_TIM1_OC1Init
+9520  05d6 5b07          	addw	sp,#7
+9521                     ; 500 	TIM1_Cmd(ENABLE);
+9523  05d8 a601          	ld	a,#1
+9524  05da 8d000000      	callf	f_TIM1_Cmd
+9526                     ; 501 	TIM1_CtrlPWMOutputs(ENABLE);
+9528  05de a601          	ld	a,#1
+9529  05e0 8d000000      	callf	f_TIM1_CtrlPWMOutputs
+9531                     ; 502 }
+9534  05e4 87            	retf
+9601                     	switch	.const
+9602  1d00               L26:
+9603  1d00 00000001      	dc.l	1
+9604                     ; 504 void SWI2C_Update(void)
+9604                     ; 505 {	
+9605                     	switch	.text
+9606  05e5               f_SWI2C_Update:
+9608  05e5 89            	pushw	x
+9609       00000002      OFST:	set	2
+9612                     ; 506 	if (Backlight_on_timer == TIMER_EXPIRED)
+9614  05e6 ae0004        	ldw	x,#L5_Backlight_on_timer
+9615  05e9 8d000000      	callf	d_ltor
+9617  05ed ae1d00        	ldw	x,#L26
+9618  05f0 8d000000      	callf	d_lcmp
+9620  05f4 2616          	jrne	L126
+9621                     ; 508 		SET_BACKLIGHT_ON();
+9623  05f6 4b80          	push	#128
+9624  05f8 ae500a        	ldw	x,#20490
+9625  05fb 8d000000      	callf	f_GPIO_WriteLow
+9627  05ff 84            	pop	a
+9628                     ; 509 		Backlight_on_timer = TIMER_STOPPED;
+9630  0600 ae0000        	ldw	x,#0
+9631  0603 cf0006        	ldw	L5_Backlight_on_timer+2,x
+9632  0606 ae0000        	ldw	x,#0
+9633  0609 cf0004        	ldw	L5_Backlight_on_timer,x
+9634  060c               L126:
+9635                     ; 513 	if (Power_status && !I2C_stop)
+9637  060c 725d0011      	tnz	L51_Power_status
+9638  0610 2604          	jrne	L46
+9639  0612 ac750775      	jpf	L326
+9640  0616               L46:
+9642  0616 725d0012      	tnz	L32_I2C_stop
+9643  061a 2704          	jreq	L66
+9644  061c ac750775      	jpf	L326
+9645  0620               L66:
+9646                     ; 515 		IT6802_fsm();
+9648  0620 8d000000      	callf	f_IT6802_fsm
+9650                     ; 517 		if (frc_update_timer == TIMER_EXPIRED && Have_FRC)
+9652  0624 ae0000        	ldw	x,#L3_frc_update_timer
+9653  0627 8d000000      	callf	d_ltor
+9655  062b ae1d00        	ldw	x,#L26
+9656  062e 8d000000      	callf	d_lcmp
+9658  0632 265f          	jrne	L526
+9660  0634 725d0000      	tnz	L52_Have_FRC
+9661  0638 2759          	jreq	L526
+9662                     ; 520 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x18, &read_LVDS_mode);
+9664  063a 96            	ldw	x,sp
+9665  063b 1c0001        	addw	x,#OFST-1
+9666  063e 89            	pushw	x
+9667  063f ae0018        	ldw	x,#24
+9668  0642 a622          	ld	a,#34
+9669  0644 95            	ld	xh,a
+9670  0645 8d530353      	callf	f_SWI2C_ReadByte
+9672  0649 85            	popw	x
+9673                     ; 521 			if (read_LVDS_mode != LVDS_mode)
+9675  064a 7b01          	ld	a,(OFST-1,sp)
+9676  064c c10010        	cp	a,L31_LVDS_mode
+9677  064f 270e          	jreq	L726
+9678                     ; 523 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x18, LVDS_mode);
+9680  0651 3b0010        	push	L31_LVDS_mode
+9681  0654 ae0018        	ldw	x,#24
+9682  0657 a622          	ld	a,#34
+9683  0659 95            	ld	xh,a
+9684  065a 8dcf03cf      	callf	f_SWI2C_WriteByte
+9686  065e 84            	pop	a
+9687  065f               L726:
+9688                     ; 525 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x0A, &read_MFC);
+9690  065f 96            	ldw	x,sp
+9691  0660 1c0002        	addw	x,#OFST+0
+9692  0663 89            	pushw	x
+9693  0664 ae000a        	ldw	x,#10
+9694  0667 a622          	ld	a,#34
+9695  0669 95            	ld	xh,a
+9696  066a 8d530353      	callf	f_SWI2C_ReadByte
+9698  066e 85            	popw	x
+9699                     ; 526 			if (read_MFC != 0)
+9701  066f 0d02          	tnz	(OFST+0,sp)
+9702  0671 2714          	jreq	L136
+9703                     ; 528 				IR_DelayNMiliseconds(50);
+9705  0673 ae0032        	ldw	x,#50
+9706  0676 8d000000      	callf	f_IR_DelayNMiliseconds
+9708                     ; 529 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x0A, 0);
+9710  067a 4b00          	push	#0
+9711  067c ae000a        	ldw	x,#10
+9712  067f a622          	ld	a,#34
+9713  0681 95            	ld	xh,a
+9714  0682 8dcf03cf      	callf	f_SWI2C_WriteByte
+9716  0686 84            	pop	a
+9717  0687               L136:
+9718                     ; 531 			frc_update_timer = FRC_UPDATE_TIME;
+9720  0687 ae01f5        	ldw	x,#501
+9721  068a cf0002        	ldw	L3_frc_update_timer+2,x
+9722  068d ae0000        	ldw	x,#0
+9723  0690 cf0000        	ldw	L3_frc_update_timer,x
+9724  0693               L526:
+9725                     ; 535 		if (secret_detect_timer == TIMER_EXPIRED)
+9727  0693 ae0008        	ldw	x,#L7_secret_detect_timer
+9728  0696 8d000000      	callf	d_ltor
+9730  069a ae1d00        	ldw	x,#L26
+9731  069d 8d000000      	callf	d_lcmp
+9733  06a1 2610          	jrne	L336
+9734                     ; 537 			SWI2C_VerifyKey();
+9736  06a3 8d9e049e      	callf	f_SWI2C_VerifyKey
+9738                     ; 538 			secret_detect_timer = SECRET_DETECT_TIME;
+9740  06a7 ae01f5        	ldw	x,#501
+9741  06aa cf000a        	ldw	L7_secret_detect_timer+2,x
+9742  06ad ae0000        	ldw	x,#0
+9743  06b0 cf0008        	ldw	L7_secret_detect_timer,x
+9744  06b3               L336:
+9745                     ; 541 		if (signal_detect_timer == TIMER_EXPIRED)
+9747  06b3 ae000c        	ldw	x,#L11_signal_detect_timer
+9748  06b6 8d000000      	callf	d_ltor
+9750  06ba ae1d00        	ldw	x,#L26
+9751  06bd 8d000000      	callf	d_lcmp
+9753  06c1 2704          	jreq	L07
+9754  06c3 ac750775      	jpf	L326
+9755  06c7               L07:
+9756                     ; 546 			signal_detect_timer = SINGNAL_TETECT_TIME;
+9758  06c7 ae0097        	ldw	x,#151
+9759  06ca cf000e        	ldw	L11_signal_detect_timer+2,x
+9760  06cd ae0000        	ldw	x,#0
+9761  06d0 cf000c        	ldw	L11_signal_detect_timer,x
+9762                     ; 547 			current_signal_status = SWI2C_GetSignalStatus();
+9764  06d3 8db901b9      	callf	L122f_SWI2C_GetSignalStatus
+9766  06d7 6b02          	ld	(OFST+0,sp),a
+9767                     ; 548 			if (current_signal_status != signal_status)
+9769  06d9 7b02          	ld	a,(OFST+0,sp)
+9770  06db c10002        	cp	a,L71_signal_status
+9771  06de 2775          	jreq	L736
+9772                     ; 550 				singal_change_count++;
+9774  06e0 725c0001      	inc	L12_singal_change_count
+9775                     ; 551 				if (current_signal_status && singal_change_count > SIGNAL_STABLE_COUNT)
+9777  06e4 0d02          	tnz	(OFST+0,sp)
+9778  06e6 2735          	jreq	L146
+9780  06e8 c60001        	ld	a,L12_singal_change_count
+9781  06eb a106          	cp	a,#6
+9782  06ed 252e          	jrult	L146
+9783                     ; 553 					signal_status = TRUE;
+9785  06ef 35010002      	mov	L71_signal_status,#1
+9786                     ; 554 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+9788  06f3 4b08          	push	#8
+9789  06f5 ae500f        	ldw	x,#20495
+9790  06f8 8d000000      	callf	f_GPIO_WriteHigh
+9792  06fc 84            	pop	a
+9793                     ; 556 					SWI2C_ResetHDMI();
+9795  06fd 8d090809      	callf	f_SWI2C_ResetHDMI
+9797                     ; 558 					SWI2C_ResetFPGA();
+9799  0701 8dd807d8      	callf	f_SWI2C_ResetFPGA
+9801                     ; 559 					SET_VPANEL_ON();
+9803  0705 4b01          	push	#1
+9804  0707 ae501e        	ldw	x,#20510
+9805  070a 8d000000      	callf	f_GPIO_WriteHigh
+9807  070e 84            	pop	a
+9808                     ; 560 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
+9810  070f ae1771        	ldw	x,#6001
+9811  0712 cf0006        	ldw	L5_Backlight_on_timer+2,x
+9812  0715 ae0000        	ldw	x,#0
+9813  0718 cf0004        	ldw	L5_Backlight_on_timer,x
+9815  071b 203c          	jra	L746
+9816  071d               L146:
+9817                     ; 562 				else if (!current_signal_status && singal_change_count > NO_SIGNAL_COUNT)
+9819  071d 0d02          	tnz	(OFST+0,sp)
+9820  071f 2638          	jrne	L746
+9822  0721 c60001        	ld	a,L12_singal_change_count
+9823  0724 a103          	cp	a,#3
+9824  0726 2531          	jrult	L746
+9825                     ; 564 					signal_status = FALSE;
+9827  0728 725f0002      	clr	L71_signal_status
+9828                     ; 565 					Backlight_on_timer = TIMER_STOPPED;
+9830  072c ae0000        	ldw	x,#0
+9831  072f cf0006        	ldw	L5_Backlight_on_timer+2,x
+9832  0732 ae0000        	ldw	x,#0
+9833  0735 cf0004        	ldw	L5_Backlight_on_timer,x
+9834                     ; 566 					SET_BACKLIGHT_OFF();
+9836  0738 4b80          	push	#128
+9837  073a ae500a        	ldw	x,#20490
+9838  073d 8d000000      	callf	f_GPIO_WriteHigh
+9840  0741 84            	pop	a
+9841                     ; 567 					IR_DelayNMiliseconds(200);
+9843  0742 ae00c8        	ldw	x,#200
+9844  0745 8d000000      	callf	f_IR_DelayNMiliseconds
+9846                     ; 568 					SET_VPANEL_OFF();
+9848  0749 4b01          	push	#1
+9849  074b ae501e        	ldw	x,#20510
+9850  074e 8d000000      	callf	f_GPIO_WriteLow
+9852  0752 84            	pop	a
+9853  0753 2004          	jra	L746
+9854  0755               L736:
+9855                     ; 573 				singal_change_count = 0;
+9857  0755 725f0001      	clr	L12_singal_change_count
+9858  0759               L746:
+9859                     ; 576 			if (signal_status)
+9861  0759 725d0002      	tnz	L71_signal_status
+9862  075d 270c          	jreq	L156
+9863                     ; 578 				GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+9865  075f 4b08          	push	#8
+9866  0761 ae500f        	ldw	x,#20495
+9867  0764 8d000000      	callf	f_GPIO_WriteHigh
+9869  0768 84            	pop	a
+9871  0769 200a          	jra	L326
+9872  076b               L156:
+9873                     ; 582 				GPIO_WriteReverse(LED_G_PORT, LED_G_PIN);
+9875  076b 4b08          	push	#8
+9876  076d ae500f        	ldw	x,#20495
+9877  0770 8d000000      	callf	f_GPIO_WriteReverse
+9879  0774 84            	pop	a
+9880  0775               L326:
+9881                     ; 586 }
+9884  0775 85            	popw	x
+9885  0776 87            	retf
+9917                     ; 588 void SWI2C_SystemPowerUp(void)
+9917                     ; 589 {
+9918                     	switch	.text
+9919  0777               f_SWI2C_SystemPowerUp:
+9923                     ; 590 	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
+9925  0777 4b20          	push	#32
+9926  0779 ae500a        	ldw	x,#20490
+9927  077c 8d000000      	callf	f_GPIO_WriteLow
+9929  0780 84            	pop	a
+9930                     ; 591 	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+9932  0781 4b01          	push	#1
+9933  0783 ae5014        	ldw	x,#20500
+9934  0786 8d000000      	callf	f_GPIO_WriteLow
+9936  078a 84            	pop	a
+9937                     ; 592 	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+9939  078b 4b08          	push	#8
+9940  078d ae500f        	ldw	x,#20495
+9941  0790 8d000000      	callf	f_GPIO_WriteHigh
+9943  0794 84            	pop	a
+9944                     ; 593 	IR_DelayNMiliseconds(50);
+9946  0795 ae0032        	ldw	x,#50
+9947  0798 8d000000      	callf	f_IR_DelayNMiliseconds
+9949                     ; 594 	Power_status = TRUE;
+9951  079c 35010011      	mov	L51_Power_status,#1
+9952                     ; 595 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
+9954  07a0 4b01          	push	#1
+9955  07a2 ae5005        	ldw	x,#20485
+9956  07a5 8d000000      	callf	f_GPIO_WriteLow
+9958  07a9 84            	pop	a
+9959                     ; 597 	IR_DelayNMiliseconds(200);
+9961  07aa ae00c8        	ldw	x,#200
+9962  07ad 8d000000      	callf	f_IR_DelayNMiliseconds
+9964                     ; 598 	GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
+9966  07b1 4b01          	push	#1
+9967  07b3 ae5005        	ldw	x,#20485
+9968  07b6 8d000000      	callf	f_GPIO_WriteHigh
+9970  07ba 84            	pop	a
+9971                     ; 600 	IR_DelayNMiliseconds(200);
+9973  07bb ae00c8        	ldw	x,#200
+9974  07be 8d000000      	callf	f_IR_DelayNMiliseconds
+9976                     ; 601 	IT6802_fsm_init();
+9978  07c2 8d000000      	callf	f_IT6802_fsm_init
+9980                     ; 602 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
+9982  07c6 a622          	ld	a,#34
+9983  07c8 8d3d033d      	callf	f_SWI2C_TestDevice
+9985  07cc c70000        	ld	L52_Have_FRC,a
+9986                     ; 603 	singal_change_count = 0;
+9988  07cf 725f0001      	clr	L12_singal_change_count
+9989                     ; 604 	signal_status = FALSE;
+9991  07d3 725f0002      	clr	L71_signal_status
+9992                     ; 605 }
+9995  07d7 87            	retf
+10023                     ; 607 void SWI2C_ResetFPGA(void)
+10023                     ; 608 {
+10024                     	switch	.text
+10025  07d8               f_SWI2C_ResetFPGA:
+10029                     ; 609 	if (Power_status)
+10031  07d8 725d0011      	tnz	L51_Power_status
+10032  07dc 272a          	jreq	L576
+10033                     ; 611 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+10035  07de 4b10          	push	#16
+10036  07e0 ae500a        	ldw	x,#20490
+10037  07e3 8d000000      	callf	f_GPIO_WriteLow
+10039  07e7 84            	pop	a
+10040                     ; 612 		IR_DelayNMiliseconds(200);
+10042  07e8 ae00c8        	ldw	x,#200
+10043  07eb 8d000000      	callf	f_IR_DelayNMiliseconds
+10045                     ; 613 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+10047  07ef 4b10          	push	#16
+10048  07f1 ae500a        	ldw	x,#20490
+10049  07f4 8d000000      	callf	f_GPIO_WriteHigh
+10051  07f8 84            	pop	a
+10052                     ; 614 		IR_DelayNMiliseconds(1500);
+10054  07f9 ae05dc        	ldw	x,#1500
+10055  07fc 8d000000      	callf	f_IR_DelayNMiliseconds
+10057                     ; 616 		FPGA_WriteWeavingTable();
+10059  0800 8d620262      	callf	L352f_FPGA_WriteWeavingTable
+10061                     ; 618 		FPGA_Init();
+10063  0804 8d4b094b      	callf	f_FPGA_Init
+10065  0808               L576:
+10066                     ; 620 }
+10069  0808 87            	retf
+10096                     ; 622 void SWI2C_ResetHDMI(void)
+10096                     ; 623 {
+10097                     	switch	.text
+10098  0809               f_SWI2C_ResetHDMI:
+10102                     ; 624 	if (Power_status)
+10104  0809 725d0011      	tnz	L51_Power_status
+10105  080d 2743          	jreq	L707
+10106                     ; 626 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+10108  080f 4b10          	push	#16
+10109  0811 ae500a        	ldw	x,#20490
+10110  0814 8d000000      	callf	f_GPIO_WriteLow
+10112  0818 84            	pop	a
+10113                     ; 627 		IR_DelayNMiliseconds(200);
+10115  0819 ae00c8        	ldw	x,#200
+10116  081c 8d000000      	callf	f_IR_DelayNMiliseconds
+10118                     ; 628 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+10120  0820 4b10          	push	#16
+10121  0822 ae500a        	ldw	x,#20490
+10122  0825 8d000000      	callf	f_GPIO_WriteHigh
+10124  0829 84            	pop	a
+10125                     ; 629 		IR_DelayNMiliseconds(500);
+10127  082a ae01f4        	ldw	x,#500
+10128  082d 8d000000      	callf	f_IR_DelayNMiliseconds
+10130                     ; 630 		SWI2C_WriteByte(0x90, 0x14, 0xFF);
+10132  0831 4bff          	push	#255
+10133  0833 ae0014        	ldw	x,#20
+10134  0836 a690          	ld	a,#144
+10135  0838 95            	ld	xh,a
+10136  0839 8dcf03cf      	callf	f_SWI2C_WriteByte
+10138  083d 84            	pop	a
+10139                     ; 631 		IR_DelayNMiliseconds(1000);
+10141  083e ae03e8        	ldw	x,#1000
+10142  0841 8d000000      	callf	f_IR_DelayNMiliseconds
+10144                     ; 632 		SWI2C_WriteByte(0x90, 0x14, 0x0);
+10146  0845 4b00          	push	#0
+10147  0847 ae0014        	ldw	x,#20
+10148  084a a690          	ld	a,#144
+10149  084c 95            	ld	xh,a
+10150  084d 8dcf03cf      	callf	f_SWI2C_WriteByte
+10152  0851 84            	pop	a
+10153  0852               L707:
+10154                     ; 634 }
+10157  0852 87            	retf
+10186                     ; 636 void SWI2C_SystemPowerDown(void)
+10186                     ; 637 {
+10187                     	switch	.text
+10188  0853               f_SWI2C_SystemPowerDown:
+10192                     ; 638 	SET_BACKLIGHT_OFF();
+10194  0853 4b80          	push	#128
+10195  0855 ae500a        	ldw	x,#20490
+10196  0858 8d000000      	callf	f_GPIO_WriteHigh
+10198  085c 84            	pop	a
+10199                     ; 639 	IR_DelayNMiliseconds(200);
+10201  085d ae00c8        	ldw	x,#200
+10202  0860 8d000000      	callf	f_IR_DelayNMiliseconds
+10204                     ; 640 	SET_VPANEL_OFF();
+10206  0864 4b01          	push	#1
+10207  0866 ae501e        	ldw	x,#20510
+10208  0869 8d000000      	callf	f_GPIO_WriteLow
+10210  086d 84            	pop	a
+10211                     ; 641 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
+10213  086e 4b20          	push	#32
+10214  0870 ae500a        	ldw	x,#20490
+10215  0873 8d000000      	callf	f_GPIO_WriteHigh
+10217  0877 84            	pop	a
+10218                     ; 642 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+10220  0878 4b01          	push	#1
+10221  087a ae5014        	ldw	x,#20500
+10222  087d 8d000000      	callf	f_GPIO_WriteHigh
+10224  0881 84            	pop	a
+10225                     ; 643 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+10227  0882 4b08          	push	#8
+10228  0884 ae500f        	ldw	x,#20495
+10229  0887 8d000000      	callf	f_GPIO_WriteLow
+10231  088b 84            	pop	a
+10232                     ; 644 	Backlight_on_timer = TIMER_STOPPED;
+10234  088c ae0000        	ldw	x,#0
+10235  088f cf0006        	ldw	L5_Backlight_on_timer+2,x
+10236  0892 ae0000        	ldw	x,#0
+10237  0895 cf0004        	ldw	L5_Backlight_on_timer,x
+10238                     ; 645 	Power_status = FALSE;
+10240  0898 725f0011      	clr	L51_Power_status
+10241                     ; 646 	I2C_stop = FALSE;
+10243  089c 725f0012      	clr	L32_I2C_stop
+10244                     ; 647 }
+10247  08a0 87            	retf
+10274                     ; 649 void SWI2C_ToggleI2CMode(void)
+10274                     ; 650 {
+10275                     	switch	.text
+10276  08a1               f_SWI2C_ToggleI2CMode:
+10280                     ; 651 	if (Power_status)
+10282  08a1 725d0011      	tnz	L51_Power_status
+10283  08a5 273e          	jreq	L137
+10284                     ; 653 		I2C_stop = !I2C_stop;
+10286  08a7 725d0012      	tnz	L32_I2C_stop
+10287  08ab 2604          	jrne	L401
+10288  08ad a601          	ld	a,#1
+10289  08af 2001          	jra	L601
+10290  08b1               L401:
+10291  08b1 4f            	clr	a
+10292  08b2               L601:
+10293  08b2 c70012        	ld	L32_I2C_stop,a
+10294                     ; 654 		if (I2C_stop)
+10296  08b5 725d0012      	tnz	L32_I2C_stop
+10297  08b9 2716          	jreq	L337
+10298                     ; 656 			GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+10300  08bb 4b01          	push	#1
+10301  08bd ae5014        	ldw	x,#20500
+10302  08c0 8d000000      	callf	f_GPIO_WriteHigh
+10304  08c4 84            	pop	a
+10305                     ; 657 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+10307  08c5 4b08          	push	#8
+10308  08c7 ae500f        	ldw	x,#20495
+10309  08ca 8d000000      	callf	f_GPIO_WriteHigh
+10311  08ce 84            	pop	a
+10313  08cf 2014          	jra	L137
+10314  08d1               L337:
+10315                     ; 661 			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+10317  08d1 4b01          	push	#1
+10318  08d3 ae5014        	ldw	x,#20500
+10319  08d6 8d000000      	callf	f_GPIO_WriteLow
+10321  08da 84            	pop	a
+10322                     ; 662 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+10324  08db 4b08          	push	#8
+10325  08dd ae500f        	ldw	x,#20495
+10326  08e0 8d000000      	callf	f_GPIO_WriteHigh
+10328  08e4 84            	pop	a
+10329  08e5               L137:
+10330                     ; 665 }
+10333  08e5 87            	retf
+10358                     ; 667 void SWI2C_ProcessPower(void)
+10358                     ; 668 {
+10359                     	switch	.text
+10360  08e6               f_SWI2C_ProcessPower:
+10364                     ; 669 	if (Power_status)
+10366  08e6 725d0011      	tnz	L51_Power_status
+10367  08ea 2706          	jreq	L747
+10368                     ; 671 		SWI2C_SystemPowerDown();
+10370  08ec 8d530853      	callf	f_SWI2C_SystemPowerDown
+10373  08f0 2004          	jra	L157
+10374  08f2               L747:
+10375                     ; 675 		SWI2C_SystemPowerUp();
+10377  08f2 8d770777      	callf	f_SWI2C_SystemPowerUp
+10379  08f6               L157:
+10380                     ; 677 }
+10383  08f6 87            	retf
+10385                     	switch	.data
+10386  0013               L357_Set3DOn:
+10387  0013 00            	dc.b	0
+10440                     ; 681 static void SWI2C_Set3DOnOff(u8 OnOff)
+10440                     ; 682 {
+10441                     	switch	.text
+10442  08f7               L557f_SWI2C_Set3DOnOff:
+10444  08f7 5203          	subw	sp,#3
+10445       00000003      OFST:	set	3
+10448                     ; 684 	if (OnOff)
+10450  08f9 4d            	tnz	a
+10451  08fa 2706          	jreq	L1001
+10452                     ; 686 		reg_value = 0x80;
+10454  08fc a680          	ld	a,#128
+10455  08fe 6b03          	ld	(OFST+0,sp),a
+10457  0900 2002          	jra	L3001
+10458  0902               L1001:
+10459                     ; 690 		reg_value = 0x0;
+10461  0902 0f03          	clr	(OFST+0,sp)
+10462  0904               L3001:
+10463                     ; 692 	for (retry = 0; retry < 3; retry++)
+10465  0904 0f02          	clr	(OFST-1,sp)
+10466  0906               L5001:
+10467                     ; 695 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
+10469  0906 7b03          	ld	a,(OFST+0,sp)
+10470  0908 88            	push	a
+10471  0909 ae0057        	ldw	x,#87
+10472  090c a6ba          	ld	a,#186
+10473  090e 95            	ld	xh,a
+10474  090f 8dcf03cf      	callf	f_SWI2C_WriteByte
+10476  0913 84            	pop	a
+10477                     ; 696 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
+10479  0914 96            	ldw	x,sp
+10480  0915 1c0001        	addw	x,#OFST-2
+10481  0918 89            	pushw	x
+10482  0919 ae0057        	ldw	x,#87
+10483  091c a6ba          	ld	a,#186
+10484  091e 95            	ld	xh,a
+10485  091f 8d530353      	callf	f_SWI2C_ReadByte
+10487  0923 85            	popw	x
+10488                     ; 697 		if (value == reg_value)
+10490  0924 7b01          	ld	a,(OFST-2,sp)
+10491  0926 1103          	cp	a,(OFST+0,sp)
+10492  0928 2708          	jreq	L1101
+10493                     ; 699 			break;
+10495                     ; 692 	for (retry = 0; retry < 3; retry++)
+10497  092a 0c02          	inc	(OFST-1,sp)
+10500  092c 7b02          	ld	a,(OFST-1,sp)
+10501  092e a103          	cp	a,#3
+10502  0930 25d4          	jrult	L5001
+10503  0932               L1101:
+10504                     ; 702 }
+10507  0932 5b03          	addw	sp,#3
+10508  0934 87            	retf
+10533                     ; 704 void SWI2C_Toggle3DOnOff(void)
+10533                     ; 705 {	
+10534                     	switch	.text
+10535  0935               f_SWI2C_Toggle3DOnOff:
+10539                     ; 706 	Set3DOn = !Set3DOn;
+10541  0935 725d0013      	tnz	L357_Set3DOn
+10542  0939 2604          	jrne	L611
+10543  093b a601          	ld	a,#1
+10544  093d 2001          	jra	L021
+10545  093f               L611:
+10546  093f 4f            	clr	a
+10547  0940               L021:
+10548  0940 c70013        	ld	L357_Set3DOn,a
+10549                     ; 707 	SWI2C_Set3DOnOff(Set3DOn);
+10551  0943 c60013        	ld	a,L357_Set3DOn
+10552  0946 8df708f7      	callf	L557f_SWI2C_Set3DOnOff
+10554                     ; 708 }
+10557  094a 87            	retf
+10594                     ; 713 void FPGA_Init(void)
+10594                     ; 714  {	
+10595                     	switch	.text
+10596  094b               f_FPGA_Init:
+10598  094b 88            	push	a
+10599       00000001      OFST:	set	1
+10602                     ; 716 	for (i = 0; i < table_size; i++)
+10604  094c 0f01          	clr	(OFST+0,sp)
+10606  094e 202a          	jra	L5401
+10607  0950               L1401:
+10608                     ; 718 		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], FLASH_ReadByte(EEPROM_START_ADDRESS + 1 + i));
+10610  0950 7b01          	ld	a,(OFST+0,sp)
+10611  0952 5f            	clrw	x
+10612  0953 97            	ld	xl,a
+10613  0954 1c4001        	addw	x,#16385
+10614  0957 8d000000      	callf	d_itolx
+10616  095b be02          	ldw	x,c_lreg+2
+10617  095d 89            	pushw	x
+10618  095e be00          	ldw	x,c_lreg
+10619  0960 89            	pushw	x
+10620  0961 8d000000      	callf	f_FLASH_ReadByte
+10622  0965 5b04          	addw	sp,#4
+10623  0967 88            	push	a
+10624  0968 7b02          	ld	a,(OFST+1,sp)
+10625  096a 5f            	clrw	x
+10626  096b 97            	ld	xl,a
+10627  096c d60000        	ld	a,(_address_table,x)
+10628  096f 97            	ld	xl,a
+10629  0970 a6ba          	ld	a,#186
+10630  0972 95            	ld	xh,a
+10631  0973 8dcf03cf      	callf	f_SWI2C_WriteByte
+10633  0977 84            	pop	a
+10634                     ; 716 	for (i = 0; i < table_size; i++)
+10636  0978 0c01          	inc	(OFST+0,sp)
+10637  097a               L5401:
+10640  097a 7b01          	ld	a,(OFST+0,sp)
+10641  097c c10000        	cp	a,_table_size
+10642  097f 25cf          	jrult	L1401
+10643                     ; 720 	if (FLASH_ReadByte(EEPROM_START_ADDRESS + 1))
+10645  0981 ae4001        	ldw	x,#16385
+10646  0984 89            	pushw	x
+10647  0985 ae0000        	ldw	x,#0
+10648  0988 89            	pushw	x
+10649  0989 8d000000      	callf	f_FLASH_ReadByte
+10651  098d 5b04          	addw	sp,#4
+10652  098f 4d            	tnz	a
+10653  0990 2704          	jreq	L1501
+10654                     ; 722 		Set3DOn = TRUE;
+10656  0992 35010013      	mov	L357_Set3DOn,#1
+10657  0996               L1501:
+10658                     ; 724 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
+10660  0996 4b04          	push	#4
+10661  0998 ae0019        	ldw	x,#25
+10662  099b a6ba          	ld	a,#186
+10663  099d 95            	ld	xh,a
+10664  099e 8dcf03cf      	callf	f_SWI2C_WriteByte
+10666  09a2 84            	pop	a
+10667                     ; 725 	SWI2C_Set3DOnOff(Set3DOn);	
+10669  09a3 c60013        	ld	a,L357_Set3DOn
+10670  09a6 8df708f7      	callf	L557f_SWI2C_Set3DOnOff
+10672                     ; 726 }
+10675  09aa 84            	pop	a
+10676  09ab 87            	retf
+10709                     ; 728 void HDMI_HotPlug(u8 value)
+10709                     ; 729 {
+10710                     	switch	.text
+10711  09ac               f_HDMI_HotPlug:
+10715                     ; 730 	if (value)
+10717  09ac 4d            	tnz	a
+10718  09ad 270c          	jreq	L7601
+10719                     ; 732 		GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+10721  09af 4b40          	push	#64
+10722  09b1 ae5005        	ldw	x,#20485
+10723  09b4 8d000000      	callf	f_GPIO_WriteHigh
+10725  09b8 84            	pop	a
+10727  09b9 200a          	jra	L1701
+10728  09bb               L7601:
+10729                     ; 736 		GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+10731  09bb 4b40          	push	#64
+10732  09bd ae5005        	ldw	x,#20485
+10733  09c0 8d000000      	callf	f_GPIO_WriteLow
+10735  09c4 84            	pop	a
+10736  09c5               L1701:
+10737                     ; 738 }
+10740  09c5 87            	retf
+10742                     	switch	.const
+10743  1d04               L3701_deep_value:
+10744  1d04 30            	dc.b	48
+10745  1d05 80            	dc.b	128
+10746  1d06 60            	dc.b	96
+10747  1d07 50            	dc.b	80
+10748  1d08 70            	dc.b	112
+10749  1d09 70            	dc.b	112
+10750  1d0a 70            	dc.b	112
+10751  1d0b 60            	dc.b	96
+10752  1d0c 80            	dc.b	128
+10753  1d0d 90            	dc.b	144
+10754  1d0e 50            	dc.b	80
+10755  1d0f 90            	dc.b	144
+10756  1d10 a0            	dc.b	160
+10757  1d11 40            	dc.b	64
+10758  1d12 a0            	dc.b	160
+10759  1d13 a8            	dc.b	168
+10760  1d14 30            	dc.b	48
+10761  1d15 a0            	dc.b	160
+10794                     ; 750 void SWI2C_Set_deep(u8 deep)
+10794                     ; 751 {
+10795                     	switch	.text
+10796  09c6               f_SWI2C_Set_deep:
+10798  09c6 88            	push	a
+10799       00000000      OFST:	set	0
+10802                     ; 752 	if (deep == 0)
+10804  09c7 4d            	tnz	a
+10805  09c8 2650          	jrne	L1111
+10806                     ; 754 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, FLASH_ReadByte(0x4000 + REG_0x59 + 1));
+10808  09ca ae400b        	ldw	x,#16395
+10809  09cd 89            	pushw	x
+10810  09ce ae0000        	ldw	x,#0
+10811  09d1 89            	pushw	x
+10812  09d2 8d000000      	callf	f_FLASH_ReadByte
+10814  09d6 5b04          	addw	sp,#4
+10815  09d8 88            	push	a
+10816  09d9 ae0059        	ldw	x,#89
+10817  09dc a6ba          	ld	a,#186
+10818  09de 95            	ld	xh,a
+10819  09df 8dcf03cf      	callf	f_SWI2C_WriteByte
+10821  09e3 84            	pop	a
+10822                     ; 755 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, FLASH_ReadByte(0x4000 + REG_0x5C + 1));
+10824  09e4 ae400d        	ldw	x,#16397
+10825  09e7 89            	pushw	x
+10826  09e8 ae0000        	ldw	x,#0
+10827  09eb 89            	pushw	x
+10828  09ec 8d000000      	callf	f_FLASH_ReadByte
+10830  09f0 5b04          	addw	sp,#4
+10831  09f2 88            	push	a
+10832  09f3 ae005c        	ldw	x,#92
+10833  09f6 a6ba          	ld	a,#186
+10834  09f8 95            	ld	xh,a
+10835  09f9 8dcf03cf      	callf	f_SWI2C_WriteByte
+10837  09fd 84            	pop	a
+10838                     ; 756 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, FLASH_ReadByte(0x4000 + REG_0x5A + 1));
+10840  09fe ae400c        	ldw	x,#16396
+10841  0a01 89            	pushw	x
+10842  0a02 ae0000        	ldw	x,#0
+10843  0a05 89            	pushw	x
+10844  0a06 8d000000      	callf	f_FLASH_ReadByte
+10846  0a0a 5b04          	addw	sp,#4
+10847  0a0c 88            	push	a
+10848  0a0d ae005a        	ldw	x,#90
+10849  0a10 a6ba          	ld	a,#186
+10850  0a12 95            	ld	xh,a
+10851  0a13 8dcf03cf      	callf	f_SWI2C_WriteByte
+10853  0a17 84            	pop	a
+10855  0a18 203f          	jra	L3111
+10856  0a1a               L1111:
+10857                     ; 760 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, deep_value[deep][0]);
+10859  0a1a 7b01          	ld	a,(OFST+1,sp)
+10860  0a1c 97            	ld	xl,a
+10861  0a1d a603          	ld	a,#3
+10862  0a1f 42            	mul	x,a
+10863  0a20 d61d04        	ld	a,(L3701_deep_value,x)
+10864  0a23 88            	push	a
+10865  0a24 ae0059        	ldw	x,#89
+10866  0a27 a6ba          	ld	a,#186
+10867  0a29 95            	ld	xh,a
+10868  0a2a 8dcf03cf      	callf	f_SWI2C_WriteByte
+10870  0a2e 84            	pop	a
+10871                     ; 761 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, deep_value[deep][1]);
+10873  0a2f 7b01          	ld	a,(OFST+1,sp)
+10874  0a31 97            	ld	xl,a
+10875  0a32 a603          	ld	a,#3
+10876  0a34 42            	mul	x,a
+10877  0a35 d61d05        	ld	a,(L3701_deep_value+1,x)
+10878  0a38 88            	push	a
+10879  0a39 ae005c        	ldw	x,#92
+10880  0a3c a6ba          	ld	a,#186
+10881  0a3e 95            	ld	xh,a
+10882  0a3f 8dcf03cf      	callf	f_SWI2C_WriteByte
+10884  0a43 84            	pop	a
+10885                     ; 762 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, deep_value[deep][2]);
+10887  0a44 7b01          	ld	a,(OFST+1,sp)
+10888  0a46 97            	ld	xl,a
+10889  0a47 a603          	ld	a,#3
+10890  0a49 42            	mul	x,a
+10891  0a4a d61d06        	ld	a,(L3701_deep_value+2,x)
+10892  0a4d 88            	push	a
+10893  0a4e ae005a        	ldw	x,#90
+10894  0a51 a6ba          	ld	a,#186
+10895  0a53 95            	ld	xh,a
+10896  0a54 8dcf03cf      	callf	f_SWI2C_WriteByte
+10898  0a58 84            	pop	a
+10899  0a59               L3111:
+10900                     ; 764 }
+10903  0a59 84            	pop	a
+10904  0a5a 87            	retf
+10930                     	switch	.const
+10931  1d16               L231:
+10932  1d16 00000002      	dc.l	2
+10933                     ; 766 void SWI2C_UpdateTimer(void)
+10933                     ; 767 {
+10934                     	switch	.text
+10935  0a5b               f_SWI2C_UpdateTimer:
+10939                     ; 768 	if (frc_update_timer > TIMER_EXPIRED)
+10941  0a5b ae0000        	ldw	x,#L3_frc_update_timer
+10942  0a5e 8d000000      	callf	d_ltor
+10944  0a62 ae1d16        	ldw	x,#L231
+10945  0a65 8d000000      	callf	d_lcmp
+10947  0a69 2509          	jrult	L5211
+10948                     ; 770 		frc_update_timer--;
+10950  0a6b ae0000        	ldw	x,#L3_frc_update_timer
+10951  0a6e a601          	ld	a,#1
+10952  0a70 8d000000      	callf	d_lgsbc
+10954  0a74               L5211:
+10955                     ; 773 	if (Backlight_on_timer > TIMER_EXPIRED)
+10957  0a74 ae0004        	ldw	x,#L5_Backlight_on_timer
+10958  0a77 8d000000      	callf	d_ltor
+10960  0a7b ae1d16        	ldw	x,#L231
+10961  0a7e 8d000000      	callf	d_lcmp
+10963  0a82 2509          	jrult	L7211
+10964                     ; 775 		Backlight_on_timer--;
+10966  0a84 ae0004        	ldw	x,#L5_Backlight_on_timer
+10967  0a87 a601          	ld	a,#1
+10968  0a89 8d000000      	callf	d_lgsbc
+10970  0a8d               L7211:
+10971                     ; 778 	if (secret_detect_timer > TIMER_EXPIRED)
+10973  0a8d ae0008        	ldw	x,#L7_secret_detect_timer
+10974  0a90 8d000000      	callf	d_ltor
+10976  0a94 ae1d16        	ldw	x,#L231
+10977  0a97 8d000000      	callf	d_lcmp
+10979  0a9b 2509          	jrult	L1311
+10980                     ; 780 		secret_detect_timer--;
+10982  0a9d ae0008        	ldw	x,#L7_secret_detect_timer
+10983  0aa0 a601          	ld	a,#1
+10984  0aa2 8d000000      	callf	d_lgsbc
+10986  0aa6               L1311:
+10987                     ; 783 	if (signal_detect_timer > TIMER_EXPIRED)
+10989  0aa6 ae000c        	ldw	x,#L11_signal_detect_timer
+10990  0aa9 8d000000      	callf	d_ltor
+10992  0aad ae1d16        	ldw	x,#L231
+10993  0ab0 8d000000      	callf	d_lcmp
+10995  0ab4 2509          	jrult	L3311
+10996                     ; 785 		signal_detect_timer--;
+10998  0ab6 ae000c        	ldw	x,#L11_signal_detect_timer
+10999  0ab9 a601          	ld	a,#1
+11000  0abb 8d000000      	callf	d_lgsbc
+11002  0abf               L3311:
+11003                     ; 787 }
+11006  0abf 87            	retf
+11172                     	xref	_table_size
+11173                     	xref	_address_table
+11174                     	switch	.bss
+11175  0000               L52_Have_FRC:
+11176  0000 00            	ds.b	1
+11177  0001               L12_singal_change_count:
+11178  0001 00            	ds.b	1
+11179  0002               L71_signal_status:
+11180  0002 00            	ds.b	1
+11181                     	xref	f_IT6802_fsm
+11182                     	xref	f_IT6802_fsm_init
+11183                     	xdef	f_SWI2C_UpdateTimer
+11184                     	xdef	f_SWI2C_Set_deep
+11185                     	xdef	f_SWI2C_Toggle3DOnOff
+11186                     	xdef	f_HDMI_HotPlug
+11187                     	xdef	f_FPGA_Init
+11188                     	xdef	f_SWI2C_WriteWeavingTable
+11189                     	xdef	f_SWI2C_VerifyKey
+11190                     	xdef	f_SWI2C_TestDevice
+11191                     	xdef	f_SWI2C_Write2Byte
+11192                     	xdef	f_SWI2C_WriteBytes
+11193                     	xdef	f_SWI2C_WriteByte
+11194                     	xdef	f_SWI2C_ReadBytes
+11195                     	xdef	f_SWI2C_ReadByte
+11196                     	xdef	f_SWI2C_ResetHDMI
+11197                     	xdef	f_SWI2C_ResetFPGA
+11198                     	xdef	f_SWI2C_ToggleI2CMode
+11199                     	xdef	f_SWI2C_ProcessPower
+11200                     	xdef	f_SWI2C_SystemPowerDown
+11201                     	xdef	f_SWI2C_SystemPowerUp
+11202                     	xdef	f_SWI2C_Update
+11203                     	xdef	f_SWI2C_Init
+11204                     	xref	f_IR_DelayNMiliseconds
+11205                     	xref	f_FLASH_ReadByte
+11206                     	xref	f_TIM1_CtrlPWMOutputs
+11207                     	xref	f_TIM1_Cmd
+11208                     	xref	f_TIM1_OC1Init
+11209                     	xref	f_TIM1_TimeBaseInit
+11210                     	xref	f_GPIO_ReadInputPin
+11211                     	xref	f_GPIO_WriteReverse
+11212                     	xref	f_GPIO_WriteLow
+11213                     	xref	f_GPIO_WriteHigh
+11214                     	xref	f_GPIO_Init
+11215                     	xref.b	c_lreg
+11216                     	xref.b	c_x
+11236                     	xref	d_lgsbc
+11237                     	xref	d_itolx
+11238                     	xref	d_lcmp
+11239                     	xref	d_ltor
+11240                     	xref	d_imul
+11241                     	end

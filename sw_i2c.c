@@ -71,7 +71,6 @@ static u8 signal_status, singal_change_count;
 static u8 I2C_stop = FALSE;
 static u8 Have_FRC;
 
-#if FPGA_KEY_VERIFY
 static const u8 secret_key_table1[] =
 {
 	0x02, 0xa1, 0x7e, 0x7d, 0x1e, 0x1a, 0x2b, 0x24, 0xa4, 0x3c, 0xa0, 0x6e, 0x23, 0xa9, 0xbf, 0x5d,
@@ -151,7 +150,6 @@ static const u8 secret_key_table4[] =
 	0x00, 0xa9, 0x14, 0x62, 0x4a, 0xc4, 0xde, 0x48, 0xd3, 0xb3, 0x2e, 0x0b, 0x0d, 0x40, 0x3e, 0xe3,
 	0x2f, 0x73, 0x70, 0xef, 0x9c, 0x36, 0x42, 0x32, 0xad, 0x20, 0x99, 0x59, 0x7d, 0xfd, 0xba, 0x1b
 };
-#endif
 /*==========================================================================*/
 static void _Delay_5us(void)
 {
@@ -457,6 +455,23 @@ u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 	return IIC_OK;
 }
 /*==========================================================================*/
+void SWI2C_VerifyKey(void)
+{
+	u8 secret_key[4], convert_key[4], secret_status;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
+	if ((secret_status&0x03) == 1)
+	{
+		SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
+		convert_key[0] = secret_key_table1[secret_key[0]];
+		convert_key[1] = secret_key_table2[secret_key[1]];
+		convert_key[2] = secret_key_table3[secret_key[2]];
+		convert_key[3] = secret_key_table4[secret_key[3]];
+		SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, convert_key);
+		secret_status = secret_status|0x07;
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
+	}
+}
+/*==========================================================================*/
 void SWI2C_Init(void)
 {
 	GPIO_Init(IIC_SCL_PORT, IIC_SCL_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
@@ -519,20 +534,7 @@ void SWI2C_Update(void)
 #if FPGA_KEY_VERIFY
 		if (secret_detect_timer == TIMER_EXPIRED)
 		{
-			u8 secret_key[4], convert_key[4], secret_status;
-			SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
-			if ((secret_status&0x03) == 1)
-			{
-				SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
-				convert_key[0] = secret_key_table1[secret_key[0]];
-				convert_key[1] = secret_key_table2[secret_key[1]];
-				convert_key[2] = secret_key_table3[secret_key[2]];
-				convert_key[3] = secret_key_table4[secret_key[3]];
-				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, convert_key);
-				secret_status = secret_status|0x07;
-				SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
-				//SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
-			}
+			SWI2C_VerifyKey();
 			secret_detect_timer = SECRET_DETECT_TIME;
 		}
 #endif
