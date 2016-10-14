@@ -261,7 +261,9 @@ static u8 SWI2C_GetSignalStatus(void)
 	#if CHECK_SIGNAL_RESOLUTION
 	u8 val;
 	u16 HActive, VActive;
+	#endif
 	SWI2C_ReadByte(0x90, 0x0A, &p0_status);
+	#if CHECK_SIGNAL_RESOLUTION
 	SWI2C_ReadByte(0x90, 0x9F, &val);
 	HActive = val&0x3F;
 	HActive = HActive<<8;

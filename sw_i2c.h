@@ -24,11 +24,6 @@ REG_0x5C,
 REG_0x0D
 };
 
-#define INIT_VERTICAL_PANEL		1
-#define WRITE_WEAVING_TABLE		1
-#define TEST_WEAVING_TABLE		1
-#define FPGA_KEY_VERIFY			1
-#define CHECK_SIGNAL_RESOLUTION	1
 #define EEPROM_START_ADDRESS 	0x4000
 
 extern void SWI2C_Init(void);
