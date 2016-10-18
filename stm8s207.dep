@@ -23,7 +23,7 @@ ExternDep= stm8s_flash.c  "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.
 ExternDep= stm8s_flash.c  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h" stm8s_flash.h  stm8s.h stm8s_conf.h stm8s_clk.h stm8s_gpio.h
 
 [Root.Source Files.uart.c.Config.0]
-ExternDep= uart.c "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h"  "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\string.h" stm8s.h  stm8s_conf.h stm8s_clk.h stm8s_gpio.h stm8s_uart1.h stm8s_uart3.h sw_i2c.h  ir.h
+ExternDep= uart.c "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h"  "c:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\string.h" stm8s.h  stm8s_conf.h stm8s_clk.h stm8s_gpio.h stm8s_uart1.h stm8s_uart3.h  stm8s_flash.h sw_i2c.h ir.h
 
 [Root.Source Files.uart.c.Config.1]
 ExternDep= uart.c "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h"  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\string.h" stm8s.h  stm8s_conf.h stm8s_clk.h stm8s_gpio.h stm8s_uart1.h stm8s_uart3.h sw_i2c.h  ir.h

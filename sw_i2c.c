@@ -271,6 +271,7 @@ static u8 SWI2C_GetSignalStatus(void)
 	}
 }
 /*==========================================================================*/
+#if WRITE_WEAVING_TABLE
 static const u16 weaving_table[] =
 {
 0x8018
@@ -336,6 +337,7 @@ static void FPGA_WriteWeavingTable(void)
 		SWI2C_Write2Byte(FPGA_ADDRESS, 0xC6, weaving_table[i]);
 	}
 }
+#endif
 /*==========================================================================*/
 #if TEST_WEAVING_TABLE
 static const u8 test_weaving_table[4][] =
@@ -638,7 +640,9 @@ void SWI2C_ResetFPGA(void)
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(1500);
+#if WRITE_WEAVING_TABLE
 		FPGA_WriteWeavingTable();
+#endif
 		FPGA_Init();
 	}
 }
