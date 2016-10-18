@@ -2692,10 +2692,10 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 
 /* Exported functions ------------------------------------------------------- */
 
-#define INIT_VERTICAL_PANEL		0
-#define WRITE_WEAVING_TABLE		0
-#define TEST_WEAVING_TABLE		0
-#define FPGA_KEY_VERIFY			1
+#define INIT_VERTICAL_PANEL		1
+#define WRITE_WEAVING_TABLE		1
+#define TEST_WEAVING_TABLE		1
+#define FPGA_KEY_VERIFY			0
 #define CHECK_SIGNAL_RESOLUTION	1
 #define DEBUG_USE_UART1			1
 
