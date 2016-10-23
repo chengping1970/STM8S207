@@ -10,7 +10,6 @@
 #include "sw_i2c.h"
 #include "ir.h"
 
-#define PRINTF_USE_UART3		1
 #define UART_BUFFER_MAX_LENGTH	(256 + 5)
 
 #define DP_COMMAND			2
