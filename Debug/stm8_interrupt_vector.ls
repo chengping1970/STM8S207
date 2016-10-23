@@ -70,8 +70,8 @@
  136  004d 00            	dc.b	page(f_NonHandledInterrupt)
  137  004e 0000          	dc.w	f_NonHandledInterrupt
  138  0050 82            	dc.b	130
- 140  0051 00            	dc.b	page(f_NonHandledInterrupt)
- 141  0052 0000          	dc.w	f_NonHandledInterrupt
+ 140  0051 00            	dc.b	page(f_UART_ISR)
+ 141  0052 0000          	dc.w	f_UART_ISR
  142  0054 82            	dc.b	130
  144  0055 00            	dc.b	page(f_NonHandledInterrupt)
  145  0056 0000          	dc.w	f_NonHandledInterrupt
@@ -79,8 +79,8 @@
  148  0059 00            	dc.b	page(f_NonHandledInterrupt)
  149  005a 0000          	dc.w	f_NonHandledInterrupt
  150  005c 82            	dc.b	130
- 152  005d 00            	dc.b	page(f_UART_ISR)
- 153  005e 0000          	dc.w	f_UART_ISR
+ 152  005d 00            	dc.b	page(f_NonHandledInterrupt)
+ 153  005e 0000          	dc.w	f_NonHandledInterrupt
  154  0060 82            	dc.b	130
  156  0061 00            	dc.b	page(f_NonHandledInterrupt)
  157  0062 0000          	dc.w	f_NonHandledInterrupt

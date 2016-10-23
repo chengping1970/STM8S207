@@ -1,6 +1,6 @@
 /*SW_I2C.C file
  */
-
+#include "stdio.h"
 #include "stm8s.h"
 #include "stm8s_gpio.h"
 #include "stm8s_exti.h"
@@ -47,7 +47,7 @@
 #define FRC_UPDATE_TIME			(500 + 1)
 #define SECRET_DETECT_TIME		(500 + 1)
 #define SINGNAL_TETECT_TIME		(150 + 1) 
-#define BACKLIGHT_DELAY_TIME	(6000 + 1)
+#define BACKLIGHT_DELAY_TIME	(1000 + 1)
 
 #define SIGNAL_STABLE_COUNT		5
 #define NO_SIGNAL_COUNT			2
@@ -61,7 +61,7 @@
 
 static u32 frc_update_timer = TIMER_EXPIRED;
 static u32 Backlight_on_timer = TIMER_STOPPED;
-#if FPGA_KEY_VERIFY
+#if FPGA_KEY_VERIFY_AUTO
 static u32 secret_detect_timer = TIMER_EXPIRED;
 #endif
 static u32 signal_detect_timer	= TIMER_EXPIRED;
@@ -70,7 +70,10 @@ static u8 Power_status = FALSE;
 static u8 signal_status, singal_change_count;
 static u8 I2C_stop = FALSE;
 static u8 Have_FRC;
-
+#if MHL_IIC_ERROR_RESET
+static u8 I2C_error_count = 0;
+#endif
+#if FPGA_KEY_VERIFY
 static const u8 secret_key_table1[] =
 {
 	0x02, 0xa1, 0x7e, 0x7d, 0x1e, 0x1a, 0x2b, 0x24, 0xa4, 0x3c, 0xa0, 0x6e, 0x23, 0xa9, 0xbf, 0x5d,
@@ -150,6 +153,7 @@ static const u8 secret_key_table4[] =
 	0x00, 0xa9, 0x14, 0x62, 0x4a, 0xc4, 0xde, 0x48, 0xd3, 0xb3, 0x2e, 0x0b, 0x0d, 0x40, 0x3e, 0xe3,
 	0x2f, 0x73, 0x70, 0xef, 0x9c, 0x36, 0x42, 0x32, 0xad, 0x20, 0x99, 0x59, 0x7d, 0xfd, 0xba, 0x1b
 };
+#endif
 /*==========================================================================*/
 static void _Delay_5us(void)
 {
@@ -304,12 +308,6 @@ static void FPGA_WriteWeavingTable(void)
 		SWI2C_WriteByte(FPGA_ADDRESS, 0xC7, weaving_table[i]);
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, 0x80);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
 }
 #endif
 /*==========================================================================*/
@@ -475,6 +473,7 @@ u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 /*==========================================================================*/
 void SWI2C_VerifyKey(void)
 {
+#if	FPGA_KEY_VERIFY
 	u8 secret_key[4], convert_key[4], secret_status;
 	SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
 	if ((secret_status&0x03) == 1)
@@ -488,6 +487,7 @@ void SWI2C_VerifyKey(void)
 		secret_status = secret_status|0x07;
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
 	}
+#endif
 }
 /*==========================================================================*/
 void SWI2C_Init(void)
@@ -506,7 +506,8 @@ void SWI2C_Init(void)
 	GPIO_Init(LED_G_PORT, LED_G_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 
 	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-
+	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	
 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	GPIO_Init(BACKLIGHT_PWM_PORT, BACKLIGHT_PWM_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	GPIO_Init(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
@@ -517,6 +518,9 @@ void SWI2C_Init(void)
 	           TIM1_OCNIDLESTATE_RESET);
 	TIM1_Cmd(ENABLE);
 	TIM1_CtrlPWMOutputs(ENABLE);
+#if MHL_IIC_ERROR_RESET
+	I2C_error_count = 0;
+#endif
 }
 /*==========================================================================*/
 void SWI2C_Update(void)
@@ -549,7 +553,7 @@ void SWI2C_Update(void)
 			frc_update_timer = FRC_UPDATE_TIME;
 		}	
 
-#if FPGA_KEY_VERIFY
+#if FPGA_KEY_VERIFY_AUTO
 		if (secret_detect_timer == TIMER_EXPIRED)
 		{
 			SWI2C_VerifyKey();
@@ -618,6 +622,11 @@ void SWI2C_SystemPowerUp(void)
 	IR_DelayNMiliseconds(200);
 	IT6802_fsm_init();
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
+#if ENABLE_HDMI_HPD
+	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	IR_DelayNMiliseconds(2000);
+	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+#endif
 	singal_change_count = 0;
 	signal_status = FALSE;
 }
@@ -659,6 +668,9 @@ void SWI2C_SystemPowerDown(void)
 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+#if ENABLE_HDMI_HPD
+	//GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+#endif
 	Backlight_on_timer = TIMER_STOPPED;
 	Power_status = FALSE;
 	I2C_stop = FALSE;
@@ -698,19 +710,22 @@ static u8 Set3DOn = FALSE;
 
 static void SWI2C_Set3DOnOff(u8 OnOff)
 {
-	u8 reg_value, retry;
+	u8 reg_value, insert, retry;
 	if (OnOff)
 	{
 		reg_value = 0x80;
+		insert = 0;
 	}
 	else
 	{
 		reg_value = 0x0;
+		insert = 1;
 	}
 	for (retry = 0; retry < 3; retry++)
 	{
 		u8 value;
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, insert);
 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
 		if (value == reg_value)
 		{
@@ -740,6 +755,12 @@ void FPGA_Init(void)
 		Set3DOn = TRUE;
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, 0x00);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
 	SWI2C_Set3DOnOff(Set3DOn);	
 }
 /*==========================================================================*/
@@ -781,6 +802,20 @@ void SWI2C_Set_deep(u8 deep)
 	}
 }
 /*==========================================================================*/
+#if MHL_IIC_ERROR_RESET
+void SWI2C_ErrorProcess(void)
+{
+	I2C_error_count++;
+	if (I2C_error_count > 50)
+	{
+		printf("I2C Error, reboot!!!");
+		IR_DelayNMiliseconds(1000);
+		WWDG->CR |= 0x80;
+		WWDG->CR &= ~0x40;
+	}
+}
+#endif
+/*==========================================================================*/
 void SWI2C_UpdateTimer(void)
 {
 	if (frc_update_timer > TIMER_EXPIRED)
@@ -792,7 +827,7 @@ void SWI2C_UpdateTimer(void)
 	{
 		Backlight_on_timer--;
 	}
-#if FPGA_KEY_VERIFY
+#if FPGA_KEY_VERIFY_AUTO
 	if (secret_detect_timer > TIMER_EXPIRED)
 	{
 		secret_detect_timer--;

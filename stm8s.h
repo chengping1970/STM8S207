@@ -2696,8 +2696,11 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define WRITE_WEAVING_TABLE		1
 #define TEST_WEAVING_TABLE		1
 #define FPGA_KEY_VERIFY			0
+#define FPGA_KEY_VERIFY_AUTO	0
+#define ENABLE_HDMI_HPD			1
 #define CHECK_SIGNAL_RESOLUTION	1
-#define DEBUG_USE_UART1			1
+#define DEBUG_USE_UART1			0
+#define MHL_IIC_ERROR_RESET		1
 
 #endif /* __STM8S_H */
 

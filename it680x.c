@@ -790,6 +790,9 @@ static unsigned char hdmirxrd( unsigned char RegAddr)
 	{
 	MHLRX_DEBUG_PRINTF(printf("HDMI Read ERROR !!!"));
 	MHLRX_DEBUG_PRINTF(printf("=====  Read Reg0x%x =  \r\n",RegAddr));
+#if MHL_IIC_ERROR_RESET
+	//SWI2C_ErrorProcess();
+#endif
 	}
 	return mDataIn;
 }
@@ -803,10 +806,13 @@ static unsigned char hdmirxwr( unsigned char RegAddr,unsigned char DataIn)
 	flag= i2c_write_byte(HDMI_ADDR, RegAddr, 1, &DataIn, HDMI_DEV);
 	if(flag==0)
 	{
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	MHLRX_DEBUG_PRINTF(printf("HDMI I2C ERROR !!!"));
 	MHLRX_DEBUG_PRINTF(printf("=====  Write Reg0x%x=%x =====  \r\n",RegAddr,DataIn));
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+#if MHL_IIC_ERROR_RESET
+	//SWI2C_ErrorProcess();
+#endif
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	}
 	return !flag;
 }
@@ -826,10 +832,13 @@ static void hdmirxbwr( unsigned char offset, unsigned char byteno, unsigned char
 	flag= i2c_write_byte(HDMI_ADDR, offset, byteno, rddata, HDMI_DEV);
 	if(flag==0)
 	{
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	MHLRX_DEBUG_PRINTF(printf("IT6802 I2C ERROR !!!"));
 	MHLRX_DEBUG_PRINTF(printf("=====  Write Reg0x%x=%x =====  \r\n",offset,rddata));
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+#if MHL_IIC_ERROR_RESET
+	//SWI2C_ErrorProcess();
+#endif
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	}
 }
 
@@ -841,10 +850,13 @@ static unsigned char mhlrxrd( unsigned char offset )
 	FLAG=i2c_read_byte(MHL_ADDR, offset, 1, &mDataIn, HDMI_DEV);
 	if(FLAG==0)
 	{
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	MHLRX_DEBUG_PRINTF(printf("MHL I2C ERROR !!!"));
 	MHLRX_DEBUG_PRINTF(printf("=====  read Reg0x%x=%x =====  \r\n",offset,mDataIn));
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+#if MHL_IIC_ERROR_RESET
+	SWI2C_ErrorProcess();
+#endif
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	}
 	return mDataIn;
 }
@@ -855,10 +867,13 @@ static unsigned char mhlrxwr( unsigned char offset, unsigned char ucdata )
 	flag= i2c_write_byte(MHL_ADDR, offset, 1, &ucdata, HDMI_DEV);
 	if(flag==0)
 	{
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	MHLRX_DEBUG_PRINTF(printf("MHL I2C ERROR !!!"));
 	MHLRX_DEBUG_PRINTF(printf("=====  Write Reg0x%x=%x =====  \r\n",offset,ucdata));
-	MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
+#if MHL_IIC_ERROR_RESET
+	SWI2C_ErrorProcess();
+#endif
+	//MHLRX_DEBUG_PRINTF(printf("====================================\r\n"));
 	}
 	return !flag;
 }

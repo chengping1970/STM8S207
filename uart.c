@@ -66,6 +66,10 @@ INTERRUPT_HANDLER(UART_ISR, 21)
 	{
 		uart_data_length = UART_BUFFER_MAX_LENGTH + 2;
 	}
+	else if (uart_rx_buffer[2] == DATA_COMMAND_WRITE_CONFIG)
+	{
+		uart_data_length = 27;
+	}
 	else
 	{
 		uart_data_length = 8;
@@ -103,6 +107,10 @@ INTERRUPT_HANDLER(UART_ISR, 18)
 	if (uart_rx_buffer[2] == DATA_COMMAND_WRITE_BANK)
 	{
 		uart_data_length = UART_BUFFER_MAX_LENGTH + 2;
+	}
+	else if (uart_rx_buffer[2] == DATA_COMMAND_WRITE_CONFIG)
+	{
+		uart_data_length = 27;
 	}
 	else
 	{
