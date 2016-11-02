@@ -2693,6 +2693,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 /* Exported functions ------------------------------------------------------- */
 
 #define INIT_VERTICAL_PANEL		1
+#define START_RESET_HDMI		1
 #define WRITE_WEAVING_TABLE		1
 #define TEST_WEAVING_TABLE		1
 #define FPGA_KEY_VERIFY			0
@@ -2701,6 +2702,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define CHECK_SIGNAL_RESOLUTION	1
 #define DEBUG_USE_UART1			0
 #define MHL_IIC_ERROR_RESET		1
+#define DEBUG_PRINTF(x)			x
 
 #endif /* __STM8S_H */
 

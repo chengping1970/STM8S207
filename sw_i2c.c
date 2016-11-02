@@ -47,7 +47,7 @@
 #define FRC_UPDATE_TIME			(500 + 1)
 #define SECRET_DETECT_TIME		(500 + 1)
 #define SINGNAL_TETECT_TIME		(150 + 1) 
-#define BACKLIGHT_DELAY_TIME	(1000 + 1)
+#define BACKLIGHT_DELAY_TIME	(5000 + 1)
 
 #define SIGNAL_STABLE_COUNT		5
 #define NO_SIGNAL_COUNT			2
@@ -574,7 +574,7 @@ void SWI2C_Update(void)
 				{
 					signal_status = TRUE;
 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-					#if INIT_VERTICAL_PANEL
+					#if START_RESET_HDMI
 					SWI2C_ResetHDMI();
 					#endif
 					SWI2C_ResetFPGA();
@@ -669,7 +669,7 @@ void SWI2C_SystemPowerDown(void)
 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
 #if ENABLE_HDMI_HPD
-	//GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 #endif
 	Backlight_on_timer = TIMER_STOPPED;
 	Power_status = FALSE;
@@ -755,7 +755,6 @@ void FPGA_Init(void)
 		Set3DOn = TRUE;
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, 0x00);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
@@ -808,7 +807,7 @@ void SWI2C_ErrorProcess(void)
 	I2C_error_count++;
 	if (I2C_error_count > 50)
 	{
-		printf("I2C Error, reboot!!!");
+		DEBUG_PRINTF(printf("I2C Error, reboot!!!"));
 		IR_DelayNMiliseconds(1000);
 		WWDG->CR |= 0x80;
 		WWDG->CR &= ~0x40;
