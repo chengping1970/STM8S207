@@ -130,8 +130,8 @@
 #define CBUSWAITTIME    	10
 #define CBUSWAITNUM     	10
 
-#define IT6802_CHIP 		0
-#define IT6801_CHIP 		1
+#define IT6802_CHIP 		1
+#define IT6801_CHIP 		0
 #if (IT6802_CHIP)
 #define _IT6802_
 #endif
@@ -749,7 +749,7 @@ static void IT6802HDMIInterruptHandler(struct it6802_dev_data *it6802);
 
 
 #ifndef Enable_IR
-static void it6802AutoPortSelect(struct it6802_dev_data *it6802);
+//static void it6802AutoPortSelect(struct it6802_dev_data *it6802);
 #endif
 static void it6802ShowErrorCount(void);
 void show_vid_info( void );
@@ -1113,7 +1113,7 @@ void IT6802_fsm_init(void)
 #else
 	HDMI_HotPlug(1);	//set port 1 HPD=1
 #endif
-	it6802PortSelect(0);	// select port 0
+	it6802PortSelect(1);	// select port 0
 }
 
 #endif
@@ -4215,7 +4215,7 @@ void IT6802_fsm(void)
 
 
 	#ifndef Enable_IR
-	it6802AutoPortSelect(it6802data);
+	//it6802AutoPortSelect(it6802data);
 	#endif
 	it6802ShowErrorCount();
 
@@ -4263,7 +4263,7 @@ static void it6802ShowErrorCount(void)
 
 }
 
-static void it6802AutoPortSelect(struct it6802_dev_data *it6802)
+/*static void it6802AutoPortSelect(struct it6802_dev_data *it6802)
 {
 #ifdef _IT6802_
 	if(SEL_PORT_1==1)
@@ -4282,7 +4282,7 @@ static void it6802AutoPortSelect(struct it6802_dev_data *it6802)
 
 	}
 #endif
-}
+}*/
 
 
 void get_vid_info( void )

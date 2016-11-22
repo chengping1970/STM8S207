@@ -12,12 +12,20 @@
 
 #include "ir.h"
 #include "sw_i2c.h"
+#include "it680x.h"
+#include "Mhlrx.h"
+#include "Mhlrx_reg.h"
 
 #define IR_IN_PORT			GPIOA
 #define IR_IN_PIN			GPIO_PIN_6
 
-#define KEY_IN_PORT			GPIOB
-#define KEY_IN_PIN			GPIO_PIN_7
+#define KEY_IN_PORT			GPIOE
+#define KEY_IN_PIN			GPIO_PIN_6
+
+#define HDMI5V_IN_PORT		GPIOB
+#define HDMI5V_0_IN_PIN		GPIO_PIN_7
+#define HDMI5V_1_IN_PIN		GPIO_PIN_6
+
 
 #define IRKEY_DUMY 			0xFF
 
@@ -89,7 +97,9 @@ static u8 ir_state, ir_bit_number, ir_code[4], head_type, receive_code, ir_press
 static u8 ir_release_timer; 
 static volatile u32 delay_timer;
 static u32 ir_process_timer, Key_detect_timer;
-static u16 Conversion_Value;
+static u8 HDMI_port = 1;
+static u16 HDMI0_5V, HDMI1_5V, key_value;
+
 #if 0
 static u8 value_c8;
 static u8 value_c9;
@@ -170,10 +180,8 @@ void IR_IN_Init(void)
 	TIM2_Cmd(ENABLE); 
 
 	GPIO_Init(KEY_IN_PORT, KEY_IN_PIN, GPIO_MODE_IN_FL_NO_IT);
-	ADC2_Init(ADC2_CONVERSIONMODE_CONTINUOUS, ADC2_CHANNEL_7, ADC2_PRESSEL_FCPU_D2,\
-					ADC2_EXTTRIG_TIM, DISABLE, ADC2_ALIGN_RIGHT, ADC2_SCHMITTTRIG_CHANNEL7, DISABLE);
-	//ADC2_ITConfig(ENABLE);
-	ADC2_StartConversion();
+	GPIO_Init(HDMI5V_IN_PORT, HDMI5V_0_IN_PIN, GPIO_MODE_IN_FL_NO_IT);
+	GPIO_Init(HDMI5V_IN_PORT, HDMI5V_0_IN_PIN, GPIO_MODE_IN_FL_NO_IT);
 
 	ir_state = IR_RECEIVE_HEAD;
 	ir_pressed = FALSE;	
@@ -208,6 +216,26 @@ void IR_Update(void)
 			u8 ir_key = _convert_IR();
 			switch (ir_key)
 			{
+				case KEY_PC:
+					if (HDMI_port == 1)
+					{
+						HDMI_port = 0;
+						it6802PortSelect(0);
+						HDMI_HotPlug(0);
+						IR_DelayNMiliseconds(2000);
+						HDMI_HotPlug(1);
+					}
+					break;
+				case KEY_HDMI:
+					if (HDMI_port == 0)
+					{
+						HDMI_port = 1;
+						it6802PortSelect(1);
+						HDMI_HotPlug(0);
+						IR_DelayNMiliseconds(2000);
+						HDMI_HotPlug(1);
+					}
+					break;
 				case KEY_DEBUG:
 					SWI2C_ToggleI2CMode();
 					break;
@@ -240,12 +268,6 @@ void IR_Update(void)
 					break;
 				case KEY_RESET_FPGA:
 					SWI2C_ResetFPGA();
-					break;
-				case KEY_PC:
-					{
-						WWDG->CR |= 0x80;
-						WWDG->CR &= ~0x40;
-					}
 					break;
 				#if TEST_WEAVING_TABLE
 				case KEY_TEST0:
@@ -289,9 +311,28 @@ void IR_Update(void)
 
 	if (Key_detect_timer == TIMER_EXPIRED)
 	{
-		Conversion_Value = ADC2_GetConversionValue();
+		ADC2_Init(ADC2_CONVERSIONMODE_CONTINUOUS, ADC2_CHANNEL_7, ADC2_PRESSEL_FCPU_D2,\
+					ADC2_EXTTRIG_TIM, DISABLE, ADC2_ALIGN_RIGHT, ADC2_SCHMITTTRIG_CHANNEL7, DISABLE);
+		ADC2_StartConversion();
+		HDMI0_5V = ADC2_GetConversionValue();
+
+		ADC2_Init(ADC2_CONVERSIONMODE_CONTINUOUS, ADC2_CHANNEL_6, ADC2_PRESSEL_FCPU_D2,\
+					ADC2_EXTTRIG_TIM, DISABLE, ADC2_ALIGN_RIGHT, ADC2_SCHMITTTRIG_CHANNEL6, DISABLE);
+		ADC2_StartConversion();
+		HDMI1_5V = ADC2_GetConversionValue();
+		
+		ADC2_Init(ADC2_CONVERSIONMODE_CONTINUOUS, ADC2_CHANNEL_9, ADC2_PRESSEL_FCPU_D2,\
+						ADC2_EXTTRIG_TIM, DISABLE, ADC2_ALIGN_RIGHT, ADC2_SCHMITTTRIG_CHANNEL9, DISABLE);
+		ADC2_StartConversion();
+		key_value = ADC2_GetConversionValue();
+				
 		Key_detect_timer = KEY_DETECT_TIME;
 	}
+}
+/*==========================================================================*/
+u8 IR_GetHDMIPort(void)
+{
+	return HDMI_port;
 }
 /*==========================================================================*/
 INTERRUPT_HANDLER(IR_IN_ISR, 3)

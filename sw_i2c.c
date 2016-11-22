@@ -12,34 +12,36 @@
 #include "Mhlrx.h"
 #include "Mhlrx_reg.h"
 
-#define IIC_SCL_PORT			GPIOB
-#define IIC_SCL_PIN				GPIO_PIN_4
-#define IIC_SDA_PORT			GPIOB
-#define IIC_SDA_PIN				GPIO_PIN_5
-
+#define IIC_PORT				GPIOB
+#define IIC_SCL0_PIN			GPIO_PIN_4
+#define IIC_SDA0_PIN			GPIO_PIN_5
+#define IIC_SCL1_PIN			GPIO_PIN_2
+#define IIC_SDA1_PIN			GPIO_PIN_3
 
 #define FPGA_RESET_PORT			GPIOC
 #define FPGA_RESET_PIN			GPIO_PIN_4
 #define IT680X_RESET_PORT		GPIOB
 #define IT680X_RESET_PIN		GPIO_PIN_0
 
-#define POWER_ONOFF_PORT		GPIOC
-#define POWER_ONOFF_PIN			GPIO_PIN_5
-
-#define BACKLIGHT_ONOFF_PORT	GPIOC
-#define BACKLIGHT_ONOFF_PIN		GPIO_PIN_7
-#define BACKLIGHT_PWM_PORT		GPIOC
-#define BACKLIGHT_PWM_PIN		GPIO_PIN_6
-#define VPANEL_ONOFF_PORT		GPIOG
+#define POWER_ONOFF_PORT		GPIOE
+#define POWER_ONOFF_PIN			GPIO_PIN_2
+#define BACKLIGHT_ONOFF_PORT	GPIOE
+#define BACKLIGHT_ONOFF_PIN		GPIO_PIN_1
+#define VPANEL_ONOFF_PORT		GPIOE
 #define VPANEL_ONOFF_PIN		GPIO_PIN_0
 
-#define LED_G_PORT				GPIOD
-#define LED_G_PIN				GPIO_PIN_3
-#define LED_R_PORT				GPIOE
-#define LED_R_PIN				GPIO_PIN_0
+#define BACKLIGHT_PWM_PORT		GPIOC
+#define BACKLIGHT_PWM_PIN		GPIO_PIN_1
 
-#define HDMI_HOTPLUG_PORT		GPIOB
-#define HDMI_HOTPLUG_PIN		GPIO_PIN_6
+#define LED_G_PORT				GPIOD
+#define LED_G_PIN				GPIO_PIN_4
+#define LED_R_PORT				GPIOD
+#define LED_R_PIN				GPIO_PIN_3
+
+#define HDMI0_HOTPLUG_PORT		GPIOC
+#define HDMI0_HOTPLUG_PIN		GPIO_PIN_2
+#define HDMI1_HOTPLUG_PORT		GPIOC
+#define HDMI1_HOTPLUG_PIN		GPIO_PIN_3
 
 #define FPGA_ADDRESS			0xBA
 #define FRC_BOARD_ADDRESS		0x22
@@ -58,7 +60,9 @@
 #define SET_BACKLIGHT_ON()		GPIO_WriteLow(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN)
 #define SET_BACKLIGHT_OFF()		GPIO_WriteHigh(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN)
 
-
+static const GPIO_Pin_TypeDef IIC_SDA_pin[2] = {IIC_SDA0_PIN, IIC_SDA1_PIN};
+static const GPIO_Pin_TypeDef IIC_SCL_pin[2] = {IIC_SCL0_PIN, IIC_SCL1_PIN};
+static u8 IIC_bus_no = 0;
 static u32 frc_update_timer = TIMER_EXPIRED;
 static u32 Backlight_on_timer = TIMER_STOPPED;
 #if FPGA_KEY_VERIFY_AUTO
@@ -161,23 +165,35 @@ static void _Delay_5us(void)
    	for (i = 0;i < 10;i++);
 }
 /*==========================================================================*/
+static void _SWI2C_SetBusID(u8 addr)
+{
+	if (addr == 0xBA)
+	{
+		IIC_bus_no = 0;
+	}
+	else
+	{
+		IIC_bus_no = 1;
+	}
+}
+/*==========================================================================*/
 static void _SWI2C_Start(void)
 {
-	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
-	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
+	GPIO_WriteHigh(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 	_Delay_5us();
-	GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+	GPIO_WriteLow(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 	_Delay_5us();
-	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+	GPIO_WriteLow(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 }
 /*==========================================================================*/
 static void _SWI2C_Stop(void)
 {
-	GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+	GPIO_WriteLow(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 	_Delay_5us();
-	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 	_Delay_5us();
-	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 }
 /*==========================================================================*/
 static u8 _SWI2C_SendByte(u8 value)
@@ -188,33 +204,33 @@ static u8 _SWI2C_SendByte(u8 value)
 	{
 		if (value&0x80)
 		{
-			GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+			GPIO_WriteHigh(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 		}
 		else
 		{
-			GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+			GPIO_WriteLow(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 		}
 		_Delay_5us();
-		GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+		GPIO_WriteHigh(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 		_Delay_5us();
-		GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+		GPIO_WriteLow(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 		value = value<<1;
 	}
-	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
-	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_IN_FL_NO_IT);
+	GPIO_WriteHigh(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
+	GPIO_Init(IIC_PORT, IIC_SDA_pin[IIC_bus_no], GPIO_MODE_IN_FL_NO_IT);
 	_Delay_5us();
-	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 	for (count = 0;count < IIC_ACK_TIMEOUT;count++)
 	{
-		if (GPIO_ReadInputPin(IIC_SDA_PORT, IIC_SDA_PIN) == 0)
+		if (GPIO_ReadInputPin(IIC_PORT, IIC_SDA_pin[IIC_bus_no]) == 0)
 		{
-			GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
-			GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_LOW_FAST);
+			GPIO_WriteLow(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
+			GPIO_Init(IIC_PORT, IIC_SDA_pin[IIC_bus_no], GPIO_MODE_OUT_OD_LOW_FAST);
 			return IIC_OK;
 		}
 	}
-	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
-	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+	GPIO_WriteLow(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
+	GPIO_Init(IIC_PORT, IIC_SDA_pin[IIC_bus_no], GPIO_MODE_OUT_OD_HIZ_FAST);
 	
 	return IIC_FAIL;
 }
@@ -224,12 +240,12 @@ static u8 _SWI2C_ReceiveByte(u8 send_ack)
 {
 	u8 count, read, value = 0;
 
-	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_IN_FL_NO_IT);
+	GPIO_Init(IIC_PORT, IIC_SDA_pin[IIC_bus_no], GPIO_MODE_IN_FL_NO_IT);
 	for (count = 0;count < 8;count++)
 	{
 		_Delay_5us();
-		GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
-		if (GPIO_ReadInputPin(IIC_SDA_PORT, IIC_SDA_PIN))
+		GPIO_WriteHigh(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
+		if (GPIO_ReadInputPin(IIC_PORT, IIC_SDA_pin[IIC_bus_no]))
 		{
 			read = 1;
 		}
@@ -239,21 +255,21 @@ static u8 _SWI2C_ReceiveByte(u8 send_ack)
 		}
 		value = (value<<1)|read;
 		_Delay_5us();
-		GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+		GPIO_WriteLow(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 	}
-	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+	GPIO_Init(IIC_PORT, IIC_SDA_pin[IIC_bus_no], GPIO_MODE_OUT_OD_HIZ_FAST);
 	if (send_ack)
 	{
-		GPIO_WriteLow(IIC_SDA_PORT,IIC_SDA_PIN);
+		GPIO_WriteLow(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 	}
 	else
 	{
-		GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+		GPIO_WriteHigh(IIC_PORT,IIC_SDA_pin[IIC_bus_no]);
 	}
 	_Delay_5us();
-	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 	_Delay_5us();
-	GPIO_WriteLow(IIC_SCL_PORT,IIC_SCL_PIN);
+	GPIO_WriteLow(IIC_PORT,IIC_SCL_pin[IIC_bus_no]);
 	_Delay_5us();
 
 	return	value;		
@@ -261,12 +277,20 @@ static u8 _SWI2C_ReceiveByte(u8 send_ack)
 /*==========================================================================*/
 static u8 SWI2C_GetSignalStatus(void)
 {
-	u8 p0_status;
+	u8 port_status, port_sel;
 	#if CHECK_SIGNAL_RESOLUTION
 	u8 val;
 	u16 HActive, VActive;
 	#endif
-	SWI2C_ReadByte(0x90, 0x0A, &p0_status);
+	port_sel = IR_GetHDMIPort();
+	if (port_sel)
+	{
+		SWI2C_ReadByte(0x90, 0x0B, &port_status);
+	}
+	else
+	{
+		SWI2C_ReadByte(0x90, 0x0A, &port_status);
+	}
 	#if CHECK_SIGNAL_RESOLUTION
 	SWI2C_ReadByte(0x90, 0x9F, &val);
 	HActive = val&0x3F;
@@ -279,7 +303,7 @@ static u8 SWI2C_GetSignalStatus(void)
 	SWI2C_ReadByte(0x90, 0xA5, &val);
 	VActive += val;
 	#endif
-	if ((p0_status&0x0C) == 0x0C)
+	if ((port_status&0x0C) == 0x0C)
 	{
 		#if CHECK_SIGNAL_RESOLUTION
 		if (HActive == 3840 && VActive == 2160)
@@ -342,21 +366,23 @@ void SWI2C_WriteWeavingTable(u8 index)
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
 	if (I2C_stop)
-		{
-			GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
-			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-		}
-		else
-		{
-			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-		}
+	{
+		GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+		GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+	}
+	else
+	{
+		GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+		GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+	}
 }
 #endif
 /*==========================================================================*/
 u8 SWI2C_TestDevice(u8 addr)
 {
 	u8 result;
+	
+	_SWI2C_SetBusID(addr);
 	_SWI2C_Start();
 	result = _SWI2C_SendByte(addr);
 	_SWI2C_Stop();
@@ -372,6 +398,8 @@ u8 SWI2C_ReadByte(u8 addr, u8 subaddr, u8 * pValue)
 u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 {	
 	u8 result;
+
+	_SWI2C_SetBusID(addr);
 	_SWI2C_Start();
 	result = _SWI2C_SendByte(addr);
 	if (result == IIC_FAIL)
@@ -410,6 +438,8 @@ u8 SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value)
 u8 SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data) 
 {
 	u8 result;
+
+	_SWI2C_SetBusID(addr);
 	_SWI2C_Start();                              
 	result = _SWI2C_SendByte(addr);  
 	if (result == IIC_FAIL)
@@ -442,6 +472,8 @@ u8 SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data)
 u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 {
 	u8 result;
+
+	_SWI2C_SetBusID(addr);
 	_SWI2C_Start();
 	result = _SWI2C_SendByte(addr);
 	if (result == IIC_FAIL)
@@ -490,10 +522,14 @@ void SWI2C_VerifyKey(void)
 /*==========================================================================*/
 void SWI2C_Init(void)
 {
-	GPIO_Init(IIC_SCL_PORT, IIC_SCL_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
-	GPIO_Init(IIC_SDA_PORT, IIC_SDA_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
-	GPIO_WriteHigh(IIC_SCL_PORT,IIC_SCL_PIN);
-	GPIO_WriteHigh(IIC_SDA_PORT,IIC_SDA_PIN);
+	GPIO_Init(IIC_PORT, IIC_SCL0_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+	GPIO_Init(IIC_PORT, IIC_SDA0_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+	GPIO_Init(IIC_PORT, IIC_SCL1_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+	GPIO_Init(IIC_PORT, IIC_SDA1_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
+	GPIO_WriteHigh(IIC_PORT,IIC_SCL0_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SDA0_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SCL1_PIN);
+	GPIO_WriteHigh(IIC_PORT,IIC_SDA1_PIN);
 
 	GPIO_Init(POWER_ONOFF_PORT, POWER_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	
@@ -503,8 +539,10 @@ void SWI2C_Init(void)
 	GPIO_Init(LED_R_PORT, LED_R_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	
 	GPIO_Init(LED_G_PORT, LED_G_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 
-	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
-	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	GPIO_Init(HDMI0_HOTPLUG_PORT, HDMI0_HOTPLUG_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+	GPIO_WriteLow(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
+	GPIO_Init(HDMI1_HOTPLUG_PORT, HDMI1_HOTPLUG_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
+	GPIO_WriteLow(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
 	
 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	GPIO_Init(BACKLIGHT_PWM_PORT, BACKLIGHT_PWM_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
@@ -512,7 +550,7 @@ void SWI2C_Init(void)
 	
 	TIM1_TimeBaseInit(0, TIM1_COUNTERMODE_UP, 4095, 0);
 	TIM1_OC1Init(TIM1_OCMODE_PWM2, TIM1_OUTPUTSTATE_ENABLE, TIM1_OUTPUTNSTATE_DISABLE,
-	           0, TIM1_OCPOLARITY_LOW, TIM1_OCNPOLARITY_HIGH, TIM1_OCIDLESTATE_SET,
+	           1350, TIM1_OCPOLARITY_LOW, TIM1_OCNPOLARITY_HIGH, TIM1_OCIDLESTATE_SET,
 	           TIM1_OCNIDLESTATE_RESET);
 	TIM1_Cmd(ENABLE);
 	TIM1_CtrlPWMOutputs(ENABLE);
@@ -621,9 +659,11 @@ void SWI2C_SystemPowerUp(void)
 	IT6802_fsm_init();
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 #if ENABLE_HDMI_HPD
-	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
+	GPIO_WriteHigh(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
 	IR_DelayNMiliseconds(2000);
-	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	GPIO_WriteLow(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
+	GPIO_WriteLow(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
 #endif
 	singal_change_count = 0;
 	signal_status = FALSE;
@@ -667,7 +707,8 @@ void SWI2C_SystemPowerDown(void)
 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
 #if ENABLE_HDMI_HPD
-	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
+	GPIO_WriteHigh(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
 #endif
 	Backlight_on_timer = TIMER_STOPPED;
 	Power_status = FALSE;
@@ -765,11 +806,13 @@ void HDMI_HotPlug(u8 value)
 {
 	if (value)
 	{
-		GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+		GPIO_WriteLow(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
+		GPIO_WriteLow(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
 	}
 	else
 	{
-		GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+		GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
+		GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
 	}
 }
 /*==========================================================================*/
