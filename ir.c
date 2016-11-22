@@ -199,7 +199,6 @@ void Timer_Init(void)
 	Key_detect_timer = TIMER_EXPIRED;
 }
 /*==========================================================================*/
-static u8 value_debug = 0;
 void IR_Update(void)
 {
 	if (ir_pressed)
