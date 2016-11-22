@@ -274,6 +274,7 @@ static u8 SWI2C_GetSignalStatus(void)
 }
 /*==========================================================================*/
 #if WRITE_WEAVING_TABLE
+#if WRITE_SHORT_TABLE
 static const u16 weaving_table[] =
 {
 0x8018
@@ -339,6 +340,24 @@ static void FPGA_WriteWeavingTable(void)
 		SWI2C_Write2Byte(FPGA_ADDRESS, 0xC6, weaving_table[i]);
 	}
 }
+#else
+static const u8 weaving_table[] =
+{
+#include "weaving_default.txt"
+};
+static void FPGA_WriteWeavingTable(void)
+{
+	u16 i;
+	
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
+	for (i = 0; i < sizeof(weaving_table); i++)
+	{
+		SWI2C_WriteByte(FPGA_ADDRESS, 0xC7, weaving_table[i]);
+	}
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
+}
+#endif
 #endif
 /*==========================================================================*/
 #if TEST_WEAVING_TABLE
@@ -361,7 +380,9 @@ static const u8 test_weaving_table[4][] =
 void SWI2C_WriteWeavingTable(u8 index)
 {
 	u16 i;
-	
+
+	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
 	for (i = 0; i < 1028; i++)
@@ -369,8 +390,16 @@ void SWI2C_WriteWeavingTable(u8 index)
 		SWI2C_WriteByte(FPGA_ADDRESS, 0xC7, test_weaving_table[index][i]);
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
+	if (I2C_stop)
+	{
+		GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+		GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+	}
+	else
+	{
+		GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+		GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+	}
 }
 #endif
 /*==========================================================================*/
@@ -567,7 +596,6 @@ void SWI2C_Update(void)
 				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, convert_key);
 				secret_status = secret_status|0x07;
 				SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
-				//SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
 			}
 			secret_detect_timer = SECRET_DETECT_TIME;
 		}
