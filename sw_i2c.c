@@ -70,6 +70,7 @@ static u8 Power_status = FALSE;
 static u8 signal_status, singal_change_count;
 static u8 I2C_stop = FALSE;
 static u8 Have_FRC;
+static u8 onoff_count = 0;
 #if MHL_IIC_ERROR_RESET
 static u8 I2C_error_count = 0;
 #endif
@@ -497,13 +498,15 @@ void SWI2C_Init(void)
 
 	GPIO_Init(POWER_ONOFF_PORT, POWER_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	
-	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_LOW_FAST);	
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	
 	GPIO_Init(IT680X_RESET_PORT, IT680X_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	
 	GPIO_Init(LED_R_PORT, LED_R_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	
 	GPIO_Init(LED_G_PORT, LED_G_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 
-	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
 	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 	
 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
@@ -516,9 +519,7 @@ void SWI2C_Init(void)
 	           TIM1_OCNIDLESTATE_RESET);
 	TIM1_Cmd(ENABLE);
 	TIM1_CtrlPWMOutputs(ENABLE);
-#if MHL_IIC_ERROR_RESET
-	I2C_error_count = 0;
-#endif
+
 }
 /*==========================================================================*/
 void SWI2C_Update(void)
@@ -573,7 +574,7 @@ void SWI2C_Update(void)
 					signal_status = TRUE;
 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 					#if START_RESET_HDMI
-					SWI2C_ResetHDMI();
+					SWI2C_FirstResetFPGA();
 					#endif
 					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
@@ -583,6 +584,7 @@ void SWI2C_Update(void)
 				{
 					signal_status = FALSE;
 					Backlight_on_timer = TIMER_STOPPED;
+					GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 					SET_BACKLIGHT_OFF();
 					IR_DelayNMiliseconds(200);
 					SET_VPANEL_OFF();
@@ -605,33 +607,42 @@ void SWI2C_Update(void)
 	}
 }
 /*==========================================================================*/
-void SWI2C_SystemPowerUp(void)
+static void SWI2C_ResetIT680x(void)
 {
-	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
-	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-	IR_DelayNMiliseconds(50);
-	Power_status = TRUE;
+#if MHL_IIC_ERROR_RESET
+	I2C_error_count = 0;
+#endif
 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
-	//GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	IR_DelayNMiliseconds(200);
 	GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
-	//GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	IR_DelayNMiliseconds(200);
 	IT6802_fsm_init();
-	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 #if ENABLE_HDMI_HPD
 	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 	IR_DelayNMiliseconds(2000);
 	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 #endif
+}
+/*==========================================================================*/
+void SWI2C_SystemPowerUp(void)
+{
+	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
+	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+	DEBUG_PRINTF(printf("\r\n***** START UP, POWER ON *****\r\n"));
+	onoff_count++;
+	DEBUG_PRINTF(printf("***** COUNT %d *****\r\n", (onoff_count&0xFF)));
+	IR_DelayNMiliseconds(50);
+	Power_status = TRUE;	
+	SWI2C_ResetIT680x();
+	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 	singal_change_count = 0;
 	signal_status = FALSE;
 }
 /*==========================================================================*/
 void SWI2C_ResetFPGA(void)
 {
-	if (Power_status)
+	if (Power_status && (GPIO_ReadOutputData(FPGA_RESET_PORT) & FPGA_RESET_PIN))
 	{		
 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(200);
@@ -644,7 +655,7 @@ void SWI2C_ResetFPGA(void)
 	}
 }
 /*==========================================================================*/
-void SWI2C_ResetHDMI(void)
+void SWI2C_FirstResetFPGA(void)
 {
 	if (Power_status)
 	{
@@ -659,16 +670,18 @@ void SWI2C_ResetHDMI(void)
 }
 /*==========================================================================*/
 void SWI2C_SystemPowerDown(void)
-{
+{	
+	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	SET_BACKLIGHT_OFF();
 	IR_DelayNMiliseconds(200);
 	SET_VPANEL_OFF();
 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
-	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
-	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
 #if ENABLE_HDMI_HPD
 	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 #endif
+	DEBUG_PRINTF(printf("***** STANBY MODE, POWER OFF *****\r\n\r\n"));
 	Backlight_on_timer = TIMER_STOPPED;
 	Power_status = FALSE;
 	I2C_stop = FALSE;
@@ -805,10 +818,15 @@ void SWI2C_ErrorProcess(void)
 	I2C_error_count++;
 	if (I2C_error_count > 50)
 	{
-		DEBUG_PRINTF(printf("I2C Error, reboot!!!"));
-		IR_DelayNMiliseconds(1000);
-		WWDG->CR |= 0x80;
-		WWDG->CR &= ~0x40;
+		DEBUG_PRINTF(printf("I2C Error, RESET IT680x!!!"));
+		signal_status = FALSE;
+		singal_change_count = 0;
+		Backlight_on_timer = TIMER_STOPPED;
+		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+		SET_BACKLIGHT_OFF();
+		IR_DelayNMiliseconds(200);
+		SET_VPANEL_OFF();
+		SWI2C_ResetIT680x();
 	}
 }
 #endif

@@ -33,7 +33,7 @@ extern void SWI2C_SystemPowerDown(void);
 extern void SWI2C_ProcessPower(void);
 extern void SWI2C_ToggleI2CMode(void);
 extern void SWI2C_ResetFPGA(void);
-extern void SWI2C_ResetHDMI(void);
+extern void SWI2C_FirstResetFPGA(void);
 
 extern u8 SWI2C_ReadByte(u8 addr, u8 subaddr, u8 * pValue);
 extern u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data);
