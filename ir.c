@@ -1,5 +1,6 @@
 /*IR.C file
  */
+#include "stdio.h"
 #include "stm8s.h"
 #include "stm8s_gpio.h"
 #include "stm8s_clk.h"
@@ -217,24 +218,10 @@ void IR_Update(void)
 			switch (ir_key)
 			{
 				case KEY_PC:
-					if (HDMI_port == 1)
-					{
-						HDMI_port = 0;
-						it6802PortSelect(0);
-						HDMI_HotPlug(0);
-						IR_DelayNMiliseconds(2000);
-						HDMI_HotPlug(1);
-					}
+					IR_SetHDMIPort(0);
 					break;
 				case KEY_HDMI:
-					if (HDMI_port == 0)
-					{
-						HDMI_port = 1;
-						it6802PortSelect(1);
-						HDMI_HotPlug(0);
-						IR_DelayNMiliseconds(2000);
-						HDMI_HotPlug(1);
-					}
+					IR_SetHDMIPort(1);
 					break;
 				case KEY_DEBUG:
 					SWI2C_ToggleI2CMode();
@@ -330,9 +317,34 @@ void IR_Update(void)
 	}
 }
 /*==========================================================================*/
+u8 IR_GetHDMIPort5V(u8 port)
+{
+	if (port)
+	{
+		return (HDMI1_5V > 300);
+	}
+	else
+	{
+		return (HDMI0_5V > 300);
+	}
+}
+/*==========================================================================*/
 u8 IR_GetHDMIPort(void)
 {
 	return HDMI_port;
+}
+/**************************************************************************/
+void IR_SetHDMIPort(u8 port)
+{
+	if (HDMI_port != port && IR_GetHDMIPort5V(port))
+	{
+		HDMI_port = port;
+		DEBUG_PRINTF(printf("==== HDMI switch to port %d ====\r\n", port&0x01));
+		it6802PortSelect(port);
+		HDMI_HotPlug(0);
+		IR_DelayNMiliseconds(2000);
+		HDMI_HotPlug(1);
+	}				
 }
 /*==========================================================================*/
 INTERRUPT_HANDLER(IR_IN_ISR, 3)

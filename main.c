@@ -41,6 +41,7 @@ INIT_FLAG,	// flag
 0x9D,	// DF
 0xBB,	// E7
 0x2D,	// 0D
+0
 };
 #else
 const u8 register_default_value[] =
@@ -65,9 +66,12 @@ INIT_FLAG,	// flag
 0x9D,	// DF
 0xBD,	// E7
 0x24,	// 0D
+0
 };
 #endif
-void flash_init(void)
+
+#if DATA_STORAGE_FLASH
+void storage_init(void)
 {
 	/* Define flash programming Time*/
 	FLASH_SetProgrammingTime(FLASH_PROGRAMTIME_STANDARD);
@@ -83,11 +87,28 @@ void flash_init(void)
 		u8 i;
 		for (i = 1; i < sizeof(register_default_value); i++)
 		{
-			FLASH_ProgramByte(EEPROM_START_ADDRESS + i,register_default_value[i]);
+			FLASH_ProgramByte(EEPROM_START_ADDRESS + i, register_default_value[i]);
 		}
 		FLASH_ProgramByte(EEPROM_START_ADDRESS, INIT_FLAG);
 	}
 }
+#else
+void storage_init(void)
+{
+	u8 val;
+	SWI2C_ReadEEPROM(0xA0, 0x00, 1, &val);
+	if (val != INIT_FLAG)
+	{
+		u8 i, size = sizeof(register_default_value);
+		
+		DEBUG_PRINTF(printf("**** INIT EEPROM ****\r\n"));
+		for (i = 0; i < size; i++)
+		{
+			SWI2C_WriteEEPROM(0xA0, i, 1, &register_default_value[i]);
+		}
+	}
+}
+#endif
 
 main()
 {	
@@ -102,13 +123,14 @@ main()
   	CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
 #endif
 	SWI2C_Init();
-	flash_init();	
 	IR_IN_Init();
 	Timer_Init();
 	UART_Init();
-		
 	/* Enable general interrupts */
 	enableInterrupts();	
+	
+	DEBUG_PRINTF(printf("\r\n2016-12-08 VER1.0\r\n"));
+	storage_init();	
 	
 	SWI2C_SystemPowerUp();
 	

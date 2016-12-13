@@ -11,6 +11,9 @@ extern void IR_IN_Init(void);
 extern void Timer_Init(void);
 extern void IR_Update(void);
 extern u8 IR_GetHDMIPort(void);
+extern u8 IR_GetHDMIPort5V(u8 port);
+extern void IR_SetHDMIPort(u8 port);
+
 extern void IR_DelayNMiliseconds(u16 delay);
 
 @far @interrupt void IR_IN_ISR(void);

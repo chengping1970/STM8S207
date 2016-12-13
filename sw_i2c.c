@@ -7,6 +7,7 @@
 #include "stm8s_tim1.h"
 #include "stm8s_flash.h"
 #include "ir.h" 
+#include "uart.h"
 #include "sw_i2c.h"
 #include "it680x.h"
 #include "Mhlrx.h"
@@ -72,6 +73,7 @@ static u32 signal_detect_timer	= TIMER_EXPIRED;
 static u8 LVDS_mode = 0;
 static u8 Power_status = FALSE;
 static u8 signal_status, singal_change_count;
+static u8 I2C_write_EE = FALSE;
 static u8 I2C_stop = FALSE;
 static u8 Have_FRC;
 #if MHL_IIC_ERROR_RESET
@@ -167,7 +169,7 @@ static void _Delay_5us(void)
 /*==========================================================================*/
 static void _SWI2C_SetBusID(u8 addr)
 {
-	if (addr == 0xBA)
+	if (addr == 0xBA || I2C_write_EE)
 	{
 		IIC_bus_no = 0;
 	}
@@ -306,7 +308,11 @@ static u8 SWI2C_GetSignalStatus(void)
 	if ((port_status&0x0C) == 0x0C)
 	{
 		#if CHECK_SIGNAL_RESOLUTION
+		#if SUPPORT_4K_PANEL
 		if (HActive == 3840 && VActive == 2160)
+		#else
+		if (HActive == 1920 && VActive == 1080)
+		#endif
 		#endif
 		{
 			return 1;
@@ -317,6 +323,74 @@ static u8 SWI2C_GetSignalStatus(void)
 }
 /*==========================================================================*/
 #if WRITE_WEAVING_TABLE
+#if WRITE_SHORT_TABLE
+static const u16 weaving_table[] =
+{
+0x8018
+,0x9017
+,0x9017
+,0x9016
+,0x9015
+,0x9014
+,0x912C
+,0x912B
+,0x912B
+,0x912A
+,0x9129
+,0x9128
+,0x9240
+,0x923F
+,0x923F
+,0x923E
+,0x923D
+,0x923C
+,0x9354
+,0x9353
+,0x9353
+,0x9352
+,0x9351
+,0x9350
+,0x9468
+,0x9467
+,0x9467
+,0x9466
+,0x9465
+,0x9464
+,0x957C
+,0x957B
+,0x957B
+,0x957A
+,0x9579
+,0x9578
+,0x9690
+,0x968F
+,0x968F
+,0x968E
+,0x968D
+,0x968C
+,0x97A4
+,0x97A3
+,0x97A3
+,0x97A2
+,0x97A1
+,0xA7A0
+,0x102E
+,0x200C
+,0x3004
+,0x4008
+,0x502C
+};
+static void FPGA_WriteWeavingTable(void)
+{
+	u16 i;
+	
+	for (i = 0; i < sizeof(weaving_table)/2; i++)
+	{
+		SWI2C_Write2Byte(FPGA_ADDRESS, 0xC6, weaving_table[i]);
+	}
+}
+#else
+
 static const u8 weaving_table[] =
 {
 #include "weaving_default.txt"
@@ -333,6 +407,7 @@ static void FPGA_WriteWeavingTable(void)
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x02);
 }
+#endif
 #endif
 /*==========================================================================*/
 #if TEST_WEAVING_TABLE
@@ -428,6 +503,27 @@ u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 	_SWI2C_Stop();
 
 	return IIC_OK;
+}
+/*==========================================================================*/
+u8 SWI2C_WriteEEPROM(u8 addr, u8 subaddr, u8 num, u8 * pValue)
+{	
+	u8 ret;
+	
+	I2C_write_EE = TRUE;
+	ret = SWI2C_WriteBytes(addr, subaddr, num, pValue);
+	IR_DelayNMiliseconds(10);
+	I2C_write_EE = FALSE;
+	return ret;
+}
+/*==========================================================================*/
+u8 SWI2C_ReadEEPROM(u8 addr, u8 subaddr, u8 num, u8 * pValue)
+{	
+	u8 ret;
+	
+	I2C_write_EE = TRUE;
+	ret = SWI2C_ReadBytes(addr, subaddr, num, pValue);
+	I2C_write_EE = FALSE;
+	return ret;
 }
 /*==========================================================================*/
 u8 SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value)
@@ -531,7 +627,7 @@ void SWI2C_Init(void)
 	GPIO_WriteHigh(IIC_PORT,IIC_SCL1_PIN);
 	GPIO_WriteHigh(IIC_PORT,IIC_SDA1_PIN);
 
-	GPIO_Init(POWER_ONOFF_PORT, POWER_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(POWER_ONOFF_PORT, POWER_ONOFF_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
 	
 	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	GPIO_Init(IT680X_RESET_PORT, IT680X_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
@@ -544,7 +640,7 @@ void SWI2C_Init(void)
 	GPIO_Init(HDMI1_HOTPLUG_PORT, HDMI1_HOTPLUG_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 	GPIO_WriteLow(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
 	
-	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
 	GPIO_Init(BACKLIGHT_PWM_PORT, BACKLIGHT_PWM_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	GPIO_Init(VPANEL_ONOFF_PORT, VPANEL_ONOFF_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 	
@@ -557,6 +653,7 @@ void SWI2C_Init(void)
 #if MHL_IIC_ERROR_RESET
 	I2C_error_count = 0;
 #endif
+	I2C_write_EE = FALSE;
 }
 /*==========================================================================*/
 void SWI2C_Update(void)
@@ -610,9 +707,7 @@ void SWI2C_Update(void)
 				{
 					signal_status = TRUE;
 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-					#if START_RESET_HDMI
-					SWI2C_ResetHDMI();
-					#endif
+					SWI2C_FirstResetFPGA();
 					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
@@ -624,6 +719,7 @@ void SWI2C_Update(void)
 					SET_BACKLIGHT_OFF();
 					IR_DelayNMiliseconds(200);
 					SET_VPANEL_OFF();
+					GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 				}
 			}
 			else
@@ -637,7 +733,16 @@ void SWI2C_Update(void)
 			}
 			else
 			{
-				GPIO_WriteReverse(LED_G_PORT, LED_G_PIN);
+				uint8_t Port = IR_GetHDMIPort();
+				if (IR_GetHDMIPort5V(Port) == 0 && IR_GetHDMIPort5V(!Port) == 1)
+				{
+					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+					IR_SetHDMIPort(!Port);
+				}
+				else
+				{
+					GPIO_WriteReverse(LED_G_PORT, LED_G_PIN);
+				}
 			}
 		}	
 	}
@@ -648,7 +753,8 @@ void SWI2C_SystemPowerUp(void)
 	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-	IR_DelayNMiliseconds(50);
+	DEBUG_PRINTF(printf("\r\n==== POWER UP ====\r\n"));
+	IR_DelayNMiliseconds(200);
 	Power_status = TRUE;
 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
 	//GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
@@ -658,6 +764,7 @@ void SWI2C_SystemPowerUp(void)
 	IR_DelayNMiliseconds(200);
 	IT6802_fsm_init();
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
+	UART_InitMachineNo();
 #if ENABLE_HDMI_HPD
 	GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
 	GPIO_WriteHigh(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
@@ -684,10 +791,11 @@ void SWI2C_ResetFPGA(void)
 	}
 }
 /*==========================================================================*/
-void SWI2C_ResetHDMI(void)
+void SWI2C_FirstResetFPGA(void)
 {
 	if (Power_status)
-	{
+	{		
+#if START_RESET_HDMI
 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
@@ -695,21 +803,27 @@ void SWI2C_ResetHDMI(void)
 		SWI2C_WriteByte(0x90, 0x14, 0xFF);
 		IR_DelayNMiliseconds(1000);
 		SWI2C_WriteByte(0x90, 0x14, 0x0);
+#else
+		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+		IR_DelayNMiliseconds(200);
+#endif
 	}
 }
 /*==========================================================================*/
 void SWI2C_SystemPowerDown(void)
 {
-	SET_BACKLIGHT_OFF();
-	IR_DelayNMiliseconds(200);
-	SET_VPANEL_OFF();
-	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+	SET_BACKLIGHT_OFF();
+	IR_DelayNMiliseconds(200);
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	SET_VPANEL_OFF();
+	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 #if ENABLE_HDMI_HPD
 	GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
 	GPIO_WriteHigh(HDMI1_HOTPLUG_PORT,HDMI1_HOTPLUG_PIN);
 #endif
+	DEBUG_PRINTF(printf("==== POWER DOWN ====\r\n"));
 	Backlight_on_timer = TIMER_STOPPED;
 	Power_status = FALSE;
 	I2C_stop = FALSE;
@@ -784,7 +898,8 @@ extern const u8 table_size;
 
 void FPGA_Init(void)
  {	
- 	u8 i;
+#if DATA_STORAGE_FLASH
+	u8 i;
 	for (i = 0; i < table_size; i++)
 	{
 		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], FLASH_ReadByte(EEPROM_START_ADDRESS + 1 + i));
@@ -793,12 +908,29 @@ void FPGA_Init(void)
 	{
 		Set3DOn = TRUE;
 	}
+#else
+	u8 i, val;
+	for (i = 0; i < table_size; i++)
+	{
+		SWI2C_ReadEEPROM(0xA0, i + 1, 1, &val);
+		if (i == 0 && val)
+		{
+			Set3DOn = TRUE;
+		}
+		SWI2C_WriteByte(FPGA_ADDRESS, address_table[i], val);
+	}
+#endif
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
+#if SUPPORT_4K_PANEL
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
+#else
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
+#endif
 	SWI2C_Set3DOnOff(Set3DOn);	
 }
 /*==========================================================================*/
@@ -830,9 +962,19 @@ void SWI2C_Set_deep(u8 deep)
 {
 	if (deep == 0)
 	{
+#if DATA_STORAGE_FLASH
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, FLASH_ReadByte(0x4000 + REG_0x59 + 1));
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, FLASH_ReadByte(0x4000 + REG_0x5C + 1));
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, FLASH_ReadByte(0x4000 + REG_0x5A + 1));
+#else
+		u8 val;
+		SWI2C_ReadEEPROM(0xA0, REG_0x59 + 1, 1, &val);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x59, val);
+		SWI2C_ReadEEPROM(0xA0, REG_0x5C + 1, 1, &val);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x5C, val);
+		SWI2C_ReadEEPROM(0xA0, REG_0x5A + 1, 1, &val);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x5A, val);
+#endif
 	}
 	else
 	{
@@ -848,7 +990,7 @@ void SWI2C_ErrorProcess(void)
 	I2C_error_count++;
 	if (I2C_error_count > 50)
 	{
-		DEBUG_PRINTF(printf("I2C Error, reboot!!!"));
+		DEBUG_PRINTF(printf("I2C Error, reboot!!!\r\n"));
 		IR_DelayNMiliseconds(1000);
 		WWDG->CR |= 0x80;
 		WWDG->CR &= ~0x40;
