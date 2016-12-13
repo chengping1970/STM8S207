@@ -33,7 +33,7 @@ extern void SWI2C_SystemPowerDown(void);
 extern void SWI2C_ProcessPower(void);
 extern void SWI2C_ToggleI2CMode(void);
 extern void SWI2C_ResetFPGA(void);
-extern void SWI2C_ResetHDMI(void);
+extern void SWI2C_FirstResetFPGA(void);
 
 extern u8 SWI2C_ReadByte(u8 addr, u8 subaddr, u8 * pValue);
 extern u8 SWI2C_ReadBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data);
@@ -41,6 +41,7 @@ extern u8 SWI2C_WriteByte(u8 addr, u8 subaddr, u8 value);
 extern u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data);
 extern u8 SWI2C_Write2Byte(u8 addr, u8 subaddr, u16 data);
 extern u8 SWI2C_TestDevice(u8 addr);
+extern void SWI2C_VerifyKey(void);
 
 extern void SWI2C_WriteWeavingTable(u8 index);
 

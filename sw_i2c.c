@@ -47,7 +47,7 @@
 #define FRC_UPDATE_TIME			(500 + 1)
 #define SECRET_DETECT_TIME		(500 + 1)
 #define SINGNAL_TETECT_TIME		(150 + 1) 
-#define BACKLIGHT_DELAY_TIME	(1000 + 1)
+#define BACKLIGHT_DELAY_TIME	(5000 + 1)
 
 #define SIGNAL_STABLE_COUNT		5
 #define NO_SIGNAL_COUNT			2
@@ -61,7 +61,7 @@
 
 static u32 frc_update_timer = TIMER_EXPIRED;
 static u32 Backlight_on_timer = TIMER_STOPPED;
-#if FPGA_KEY_VERIFY
+#if FPGA_KEY_VERIFY_AUTO
 static u32 secret_detect_timer = TIMER_EXPIRED;
 #endif
 static u32 signal_detect_timer	= TIMER_EXPIRED;
@@ -70,6 +70,7 @@ static u8 Power_status = FALSE;
 static u8 signal_status, singal_change_count;
 static u8 I2C_stop = FALSE;
 static u8 Have_FRC;
+static u8 onoff_count = 0;
 #if MHL_IIC_ERROR_RESET
 static u8 I2C_error_count = 0;
 #endif
@@ -262,15 +263,34 @@ static u8 _SWI2C_ReceiveByte(u8 send_ack)
 static u8 SWI2C_GetSignalStatus(void)
 {
 	u8 p0_status;
+	#if CHECK_SIGNAL_RESOLUTION
+	u8 val;
+	u16 HActive, VActive;
+	#endif
 	SWI2C_ReadByte(0x90, 0x0A, &p0_status);
+	#if CHECK_SIGNAL_RESOLUTION
+	SWI2C_ReadByte(0x90, 0x9F, &val);
+	HActive = val&0x3F;
+	HActive = HActive<<8;
+	SWI2C_ReadByte(0x90, 0x9E, &val);
+	HActive += val;
+	SWI2C_ReadByte(0x90, 0xA4, &val);
+	VActive = val&0xF0;
+	VActive = VActive<<4;
+	SWI2C_ReadByte(0x90, 0xA5, &val);
+	VActive += val;
+	#endif
 	if ((p0_status&0x0C) == 0x0C)
 	{
-		return 1;
+		#if CHECK_SIGNAL_RESOLUTION
+		if (HActive == 1920 && VActive == 1080)
+		#endif
+		{
+			return 1;
+		}
 	}
-	else
-	{
-		return 0;
-	}
+	
+	return 0;
 }
 /*==========================================================================*/
 #if WRITE_WEAVING_TABLE
@@ -518,6 +538,25 @@ u8 SWI2C_WriteBytes(u8 addr, u8 subaddr, u8 number, u8 * p_data)
 	return IIC_OK;
 }
 /*==========================================================================*/
+void SWI2C_VerifyKey(void)
+{
+#if	FPGA_KEY_VERIFY
+	u8 secret_key[4], convert_key[4], secret_status;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
+	if ((secret_status&0x03) == 1)
+	{
+		SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
+		convert_key[0] = secret_key_table1[secret_key[0]];
+		convert_key[1] = secret_key_table2[secret_key[1]];
+		convert_key[2] = secret_key_table3[secret_key[2]];
+		convert_key[3] = secret_key_table4[secret_key[3]];
+		SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, convert_key);
+		secret_status = secret_status|0x07;
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
+	}
+#endif
+}
+/*==========================================================================*/
 void SWI2C_Init(void)
 {
 	GPIO_Init(IIC_SCL_PORT, IIC_SCL_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
@@ -527,13 +566,15 @@ void SWI2C_Init(void)
 
 	GPIO_Init(POWER_ONOFF_PORT, POWER_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	
-	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_LOW_FAST);	
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	
 	GPIO_Init(IT680X_RESET_PORT, IT680X_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	
 	GPIO_Init(LED_R_PORT, LED_R_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	
 	GPIO_Init(LED_G_PORT, LED_G_PIN, GPIO_MODE_OUT_PP_LOW_FAST);
 
-	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(HDMI_HOTPLUG_PORT, HDMI_HOTPLUG_PIN, GPIO_MODE_OUT_OD_HIZ_FAST);
 	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 
 	GPIO_Init(BACKLIGHT_ONOFF_PORT, BACKLIGHT_ONOFF_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
@@ -546,9 +587,7 @@ void SWI2C_Init(void)
 	           TIM1_OCNIDLESTATE_RESET);
 	TIM1_Cmd(ENABLE);
 	TIM1_CtrlPWMOutputs(ENABLE);
-#if MHL_IIC_ERROR_RESET
-	I2C_error_count = 0;
-#endif
+
 }
 /*==========================================================================*/
 void SWI2C_Update(void)
@@ -581,22 +620,10 @@ void SWI2C_Update(void)
 			frc_update_timer = FRC_UPDATE_TIME;
 		}	
 
-#if FPGA_KEY_VERIFY
+#if FPGA_KEY_VERIFY_AUTO
 		if (secret_detect_timer == TIMER_EXPIRED)
 		{
-			u8 secret_key[4], convert_key[4], secret_status;
-			SWI2C_ReadByte(FPGA_ADDRESS, 0x19, &secret_status);
-			if ((secret_status&0x03) == 1)
-			{
-				SWI2C_ReadBytes(FPGA_ADDRESS, 0x10, 4, secret_key);
-				convert_key[0] = secret_key_table1[secret_key[0]];
-				convert_key[1] = secret_key_table2[secret_key[1]];
-				convert_key[2] = secret_key_table3[secret_key[2]];
-				convert_key[3] = secret_key_table4[secret_key[3]];
-				SWI2C_WriteBytes(FPGA_ADDRESS, 0x14, 4, convert_key);
-				secret_status = secret_status|0x07;
-				SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
-			}
+			SWI2C_VerifyKey();
 			secret_detect_timer = SECRET_DETECT_TIME;
 		}
 #endif
@@ -614,9 +641,7 @@ void SWI2C_Update(void)
 				{
 					signal_status = TRUE;
 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-					#if INIT_VERTICAL_PANEL
-					SWI2C_ResetHDMI();
-					#endif
+					SWI2C_FirstResetFPGA();
 					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
@@ -628,6 +653,7 @@ void SWI2C_Update(void)
 					SET_BACKLIGHT_OFF();
 					IR_DelayNMiliseconds(200);
 					SET_VPANEL_OFF();
+					GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 				}
 			}
 			else
@@ -647,33 +673,42 @@ void SWI2C_Update(void)
 	}
 }
 /*==========================================================================*/
-void SWI2C_SystemPowerUp(void)
+static void SWI2C_ResetIT680x(void)
 {
-	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
-	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-	IR_DelayNMiliseconds(50);
-	Power_status = TRUE;
+#if MHL_IIC_ERROR_RESET
+	I2C_error_count = 0;
+#endif
 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
-	//GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	IR_DelayNMiliseconds(200);
 	GPIO_WriteHigh(IT680X_RESET_PORT, IT680X_RESET_PIN);
-	//GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	IR_DelayNMiliseconds(200);
 	IT6802_fsm_init();
-	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 #if ENABLE_HDMI_HPD
 	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 	IR_DelayNMiliseconds(2000);
 	GPIO_WriteHigh(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 #endif
+}
+/*==========================================================================*/
+void SWI2C_SystemPowerUp(void)
+{
+	GPIO_WriteLow(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
+	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+	GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+	DEBUG_PRINTF(printf("\r\n***** START UP, POWER ON *****\r\n"));
+	onoff_count++;
+	DEBUG_PRINTF(printf("***** COUNT %d *****\r\n", (onoff_count&0xFF)));
+	IR_DelayNMiliseconds(50);
+	Power_status = TRUE;	
+	SWI2C_ResetIT680x();
+	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 	singal_change_count = 0;
 	signal_status = FALSE;
 }
 /*==========================================================================*/
 void SWI2C_ResetFPGA(void)
 {
-	if (Power_status)
+	if (Power_status && (GPIO_ReadOutputData(FPGA_RESET_PORT) & FPGA_RESET_PIN))
 	{		
 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(200);
@@ -686,10 +721,11 @@ void SWI2C_ResetFPGA(void)
 	}
 }
 /*==========================================================================*/
-void SWI2C_ResetHDMI(void)
+void SWI2C_FirstResetFPGA(void)
 {
 	if (Power_status)
-	{
+	{		
+#if START_RESET_HDMI
 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
@@ -697,20 +733,26 @@ void SWI2C_ResetHDMI(void)
 		SWI2C_WriteByte(0x90, 0x14, 0xFF);
 		IR_DelayNMiliseconds(1000);
 		SWI2C_WriteByte(0x90, 0x14, 0x0);
+#else
+		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+		IR_DelayNMiliseconds(200);
+#endif
 	}
 }
 /*==========================================================================*/
 void SWI2C_SystemPowerDown(void)
 {
-	SET_BACKLIGHT_OFF();
-	IR_DelayNMiliseconds(200);
-	SET_VPANEL_OFF();
-	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+	SET_BACKLIGHT_OFF();
+	IR_DelayNMiliseconds(200);
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	SET_VPANEL_OFF();
+	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 #if ENABLE_HDMI_HPD
-	//GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
+	GPIO_WriteLow(HDMI_HOTPLUG_PORT,HDMI_HOTPLUG_PIN);
 #endif
+	DEBUG_PRINTF(printf("***** STANBY MODE, POWER OFF *****\r\n\r\n"));
 	Backlight_on_timer = TIMER_STOPPED;
 	Power_status = FALSE;
 	I2C_stop = FALSE;
@@ -750,19 +792,22 @@ static u8 Set3DOn = FALSE;
 
 static void SWI2C_Set3DOnOff(u8 OnOff)
 {
-	u8 reg_value, retry;
+	u8 reg_value, insert, retry;
 	if (OnOff)
 	{
-		reg_value = 0x40;
+		reg_value = 0x80;
+		insert = 0;
 	}
 	else
 	{
-		reg_value = 0x80;
+		reg_value = 0x0;
+		insert = 1;
 	}
 	for (retry = 0; retry < 3; retry++)
 	{
 		u8 value;
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, insert);
 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
 		if (value == reg_value)
 		{
@@ -792,8 +837,17 @@ void FPGA_Init(void)
 		Set3DOn = TRUE;
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
+	
+#if 1
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
+#else
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
+#endif
 	SWI2C_Set3DOnOff(Set3DOn);	
 }
 /*==========================================================================*/
@@ -841,10 +895,15 @@ void SWI2C_ErrorProcess(void)
 	I2C_error_count++;
 	if (I2C_error_count > 50)
 	{
-		printf("I2C Error, reboot!!!");
-		IR_DelayNMiliseconds(1000);
-		WWDG->CR |= 0x80;
-		WWDG->CR &= ~0x40;
+		DEBUG_PRINTF(printf("I2C Error, RESET IT680x!!!"));
+		signal_status = FALSE;
+		singal_change_count = 0;
+		Backlight_on_timer = TIMER_STOPPED;
+		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+		SET_BACKLIGHT_OFF();
+		IR_DelayNMiliseconds(200);
+		SET_VPANEL_OFF();
+		SWI2C_ResetIT680x();
 	}
 }
 #endif
@@ -860,7 +919,7 @@ void SWI2C_UpdateTimer(void)
 	{
 		Backlight_on_timer--;
 	}
-#if FPGA_KEY_VERIFY
+#if FPGA_KEY_VERIFY_AUTO
 	if (secret_detect_timer > TIMER_EXPIRED)
 	{
 		secret_detect_timer--;

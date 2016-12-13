@@ -54,7 +54,7 @@ KEY_VOLUME_PLUS,
 KEY_VOLUME_MINUS,
 KEY_LEFT,
 KEY_RIGHT,
-KEY_RESET_HDMI,
+KEY_VERIFY_SECRET,
 KEY_RESET_FPGA,
 KEY_DEBUG,
 
@@ -120,7 +120,7 @@ static u8 _convert_IR(void)
 			case 0xC3: 		return KEY_HDMI;
 			case 0x75: 		return KEY_ONOFF_3D;
 			case 0xC1: 		return KEY_DEBUG;
-			case 0xC4:		return KEY_RESET_HDMI;
+			case 0xC4:		return KEY_VERIFY_SECRET;
 			case 0x58:		return KEY_RESET_FPGA;
 			#if TEST_WEAVING_TABLE
 			case 0x50:		return KEY_TEST0;
@@ -147,7 +147,7 @@ static u8 _convert_IR(void)
 			case 0x57: 		return KEY_HDMI;
 			case 0x5B: 		return KEY_ONOFF_3D;
 			case 0x01: 		return KEY_DEBUG;		
-			case 0x08:		return KEY_RESET_HDMI;
+			case 0x08:		return KEY_VERIFY_SECRET;
 			case 0x1F:		return KEY_RESET_FPGA;
 			#if TEST_WEAVING_TABLE
 			case 0x5A:		return KEY_TEST0;
@@ -235,12 +235,20 @@ void IR_Update(void)
 				case KEY_POWER:
 					SWI2C_ProcessPower();
 					break;
-				case KEY_RESET_HDMI:
-					SWI2C_ResetHDMI();
+				case KEY_VERIFY_SECRET:
+					SWI2C_VerifyKey();
 					break;
 				case KEY_RESET_FPGA:
 					SWI2C_ResetFPGA();
 					break;
+				#if 0
+				case KEY_PC:
+					{
+						WWDG->CR |= 0x80;
+						WWDG->CR &= ~0x40;
+					}
+					break;
+				#endif
 				#if TEST_WEAVING_TABLE
 				case KEY_TEST0:
 					SWI2C_WriteWeavingTable(0);

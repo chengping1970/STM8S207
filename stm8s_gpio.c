@@ -141,6 +141,17 @@ void GPIO_WriteReverse(GPIO_TypeDef* GPIOx, GPIO_Pin_TypeDef PortPins)
 }
 
 /**
+  * @brief  Reads the specified GPIO output data port.
+  * @note   The port must be configured in input mode.  
+  * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
+  * @retval GPIO output data port value.
+  */
+uint8_t GPIO_ReadOutputData(GPIO_TypeDef* GPIOx)
+{
+  return ((uint8_t)GPIOx->ODR);
+}
+
+/**
   * @brief  Reads the specified GPIO input data pin.
   * @param  GPIOx : Select the GPIO peripheral number (x = A to I).
   * @param  GPIO_Pin : Specifies the pin number.
