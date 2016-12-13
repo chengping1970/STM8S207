@@ -241,12 +241,14 @@ void IR_Update(void)
 				case KEY_RESET_FPGA:
 					SWI2C_ResetFPGA();
 					break;
+				#if 0
 				case KEY_PC:
 					{
 						WWDG->CR |= 0x80;
 						WWDG->CR &= ~0x40;
 					}
 					break;
+				#endif
 				#if TEST_WEAVING_TABLE
 				case KEY_TEST0:
 					SWI2C_WriteWeavingTable(0);

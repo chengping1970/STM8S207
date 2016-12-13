@@ -573,9 +573,7 @@ void SWI2C_Update(void)
 				{
 					signal_status = TRUE;
 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-					#if START_RESET_HDMI
 					SWI2C_FirstResetFPGA();
-					#endif
 					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
@@ -584,10 +582,10 @@ void SWI2C_Update(void)
 				{
 					signal_status = FALSE;
 					Backlight_on_timer = TIMER_STOPPED;
-					GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 					SET_BACKLIGHT_OFF();
 					IR_DelayNMiliseconds(200);
 					SET_VPANEL_OFF();
+					GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 				}
 			}
 			else
@@ -658,7 +656,8 @@ void SWI2C_ResetFPGA(void)
 void SWI2C_FirstResetFPGA(void)
 {
 	if (Power_status)
-	{
+	{		
+#if START_RESET_HDMI
 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
@@ -666,6 +665,10 @@ void SWI2C_FirstResetFPGA(void)
 		SWI2C_WriteByte(0x90, 0x14, 0xFF);
 		IR_DelayNMiliseconds(1000);
 		SWI2C_WriteByte(0x90, 0x14, 0x0);
+#else
+		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+		IR_DelayNMiliseconds(200);
+#endif
 	}
 }
 /*==========================================================================*/
@@ -673,9 +676,9 @@ void SWI2C_SystemPowerDown(void)
 {	
 	GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
-	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	SET_BACKLIGHT_OFF();
 	IR_DelayNMiliseconds(200);
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	SET_VPANEL_OFF();
 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 #if ENABLE_HDMI_HPD
