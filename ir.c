@@ -234,10 +234,7 @@ void IR_Update(void)
 					break;
 				case KEY_POWER:
 					SWI2C_ProcessPower();
-					break;
-				case KEY_VERIFY_SECRET:
-					SWI2C_VerifyKey();
-					break;
+					break;	
 				case KEY_RESET_FPGA:
 					SWI2C_ResetFPGA();
 					break;
@@ -249,6 +246,9 @@ void IR_Update(void)
 					}
 					break;
 				#endif
+				case KEY_HDMI:	
+					SWI2C_VerifyKey();
+					break;
 				#if TEST_WEAVING_TABLE
 				case KEY_TEST0:
 					SWI2C_WriteWeavingTable(0);

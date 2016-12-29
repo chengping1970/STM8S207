@@ -486,6 +486,11 @@ void SWI2C_VerifyKey(void)
 		secret_status = secret_status|0x07;
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x19, secret_status);
 	}
+#else
+	u8 value;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x3A, &value);
+	value = !value;
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, value);
 #endif
 }
 /*==========================================================================*/
@@ -574,8 +579,8 @@ void SWI2C_Update(void)
 					signal_status = TRUE;
 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 					SWI2C_FirstResetFPGA();
-					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
+					SWI2C_ResetFPGA();
 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
 				}
 				else if (!current_signal_status && singal_change_count > NO_SIGNAL_COUNT)
@@ -640,8 +645,10 @@ void SWI2C_SystemPowerUp(void)
 /*==========================================================================*/
 void SWI2C_ResetFPGA(void)
 {
-	if (Power_status && (GPIO_ReadOutputData(FPGA_RESET_PORT) & FPGA_RESET_PIN))
-	{		
+	u8 reset = GPIO_ReadOutputData(FPGA_RESET_PORT);
+	if (Power_status && (reset & FPGA_RESET_PIN))
+	{	
+		DEBUG_PRINTF(printf("***** RESET FPGA *****\r\n"));
 		GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
@@ -662,6 +669,7 @@ void SWI2C_FirstResetFPGA(void)
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(500);
+		DEBUG_PRINTF(printf("***** TURNOFF IT680X SIGNAL *****\r\n"));
 		SWI2C_WriteByte(0x90, 0x14, 0xFF);
 		IR_DelayNMiliseconds(1000);
 		SWI2C_WriteByte(0x90, 0x14, 0x0);
