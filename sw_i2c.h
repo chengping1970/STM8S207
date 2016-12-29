@@ -26,6 +26,9 @@ REG_0x0D
 
 #define EEPROM_START_ADDRESS 	0x4000
 
+#define MACHINE_ID_POSITION		20
+#define BACKLIGHT_POSITION		21
+
 extern void SWI2C_Init(void);
 extern void SWI2C_Update(void);
 extern void SWI2C_SystemPowerUp(void);
@@ -54,5 +57,6 @@ extern void SWI2C_Toggle3DOnOff(void);
 extern void SWI2C_Set_deep(u8 deep);
 extern void SWI2C_UpdateTimer(void);
 extern void SWI2C_ErrorProcess(void);
+extern void SWI2C_SetBacklight(u8 backlight);
 
 #endif //__SW_I2C_H__

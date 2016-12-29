@@ -36,7 +36,7 @@
 #ifndef _IT680x_
 #define _IT680x_
 #endif
-#include "stdio.h"
+#include <stdio.h>
 #include "stm8s.h"
 #include "IT680x.h"
 #include "Mhlrx.h"

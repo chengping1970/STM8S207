@@ -2,7 +2,7 @@
  * 
  * Copyright (c) 2002-2005 STMicroelectronics
  */
-#include"stdio.h"
+#include <stdio.h>
 #include "stm8s.h"
 #include "sw_i2c.h"
 #include "ir.h"
@@ -17,7 +17,7 @@
 
 const u8 address_table[] = {0x57, 0xC8, 0xC9, 0xCA, 0xCB, 0x18, 0x47, 0x48, 0x49, 0x4A, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x7D, 0xDF, 0xE7, 0x0D}; 		
 const u8 table_size = sizeof(address_table);
-#define INIT_FLAG 0xA5
+#define INIT_FLAG 0xAA
 #if (!INIT_VERTICAL_PANEL)
 const u8 register_default_value[] =
 {
@@ -41,7 +41,8 @@ INIT_FLAG,	// flag
 0x9D,	// DF
 0xBB,	// E7
 0x2D,	// 0D
-0
+0,		//machine ID
+100		//backlight
 };
 #else
 const u8 register_default_value[] =
@@ -66,7 +67,8 @@ INIT_FLAG,	// flag
 0x9D,	// DF
 0xBD,	// E7
 0x24,	// 0D
-0
+0,		//machine ID
+100 	//backlight
 };
 #endif
 
@@ -129,9 +131,10 @@ main()
 	/* Enable general interrupts */
 	enableInterrupts();	
 	
-	DEBUG_PRINTF(printf("\r\n2016-12-08 VER1.0\r\n"));
+	DEBUG_PRINTF(printf("\r\n2016-12-29 VER1.6\r\n"));
+	#if DATA_STORAGE_FLASH
 	storage_init();	
-	
+	#endif
 	SWI2C_SystemPowerUp();
 	
 	while (1)

@@ -1,6 +1,6 @@
 /*IR.C file
  */
-#include "stdio.h"
+#include <stdio.h>
 #include "stm8s.h"
 #include "stm8s_gpio.h"
 #include "stm8s_clk.h"
