@@ -33,9 +33,8 @@ typedef enum
 
 #define MULTI_BYTE_RW		1
 
-
 static u8 uart_rx_buffer[UART_BUFFER_MAX_LENGTH + 2];
-static u8 uart_rx_index;
+static u16 uart_rx_index;
 static u8 uart_received = FALSE;
 static u8 uart_rxtx_data[UART_BUFFER_MAX_LENGTH + 2];
 static u16 uart_data_length = 8;
@@ -337,6 +336,7 @@ void UART_Update(void)
 					checksum = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
 					if (checksum == uart_rxtx_data[DP_CHECK_SUM])
 					{
+						UART_Send(uart_rxtx_data, 8);
 						switch (uart_rxtx_data[DP_DEVICE_ADDR])
 						{
 							case 0:
@@ -355,8 +355,8 @@ void UART_Update(void)
 					else
 					{
 						uart_rxtx_data[DP_COMMAND] = 0xFE;
+						UART_Send(uart_rxtx_data, 8);
 					}
-					UART_Send(uart_rxtx_data, 8);
 					break;
 				case DATA_COMMAND_WRITE_TWO_BYTE:
 					break;
