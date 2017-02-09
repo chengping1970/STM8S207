@@ -56,6 +56,7 @@ KEY_DEEP_4,
 KEY_DEEP_5,
 KEY_POWER,
 KEY_ONOFF_3D,
+KEY_INSERT_OFF,
 KEY_SOURCE,
 KEY_PC,
 KEY_HDMI,
@@ -130,6 +131,7 @@ static u8 _convert_IR(void)
 			case 0xC0: 		return KEY_PC;
 			case 0xC3: 		return KEY_HDMI;
 			case 0x75: 		return KEY_ONOFF_3D;
+			case 0x0A:		return KEY_INSERT_OFF;
 			case 0xC1: 		return KEY_DEBUG;
 			case 0xC4:		return KEY_VERIFY_SECRET;
 			case 0x58:		return KEY_RESET_FPGA;
@@ -157,6 +159,7 @@ static u8 _convert_IR(void)
 			case 0x56: 		return KEY_PC;
 			case 0x57: 		return KEY_HDMI;
 			case 0x5B: 		return KEY_ONOFF_3D;
+			case 0x58:		return KEY_INSERT_OFF;
 			case 0x01: 		return KEY_DEBUG;		
 			case 0x08:		return KEY_VERIFY_SECRET;
 			case 0x1F:		return KEY_RESET_FPGA;
@@ -250,11 +253,14 @@ void IR_Update(void)
 				case KEY_POWER:
 					SWI2C_ProcessPower();
 					break;
+                                case KEY_RESET_FPGA:
+					SWI2C_ResetFPGA();
+					break;
 				case KEY_VERIFY_SECRET:
 					SWI2C_VerifyKey();
 					break;
-				case KEY_RESET_FPGA:
-					SWI2C_ResetFPGA();
+				case KEY_INSERT_OFF:	
+					SWI2C_ToggleInsert();
 					break;
 				#if TEST_WEAVING_TABLE
 				case KEY_TEST0:
@@ -336,14 +342,17 @@ u8 IR_GetHDMIPort(void)
 /**************************************************************************/
 void IR_SetHDMIPort(u8 port)
 {
-	if (HDMI_port != port && IR_GetHDMIPort5V(port))
+	if (HDMI_port != port)
 	{
-		HDMI_port = port;
-		DEBUG_PRINTF(printf("==== HDMI switch to port %d ====\r\n", port&0x01));
-		it6802PortSelect(port);
-		HDMI_HotPlug(0);
-		IR_DelayNMiliseconds(2000);
-		HDMI_HotPlug(1);
+		if (IR_GetHDMIPort5V(port))
+		{
+			HDMI_port = port;
+			DEBUG_PRINTF(printf("==== HDMI switch to port %d ====\r\n", port&0x01));
+			it6802PortSelect(port);
+			HDMI_HotPlug(0);
+			IR_DelayNMiliseconds(2000);
+			HDMI_HotPlug(1);
+		}
 	}				
 }
 /*==========================================================================*/

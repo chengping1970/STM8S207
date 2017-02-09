@@ -56,6 +56,7 @@
 #define SECRET_DETECT_TIME		(500 + 1)
 #define SINGNAL_TETECT_TIME		(150 + 1) 
 #define BACKLIGHT_DELAY_TIME	(5000 + 1)
+#define PANEL_UPDATE_TIME		(1000 + 1)
 
 #define SIGNAL_STABLE_COUNT		5
 #define NO_SIGNAL_COUNT			2
@@ -86,6 +87,10 @@ static u8 Have_FRC;
 static u8 LVDS_mode = 0;
 static u32 frc_update_timer = TIMER_EXPIRED;
 #endif
+#if WRITE_4K30Hz_PANEL
+static u32 panel_update_timer = TIMER_EXPIRED;
+#endif
+
 #if MHL_IIC_ERROR_RESET
 static u8 I2C_error_count = 0;
 #endif
@@ -706,6 +711,19 @@ void SWI2C_Update(void)
 		}	
 		#endif
 
+		#if WRITE_4K30Hz_PANEL
+		if (panel_update_timer == TIMER_EXPIRED)
+		{
+			uint8_t panel_set_4k[8] = {0x38, 0x50, 0x6D, 0x00, 0x00, 0x00, 0x00, 0x02};
+			uint8_t panel_set_8bit[8] = {0x38, 0x64, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x01};
+			I2C_write_EE = TRUE;
+			SWI2C_WriteBytes(0xE0, 0x26, 8, panel_set_4k);
+			SWI2C_WriteBytes(0xE0, 0x26, 8, panel_set_8bit);
+			I2C_write_EE = FALSE;
+			panel_update_timer = PANEL_UPDATE_TIME;
+		}
+		#endif
+
 #if FPGA_KEY_VERIFY_AUTO
 		if (secret_detect_timer == TIMER_EXPIRED)
 		{
@@ -731,23 +749,7 @@ void SWI2C_Update(void)
 					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
-					#if WRITE_4K30Hz_PANEL
-					IR_DelayNMiliseconds(500);
-					{
-						uint8_t retry = 0;
-						uint8_t panel_set_4k[8] = {0x38, 0x50, 0x6D, 0x00, 0x00, 0x00, 0x00, 0x02};
-						uint8_t panel_set_8bit[8] = {0x38, 0x64, 0x1C, 0x00, 0x00, 0x00, 0x00, 0x01};
-						for (retry = 0; retry < 3; retry++)
-						{
-							I2C_write_EE = TRUE;
-							SWI2C_WriteBytes(0xE0, 0x26, 8, panel_set_4k);
-							IR_DelayNMiliseconds(100);
-							SWI2C_WriteBytes(0xE0, 0x26, 8, panel_set_8bit);
-							IR_DelayNMiliseconds(200);
-							I2C_write_EE = FALSE;
-						}
-					}
-					#endif
+					
 					
 				}
 				else if (!current_signal_status && singal_change_count > NO_SIGNAL_COUNT)
@@ -796,7 +798,6 @@ void SWI2C_SystemPowerUp(void)
 	IR_DelayNMiliseconds(200);
 	Power_status = TRUE;
 	#if !DATA_STORAGE_FLASH
-	storage_init();
 	#endif
 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
 	//GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
@@ -808,6 +809,7 @@ void SWI2C_SystemPowerUp(void)
 #if CONTROL_FRC_BOARD	 
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 #endif
+	storage_init();
 	UART_InitMachineNo();
 #if ENABLE_HDMI_HPD
 	GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
@@ -933,6 +935,14 @@ void SWI2C_Toggle3DOnOff(void)
 {	
 	Set3DOn = !Set3DOn;
 	SWI2C_Set3DOnOff(Set3DOn);
+}
+/*==========================================================================*/
+void SWI2C_ToggleInsert(void)
+{	
+	u8 insert;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x3A, &insert);
+	insert = !insert;
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, insert);
 }
 /*==========================================================================*/
 extern const u8 address_table[];
@@ -1077,7 +1087,13 @@ void SWI2C_UpdateTimer(void)
 	if (signal_detect_timer > TIMER_EXPIRED)
 	{
 		signal_detect_timer--;
-	}		
+	}	
+#if WRITE_4K30Hz_PANEL
+	if (panel_update_timer > TIMER_EXPIRED)
+	{
+		panel_update_timer--;
+	}
+#endif
 }
 /*==========================================================================*/
 

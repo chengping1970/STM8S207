@@ -2699,8 +2699,8 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define WRITE_WEAVING_TABLE		1
 #define WRITE_SHORT_TABLE		0
 #define TEST_WEAVING_TABLE		1
-#define FPGA_KEY_VERIFY			1
-#define FPGA_KEY_VERIFY_AUTO	1
+#define FPGA_KEY_VERIFY			0
+#define FPGA_KEY_VERIFY_AUTO	0
 #define ENABLE_HDMI_HPD			1
 #define WRITE_4K30Hz_PANEL		1
 #define CHECK_SIGNAL_RESOLUTION	1

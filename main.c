@@ -131,7 +131,7 @@ main()
 	/* Enable general interrupts */
 	enableInterrupts();	
 	
-	DEBUG_PRINTF(printf("\r\n2016-12-29 VER1.6\r\n"));
+	DEBUG_PRINTF(printf("\r\n2016-12-30 VER2.0 with bootloader\r\n"));
 	#if DATA_STORAGE_FLASH
 	storage_init();	
 	#endif

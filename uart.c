@@ -386,31 +386,31 @@ void UART_Update(void)
 						checksum = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
 						if (checksum == uart_rxtx_data[DP_CHECK_SUM])
 						{
-							if (uart_rxtx_data[DP_DEVICE_ADDR] < 0x80)
-							{
-								UART_Send(uart_rxtx_data, 8);
-							}
 							switch (uart_rxtx_data[DP_DEVICE_ADDR])
 							{
 								case 0:
+									uart_rxtx_data[DP_SUB_ADDR] = !Power_status;
+									uart_rxtx_data[DP_CHECK_SUM] = uart_rxtx_data[DP_CHECK_SUM] - uart_rxtx_data[DP_SUB_ADDR];
+									UART_Send(uart_rxtx_data, 8);
 									SWI2C_ProcessPower();
 									break;
 								case 1:
 									SWI2C_Toggle3DOnOff();
+									uart_rxtx_data[DP_SUB_ADDR] = !Set3DOn;
+									uart_rxtx_data[DP_CHECK_SUM] = uart_rxtx_data[DP_CHECK_SUM] - uart_rxtx_data[DP_SUB_ADDR];
+									UART_Send(uart_rxtx_data, 8);
 									break;
 								case 2:
 									SWI2C_ToggleI2CMode();
+									uart_rxtx_data[DP_SUB_ADDR] = !I2C_stop;
+									uart_rxtx_data[DP_CHECK_SUM] = uart_rxtx_data[DP_CHECK_SUM] - uart_rxtx_data[DP_SUB_ADDR];
+									UART_Send(uart_rxtx_data, 8);
 									break;
 								case 3:
 									SWI2C_WriteEEPROM(0xA0, BACKLIGHT_POSITION, 1, &uart_rxtx_data[DP_SUB_ADDR]);
 									SWI2C_SetBacklight(uart_rxtx_data[DP_SUB_ADDR]);
 									break;
-								case 0x7F:
-									DEBUG_PRINTF(printf("ENTER IAP, REBOOT!\r\n"));
-									IR_DelayNMiliseconds(100);
-									WWDG->CR |= 0x80;
-									WWDG->CR &= ~0x40;
-									break;
+								
 								case 0x80:
 									uart_rxtx_data[DP_SUB_ADDR] = Power_status;
 									uart_rxtx_data[DP_SUB_ADDR_2] = I2C_stop;
@@ -418,7 +418,12 @@ void UART_Update(void)
 									uart_rxtx_data[DP_CHECK_SUM] = 0x100 - (uart_rxtx_data[DP_DEVICE_ADDR] + uart_rxtx_data[DP_SUB_ADDR] + uart_rxtx_data[DP_SUB_ADDR_2] + uart_rxtx_data[DP_DATA]);
 									UART_Send(uart_rxtx_data, 8);
 									break;
-								
+								case 0x81:
+									{
+										WWDG->CR |= 0x80;
+										WWDG->CR &= ~0x40;
+									}
+									break;
 								default:
 									break;
 							}
