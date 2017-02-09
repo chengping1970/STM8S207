@@ -762,6 +762,14 @@ void SWI2C_Toggle3DOnOff(void)
 	SWI2C_Set3DOnOff(Set3DOn);
 }
 /*==========================================================================*/
+void SWI2C_ToggleInsert(void)
+{	
+	u8 insert;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x3A, &insert);
+	insert = !insert;
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, insert);
+}
+/*==========================================================================*/
 extern const u8 address_table[];
 extern const u8 table_size;
 

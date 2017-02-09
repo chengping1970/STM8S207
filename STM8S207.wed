@@ -61,7 +61,7 @@ ptn_Child48=Bar-47
 
 [WorkState_v1_2.DockState.Bar-0]
 BarID=59419
-Bars=20
+Bars=19
 Bar#0=0
 Bar#1=32768
 Bar#2=0
@@ -81,7 +81,6 @@ Bar#15=0
 Bar#16=124960
 Bar#17=0
 Bar#18=0
-Bar#19=0
 Style=0
 ExStyle=0
 PrevFloating=False
@@ -400,7 +399,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=83335
+PctWidth=125004
 MRUFloatCX=148
 MRUFloatCY=30
 MRUHorzDockCX=148
@@ -480,7 +479,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=222219
+PctWidth=166660
 MRUFloatCX=163
 MRUFloatCY=60
 MRUHorzDockCX=263
@@ -520,7 +519,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=83335
+PctWidth=125004
 MRUFloatCX=356
 MRUFloatCY=30
 MRUHorzDockCX=356
@@ -600,7 +599,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=83335
+PctWidth=125004
 MRUFloatCX=40
 MRUFloatCY=30
 MRUHorzDockCX=40
@@ -640,7 +639,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=83335
+PctWidth=125004
 MRUFloatCX=71
 MRUFloatCY=30
 MRUHorzDockCX=71
@@ -680,7 +679,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=222219
+PctWidth=166660
 MRUFloatCX=132
 MRUFloatCY=30
 MRUHorzDockCX=132
@@ -720,7 +719,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=222219
+PctWidth=166660
 MRUFloatCX=132
 MRUFloatCY=30
 MRUHorzDockCX=132
@@ -1802,12 +1801,13 @@ ptn_Child2=ChildFrames
 
 [WorkState_v1_2.Frames.MainFrame]
 WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPHLAAAAAAOAAAAAAAEGEAAAAANKCAAAAA
-Title=ST Visual Develop - STM8S207.stw - [main.c]
+Title=ST Visual Develop - STM8S207.stw - [ir.c]
 
 [WorkState_v1_2.Frames.ChildFrames]
 ptn_Child1=Document-0
 ptn_Child2=Document-1
 ptn_Child3=Document-2
+ptn_Child4=Document-3
 
 [WorkState_v1_2.Frames.ChildFrames.Document-0]
 ptn_Child1=ViewFrame-0
@@ -1816,8 +1816,8 @@ ptn_Child1=ViewFrame-0
 DocPathName=main.c
 DocumentString=
 DocTemplateIndex=0
-WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPAAAAAAAAAAAAAAAAMFFAAAAACMBAAAAA
-IsActiveChildFrame=True
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPAAAAAAAAAAAAAAAAMFFAAAAACMBAAAAA
+IsActiveChildFrame=False
 IsFrameVisible=True
 
 [WorkState_v1_2.Frames.ChildFrames.Document-1]
@@ -1840,4 +1840,15 @@ DocumentString=
 DocTemplateIndex=0
 WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPEDAAAAAAEDAAAAAAEJFAAAAAKPBAAAAA
 IsActiveChildFrame=False
+IsFrameVisible=True
+
+[WorkState_v1_2.Frames.ChildFrames.Document-3]
+ptn_Child1=ViewFrame-0
+
+[WorkState_v1_2.Frames.ChildFrames.Document-3.ViewFrame-0]
+DocPathName=ir.c
+DocumentString=
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPOEAAAAAAOEAAAAAAOKFAAAAAEBCAAAAA
+IsActiveChildFrame=True
 IsFrameVisible=True
