@@ -792,22 +792,19 @@ static u8 Set3DOn = FALSE;
 
 static void SWI2C_Set3DOnOff(u8 OnOff)
 {
-	u8 reg_value, insert, retry;
+	u8 reg_value, retry;
 	if (OnOff)
 	{
-		reg_value = 0x80;
-		insert = 0;
+		reg_value = 0x40;
 	}
 	else
 	{
 		reg_value = 0x0;
-		insert = 1;
 	}
 	for (retry = 0; retry < 3; retry++)
 	{
 		u8 value;
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
-		SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, insert);
 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
 		if (value == reg_value)
 		{

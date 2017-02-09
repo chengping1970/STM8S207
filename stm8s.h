@@ -2694,7 +2694,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 
 #define INIT_VERTICAL_PANEL		0
 #define WRITE_SHORT_TABLE		0
-#define START_RESET_HDMI		0
+#define START_RESET_HDMI		1
 #define WRITE_WEAVING_TABLE		1
 #define TEST_WEAVING_TABLE		1
 #define FPGA_KEY_VERIFY			0
