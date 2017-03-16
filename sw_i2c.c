@@ -590,7 +590,9 @@ void SWI2C_Update(void)
 					SET_BACKLIGHT_OFF();
 					IR_DelayNMiliseconds(200);
 					SET_VPANEL_OFF();
+				#if NO_SIGNAL_RESET_FPGA
 					GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+				#endif
 				}
 			}
 			else
@@ -785,7 +787,11 @@ void FPGA_Init(void)
 		Set3DOn = TRUE;
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
+#if MIX_3D_AND_2D
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xD7, 0x80);
+#else	
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+#endif
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);

@@ -2691,6 +2691,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define BitVal(BIT)  ( *((unsigned char *) (AREA+(BIT)/8)) & (1<<(7-(BIT)%8)) )
 
 /* Exported functions ------------------------------------------------------- */
+#define DEBUG_PRINTF(x)			x
 
 #define INIT_VERTICAL_PANEL		1
 #define START_RESET_HDMI		1
@@ -2702,8 +2703,9 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define CHECK_SIGNAL_RESOLUTION	1
 #define DEBUG_USE_UART1			0
 #define MHL_IIC_ERROR_RESET		1
-#define DEBUG_PRINTF(x)			x
+#define MIX_3D_AND_2D			1
 
+#define NO_SIGNAL_RESET_FPGA	1
 #endif /* __STM8S_H */
 
 /**
