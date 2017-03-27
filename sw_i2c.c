@@ -909,6 +909,7 @@ void SWI2C_ProcessPower(void)
 /*==========================================================================*/
 static void SWI2C_Set3DOnOff(u8 OnOff)
 {
+#if SUPPORT_4K_PANEL
 	u8 reg_value, insert, retry;
 	if (OnOff)
 	{
@@ -931,6 +932,31 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 			break;
 		}
 	}
+#else
+	u8 switch3D, insert, retry;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+	if (OnOff)
+	{
+		switch3D = 0x40;
+		insert &= 0xDF;
+	}
+	else
+	{
+		switch3D = 0x0;
+		insert |= 0x20;
+	}
+	for (retry = 0; retry < 3; retry++)
+	{
+		u8 value;
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, switch3D);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, insert);
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
+		if (value == switch3D)
+		{
+			break;
+		}
+	}
+#endif
 }
 /*==========================================================================*/
 void SWI2C_Toggle3DOnOff(void)
@@ -941,10 +967,24 @@ void SWI2C_Toggle3DOnOff(void)
 /*==========================================================================*/
 void SWI2C_ToggleInsert(void)
 {	
+#if SUPPORT_4K_PANEL
 	u8 insert;
 	SWI2C_ReadByte(FPGA_ADDRESS, 0x3A, &insert);
 	insert = !insert;
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x3A, insert);
+#else
+	u8 insert;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+	if (insert&0x20)
+	{
+		insert &= 0xDF;
+	}
+	else
+	{
+		insert |= 0x20;
+	}
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, insert);
+#endif
 }
 /*==========================================================================*/
 extern const u8 address_table[];
@@ -983,18 +1023,26 @@ void FPGA_Init(void)
 #endif
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
 #if SUPPORT_4K_PANEL
-#if MIX_3D_AND_2D
+	#if MIX_3D_AND_2D
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xD7, 0x80);
-#else	
+	#else	
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
-#endif
+	#endif
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
 #else
+	#if SUPPORT_1080P_9VIEW
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
+	#else
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
+	#endif
 #endif
 	SWI2C_Set3DOnOff(Set3DOn);	
 }

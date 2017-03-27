@@ -66,7 +66,11 @@ INIT_FLAG,	// flag
 0x2C,	// 7D
 0x9D,	// DF
 0xBD,	// E7
+#if SUPPORT_4K_PANEL
 0x24,	// 0D
+#else
+0x6E,   // 0D
+#endif
 0,		//machine ID
 100 	//backlight
 };
