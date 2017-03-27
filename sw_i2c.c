@@ -603,7 +603,7 @@ void SWI2C_Update(void)
 	{
 		IT6802_fsm();
 
-		if (frc_update_timer == TIMER_EXPIRED && Have_FRC)
+		/*if (frc_update_timer == TIMER_EXPIRED && Have_FRC)
 		{
 			u8 read_LVDS_mode, read_MFC;
 			SWI2C_ReadByte(FRC_BOARD_ADDRESS, 0x18, &read_LVDS_mode);
@@ -618,7 +618,7 @@ void SWI2C_Update(void)
 				SWI2C_WriteByte(FRC_BOARD_ADDRESS, 0x0A, 0);
 			}
 			frc_update_timer = FRC_UPDATE_TIME;
-		}	
+		}*/	
 
 #if FPGA_KEY_VERIFY_AUTO
 		if (secret_detect_timer == TIMER_EXPIRED)
@@ -792,21 +792,25 @@ static u8 Set3DOn = FALSE;
 
 static void SWI2C_Set3DOnOff(u8 OnOff)
 {
-	u8 reg_value, retry;
+	u8 switch3D, insert, retry;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
 	if (OnOff)
 	{
-		reg_value = 0x40;
+		switch3D = 0x40;
+		insert &= 0xDF;
 	}
 	else
 	{
-		reg_value = 0x0;
+		switch3D = 0x0;
+		insert |= 0x20;
 	}
 	for (retry = 0; retry < 3; retry++)
 	{
 		u8 value;
-		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, reg_value);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, switch3D);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, insert);
 		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
-		if (value == reg_value)
+		if (value == switch3D)
 		{
 			break;
 		}
@@ -817,6 +821,21 @@ void SWI2C_Toggle3DOnOff(void)
 {	
 	Set3DOn = !Set3DOn;
 	SWI2C_Set3DOnOff(Set3DOn);
+}
+/*==========================================================================*/
+void SWI2C_ToggleInsert(void)
+{	
+	u8 insert;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+	if (insert&0x20)
+	{
+		insert &= 0xDF;
+	}
+	else
+	{
+		insert |= 0x20;
+	}
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, insert);
 }
 /*==========================================================================*/
 extern const u8 address_table[];
@@ -835,7 +854,7 @@ void FPGA_Init(void)
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
 	
-#if 1
+#if SUPPORT_1080P_2DZ
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
 #else

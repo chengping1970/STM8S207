@@ -40,7 +40,7 @@ INIT_FLAG,	// flag
 0x2C,	// 7D
 0x9D,	// DF
 0xBB,	// E7
-0x2D,	// 0D
+0x6E,	// 0D
 };
 #else
 const u8 register_default_value[] =
@@ -64,7 +64,7 @@ INIT_FLAG,	// flag
 0x2C,	// 7D
 0x9D,	// DF
 0xBD,	// E7
-0x24,	// 0D
+0x6E,	// 0D
 };
 #endif
 void flash_init(void)
