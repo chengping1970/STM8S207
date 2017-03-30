@@ -238,7 +238,7 @@ void IR_Update(void)
 				case KEY_POWER:
 					SWI2C_ProcessPower();
 					break;
-                                case KEY_RESET_FPGA:
+                case KEY_RESET_FPGA:
 					SWI2C_ResetFPGA();
 					break;
 				case KEY_VERIFY_SECRET:

@@ -770,8 +770,31 @@ void SWI2C_ToggleI2CMode(void)
 		}
 		else
 		{
-			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+			{
+				u8 value;
+				SWI2C_ReadByte(FPGA_ADDRESS, 0xE2, &value);
+				if (value == 0xFF)
+				{
+					SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 19, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xC8, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 2, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xC9, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 3, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xCA, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 4, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xCB, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 5, value);
+					GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+					IR_DelayNMiliseconds(200);
+					GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+					GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+					IR_DelayNMiliseconds(200);
+					WWDG->CR |= 0x80;
+					WWDG->CR &= ~0x40;
+				}
+			}
 		}
 	}
 }
@@ -794,6 +817,17 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 {
 	u8 switch3D, insert, retry;
 	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+	#if SUPPORT_1080P_2DZ
+	if (OnOff)
+	{
+		switch3D = 0x40;
+	}
+	else
+	{
+		switch3D = 0x0;
+	}
+	insert |= 0x20;
+	#else
 	if (OnOff)
 	{
 		switch3D = 0x40;
@@ -804,6 +838,7 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 		switch3D = 0x0;
 		insert |= 0x20;
 	}
+	#endif
 	for (retry = 0; retry < 3; retry++)
 	{
 		u8 value;
@@ -855,6 +890,9 @@ void FPGA_Init(void)
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
 	
 #if SUPPORT_1080P_2DZ
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
 #else
