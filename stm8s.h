@@ -2703,7 +2703,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define CHECK_SIGNAL_RESOLUTION	1
 #define DEBUG_USE_UART1			0
 #define MHL_IIC_ERROR_RESET		1
-#define MIX_3D_AND_2D			1
+#define MIX_3D_AND_2D			0
 
 #define NO_SIGNAL_RESET_FPGA	1
 #endif /* __STM8S_H */

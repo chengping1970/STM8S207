@@ -712,8 +712,29 @@ void SWI2C_ToggleI2CMode(void)
 		}
 		else
 		{
-			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+			{
+				u8 value;
+				SWI2C_ReadByte(FPGA_ADDRESS, 0xE2, &value);
+				if (value == 0xFF)
+				{
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xC8, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 2, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xC9, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 3, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xCA, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 4, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0xCB, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 5, value);
+					GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+					IR_DelayNMiliseconds(200);
+					GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+					GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
+					IR_DelayNMiliseconds(200);
+					WWDG->CR |= 0x80;
+					WWDG->CR &= ~0x40;
+				}
+			}
 		}
 	}
 }
