@@ -934,7 +934,11 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 	}
 #else
 	u8 switch3D, insert, retry;
+	
+
+	
 	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+	#if SUPPORT_1080P_9VIEW
 	if (OnOff)
 	{
 		switch3D = 0x40;
@@ -945,6 +949,17 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 		switch3D = 0x0;
 		insert |= 0x20;
 	}
+	#else
+	if (OnOff)
+	{
+		switch3D = 0x40;
+	}
+	else
+	{
+		switch3D = 0x0;
+	}
+	insert |= 0x20;
+	#endif
 	for (retry = 0; retry < 3; retry++)
 	{
 		u8 value;
@@ -1040,6 +1055,9 @@ void FPGA_Init(void)
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
 	#else
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
 	#endif
