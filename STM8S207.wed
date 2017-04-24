@@ -397,7 +397,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=11535
+PctWidth=23046
 MRUFloatCX=148
 MRUFloatCY=30
 MRUHorzDockCX=148
@@ -464,9 +464,9 @@ MRUWidth=146
 Docking=True
 MRUDockID=59419
 MRUDockLeftPos=504
-MRUDockTopPos=31
+MRUDockTopPos=30
 MRUDockRightPos=767
-MRUDockBottomPos=61
+MRUDockBottomPos=60
 MRUFloatStyle=8196
 MRUFloatXPos=0
 MRUFloatYPos=0
@@ -477,7 +477,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=317953
+PctWidth=302605
 MRUFloatCX=163
 MRUFloatCY=60
 MRUHorzDockCX=263
@@ -517,7 +517,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=11535
+PctWidth=23046
 MRUFloatCX=356
 MRUFloatCY=30
 MRUHorzDockCX=356
@@ -584,9 +584,9 @@ MRUWidth=23
 Docking=True
 MRUDockID=59419
 MRUDockLeftPos=838
-MRUDockTopPos=31
+MRUDockTopPos=30
 MRUDockRightPos=878
-MRUDockBottomPos=61
+MRUDockBottomPos=60
 MRUFloatStyle=8196
 MRUFloatXPos=0
 MRUFloatYPos=0
@@ -597,7 +597,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=11535
+PctWidth=23046
 MRUFloatCX=40
 MRUFloatCY=30
 MRUHorzDockCX=40
@@ -624,9 +624,9 @@ MRUWidth=54
 Docking=True
 MRUDockID=59419
 MRUDockLeftPos=767
-MRUDockTopPos=30
+MRUDockTopPos=31
 MRUDockRightPos=838
-MRUDockBottomPos=60
+MRUDockBottomPos=61
 MRUFloatStyle=8196
 MRUFloatXPos=0
 MRUFloatYPos=0
@@ -637,7 +637,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=11535
+PctWidth=23046
 MRUFloatCX=71
 MRUFloatCY=30
 MRUHorzDockCX=71
@@ -677,7 +677,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=317953
+PctWidth=302605
 MRUFloatCX=132
 MRUFloatCY=30
 MRUHorzDockCX=132
@@ -717,7 +717,7 @@ MDIChild=False
 AutoHide=False
 AutoHidePinned=False
 LastAlignedDocking=0
-PctWidth=317953
+PctWidth=302605
 MRUFloatCX=132
 MRUFloatCY=30
 MRUHorzDockCX=132
@@ -745,7 +745,7 @@ MRUDockID=59420
 MRUDockLeftPos=1
 MRUDockTopPos=-2
 MRUDockRightPos=304
-MRUDockBottomPos=1
+MRUDockBottomPos=708
 MRUFloatStyle=4
 MRUFloatXPos=0
 MRUFloatYPos=0
@@ -776,10 +776,10 @@ XPos=1
 YPos=5
 Docking=True
 MRUDockID=0
-MRUDockLeftPos=1
-MRUDockTopPos=5
-MRUDockRightPos=1
-MRUDockBottomPos=196
+MRUDockLeftPos=8
+MRUDockTopPos=31
+MRUDockRightPos=1927
+MRUDockBottomPos=222
 MRUFloatStyle=4
 MRUFloatXPos=0
 MRUFloatYPos=0
@@ -1798,13 +1798,16 @@ ptn_Child1=MainFrame
 ptn_Child2=ChildFrames
 
 [WorkState_v1_2.Frames.MainFrame]
-WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAAADIPPPPAADIPPPPPPPPPPPPPPPPPPPPILAAAAAAFHAAAAAAFGEAAAAAEBDAAAAA
-Title=ST Visual Develop - STM8S207.stw - [stm8s_tim1.c]
+WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPILAAAAAAFHAAAAAAFGEAAAAAEBDAAAAA
+Title=ST Visual Develop - STM8S207.stw - [main.c]
 
 [WorkState_v1_2.Frames.ChildFrames]
 ptn_Child1=Document-0
 ptn_Child2=Document-1
 ptn_Child3=Document-2
+ptn_Child4=Document-3
+ptn_Child5=Document-4
+ptn_Child6=Document-5
 
 [WorkState_v1_2.Frames.ChildFrames.Document-0]
 ptn_Child1=ViewFrame-0
@@ -1835,6 +1838,39 @@ ptn_Child1=ViewFrame-0
 DocPathName=stm8s_tim1.c
 DocumentString=
 DocTemplateIndex=0
-WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPIGAAAAAAIGAAAAAAIMFAAAAAOCCAAAAA
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPIGAAAAAAIGAAAAAAIMFAAAAAOCCAAAAA
+IsActiveChildFrame=False
+IsFrameVisible=True
+
+[WorkState_v1_2.Frames.ChildFrames.Document-3]
+ptn_Child1=ViewFrame-0
+
+[WorkState_v1_2.Frames.ChildFrames.Document-3.ViewFrame-0]
+DocPathName=stm8s.h
+DocumentString=
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPOEAAAAAAOEAAAAAAOKFAAAAAEBCAAAAA
+IsActiveChildFrame=False
+IsFrameVisible=True
+
+[WorkState_v1_2.Frames.ChildFrames.Document-4]
+ptn_Child1=ViewFrame-0
+
+[WorkState_v1_2.Frames.ChildFrames.Document-4.ViewFrame-0]
+DocPathName=sw_i2c.c
+DocumentString=
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPIGAAAAAAIGAAAAAAIMFAAAAAOCCAAAAA
+IsActiveChildFrame=False
+IsFrameVisible=True
+
+[WorkState_v1_2.Frames.ChildFrames.Document-5]
+ptn_Child1=ViewFrame-0
+
+[WorkState_v1_2.Frames.ChildFrames.Document-5.ViewFrame-0]
+DocPathName=main.c
+DocumentString=
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPCIAAAAAACIAAAAAACOFAAAAAIECAAAAA
 IsActiveChildFrame=True
 IsFrameVisible=True
