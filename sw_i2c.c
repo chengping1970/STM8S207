@@ -302,7 +302,7 @@ static void FPGA_WriteWeavingTable(void)
 {
 	u16 i;
 	
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, FLASH_ReadByte(EEPROM_START_ADDRESS + 0x0A));
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
 	for (i = 0; i < sizeof(weaving_table); i++)
 	{
@@ -335,7 +335,7 @@ void SWI2C_WriteWeavingTable(u8 index)
 
 	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, FLASH_ReadByte(EEPROM_START_ADDRESS + 0x0A));
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
 	for (i = 0; i < 1028; i++)
 	{
