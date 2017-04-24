@@ -714,10 +714,10 @@ void SWI2C_ResetFPGA(void)
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(1500);
+		FPGA_Init();
 #if WRITE_WEAVING_TABLE
 		FPGA_WriteWeavingTable();
 #endif
-		FPGA_Init();
 	}
 }
 /*==========================================================================*/
@@ -785,15 +785,12 @@ void SWI2C_ToggleI2CMode(void)
 					FLASH_ProgramByte(EEPROM_START_ADDRESS + 4, value);
 					SWI2C_ReadByte(FPGA_ADDRESS, 0xCB, &value);
 					FLASH_ProgramByte(EEPROM_START_ADDRESS + 5, value);
-					GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
-					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-					IR_DelayNMiliseconds(200);
-					GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
-					GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
 					IR_DelayNMiliseconds(200);
 					WWDG->CR |= 0x80;
 					WWDG->CR &= ~0x40;
 				}
+				GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+				GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 			}
 		}
 	}
@@ -889,7 +886,7 @@ void FPGA_Init(void)
 	}
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
 	
-#if SUPPORT_1080P_2DZ
+#if SUPPORT_1080P_2DZ_ORI
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
