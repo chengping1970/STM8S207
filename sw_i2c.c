@@ -413,8 +413,15 @@ static const u8 weaving_table[] =
 static void FPGA_WriteWeavingTable(void)
 {
 	u16 i;
-	
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
+#if DATA_STORAGE_FLASH
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, FLASH_ReadByte(EEPROM_START_ADDRESS + 0x0A));
+#else
+	{
+		u8 value;
+		SWI2C_ReadEEPROM(0xA0, 0x0A, 1, &value);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, value);
+	}
+#endif
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
 	for (i = 0; i < sizeof(weaving_table); i++)
 	{
@@ -448,7 +455,15 @@ void SWI2C_WriteWeavingTable(u8 index)
 
 	GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
 	GPIO_WriteLow(LED_G_PORT, LED_G_PIN);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, 0x25);
+#if DATA_STORAGE_FLASH
+	SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, FLASH_ReadByte(EEPROM_START_ADDRESS + 0x0A));
+#else
+	{
+		u8 value;
+		SWI2C_ReadEEPROM(0xA0, 0x0A, 1, &value);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x4A, value);
+	}
+#endif
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xC6, 0x01);
 	for (i = 0; i < 1028; i++)
 	{
@@ -1040,8 +1055,11 @@ void FPGA_Init(void)
 	SWI2C_WriteByte(FPGA_ADDRESS, 0x19, 0x04);
 #if SUPPORT_4K_PANEL
 	#if MIX_3D_AND_2D
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xD6, 0x82);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xD7, 0x80);
 	#else	
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xD6, 0x00);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xD7, 0x00);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
 	#endif
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
@@ -1061,6 +1079,7 @@ void FPGA_Init(void)
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
+	#endif
 #endif
 	SWI2C_Set3DOnOff(Set3DOn);	
 }
