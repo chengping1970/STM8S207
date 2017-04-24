@@ -832,10 +832,11 @@ void SWI2C_ResetFPGA(void)
 		IR_DelayNMiliseconds(200);
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 		IR_DelayNMiliseconds(1500);
+		FPGA_Init();
 #if WRITE_WEAVING_TABLE
 		FPGA_WriteWeavingTable();
 #endif
-		FPGA_Init();
+
 	}
 }
 /*==========================================================================*/
@@ -1048,19 +1049,18 @@ void FPGA_Init(void)
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
 #else
-	#if SUPPORT_1080P_9VIEW
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
-	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
-	#else
+	#if SUPPORT_1080P_2DZ_ORI
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x7E);
 	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x00);
-	#endif
+	#else
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE0, 0x11);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE1, 0x32);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE2, 0x54);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE3, 0x76);
+	SWI2C_WriteByte(FPGA_ADDRESS, 0xE4, 0x07);
 #endif
 	SWI2C_Set3DOnOff(Set3DOn);	
 }

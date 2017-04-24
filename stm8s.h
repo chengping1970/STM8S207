@@ -2695,10 +2695,11 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 
 #define INIT_VERTICAL_PANEL		1
 
-#define SUPPORT_4K_PANEL		0
-#define WRITE_4K30Hz_PANEL		0
+#define SUPPORT_4K_PANEL		1
+#define WRITE_4K30Hz_PANEL		1
 #define MIX_3D_AND_2D			0
-#define SUPPORT_1080P_9VIEW		1
+#define SUPPORT_1080P_9VIEW		0
+#define SUPPORT_1080P_2DZ_ORI	0
 
 #define START_RESET_HDMI		1
 #define ENABLE_HDMI_HPD			1
