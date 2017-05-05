@@ -814,8 +814,6 @@ void SWI2C_SystemPowerUp(void)
 	DEBUG_PRINTF(printf("\r\n==== POWER UP ====\r\n"));
 	IR_DelayNMiliseconds(200);
 	Power_status = TRUE;
-	#if !DATA_STORAGE_FLASH
-	#endif
 	GPIO_WriteLow(IT680X_RESET_PORT, IT680X_RESET_PIN);
 	//GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	IR_DelayNMiliseconds(200);
@@ -826,7 +824,9 @@ void SWI2C_SystemPowerUp(void)
 #if CONTROL_FRC_BOARD	 
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 #endif
+#if !DATA_STORAGE_FLASH
 	storage_init();
+#endif
 	UART_InitMachineNo();
 #if ENABLE_HDMI_HPD
 	GPIO_WriteHigh(HDMI0_HOTPLUG_PORT,HDMI0_HOTPLUG_PIN);
@@ -904,10 +904,33 @@ void SWI2C_ToggleI2CMode(void)
 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 		}
 		else
+		#if DATA_STORAGE_FLASH
+		{
+			u8 value;
+			SWI2C_ReadByte(FPGA_ADDRESS, 0xCF, &value);
+			if (value == 0xFF)
+			{
+				SWI2C_ReadByte(FPGA_ADDRESS, 0xC8, &value);
+				FLASH_ProgramByte(EEPROM_START_ADDRESS + 2, value);
+				SWI2C_ReadByte(FPGA_ADDRESS, 0xC9, &value);
+				FLASH_ProgramByte(EEPROM_START_ADDRESS + 3, value);
+				SWI2C_ReadByte(FPGA_ADDRESS, 0xCA, &value);
+				FLASH_ProgramByte(EEPROM_START_ADDRESS + 4, value);
+				SWI2C_ReadByte(FPGA_ADDRESS, 0xCB, &value);
+				FLASH_ProgramByte(EEPROM_START_ADDRESS + 5, value);
+				IR_DelayNMiliseconds(200);
+				WWDG->CR |= 0x80;
+				WWDG->CR &= ~0x40;
+			}
+			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+			}
+		#else
 		{
 			GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
 			GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
 		}
+		#endif
 	}
 }
 /*==========================================================================*/
