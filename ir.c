@@ -65,7 +65,7 @@ KEY_VOLUME_MINUS,
 KEY_LEFT,
 KEY_RIGHT,
 KEY_VERIFY_SECRET,
-KEY_RESET_FPGA,
+KEY_TOGGLE_3D_MODE,
 KEY_DEBUG,
 
 KEY_TEST0,
@@ -134,7 +134,7 @@ static u8 _convert_IR(void)
 			case 0x0A:		return KEY_INSERT_OFF;
 			case 0xC1: 		return KEY_DEBUG;
 			case 0xC4:		return KEY_VERIFY_SECRET;
-			case 0x58:		return KEY_RESET_FPGA;
+			case 0x58:		return KEY_TOGGLE_3D_MODE;
 			#if TEST_WEAVING_TABLE
 			case 0x50:		return KEY_TEST0;
 			case 0x51:		return KEY_TEST1;
@@ -162,7 +162,7 @@ static u8 _convert_IR(void)
 			case 0x58:		return KEY_INSERT_OFF;
 			case 0x01: 		return KEY_DEBUG;		
 			case 0x08:		return KEY_VERIFY_SECRET;
-			case 0x1F:		return KEY_RESET_FPGA;
+			case 0x1F:		return KEY_TOGGLE_3D_MODE;
 			#if TEST_WEAVING_TABLE
 			case 0x5A:		return KEY_TEST0;
 			case 0x52:		return KEY_TEST1;
@@ -253,8 +253,8 @@ void IR_Update(void)
 				case KEY_POWER:
 					SWI2C_ProcessPower();
 					break;
-                case KEY_RESET_FPGA:
-					SWI2C_ResetFPGA();
+                case KEY_TOGGLE_3D_MODE:
+					SWI2C_Toggle3DMode();
 					break;
 				case KEY_VERIFY_SECRET:
 					SWI2C_VerifyKey();

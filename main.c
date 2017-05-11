@@ -30,7 +30,7 @@ INIT_FLAG,	// flag
 0x03,	// 18
 0x10,	// 47
 0x01,	// 48
-0x85,	// 49
+0x17,	// 49
 0x24,   // 4A
 0x17,	// 58
 0x40,	// 59
@@ -56,7 +56,7 @@ INIT_FLAG,	// flag
 0x00,	// 18
 0x30,	// 47
 0x01,	// 48
-0xFF,	// 49
+0x17,	// 49
 0x24,	// 4A
 0x23,   // 58
 0x40,   // 59
@@ -101,11 +101,22 @@ void storage_init(void)
 #else
 void storage_init(void)
 {
-	u8 val;
-	SWI2C_ReadEEPROM(0xA0, 0x00, 1, &val);
-	if (val != INIT_FLAG)
+	u8 val, i, need_init = TRUE;
+
+	for (i = 0;i < 5;i++)
 	{
-		u8 i, size = sizeof(register_default_value);
+		SWI2C_ReadEEPROM(0xA0, 0x00, 1, &val);
+		if (val == INIT_FLAG)
+		{
+			need_init = FALSE;
+			break;
+		}
+		IR_DelayNMiliseconds(200);
+		
+	}
+	if (need_init)
+	{
+		u8 size = sizeof(register_default_value);
 		
 		DEBUG_PRINTF(printf("**** INIT EEPROM ****\r\n"));
 		for (i = 0; i < size; i++)

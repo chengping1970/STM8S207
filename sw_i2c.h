@@ -48,16 +48,20 @@ extern void SWI2C_VerifyKey(void);
 extern u8 SWI2C_WriteEEPROM(u8 addr, u8 subaddr, u8 num, u8 * pValue);
 extern u8 SWI2C_ReadEEPROM(u8 addr, u8 subaddr, u8 num, u8 * pValue);
 
-
 extern void SWI2C_WriteWeavingTable(u8 index);
 
 extern void FPGA_Init(void);
 extern void HDMI_HotPlug(u8 value);
 extern void SWI2C_Toggle3DOnOff(void);
+extern void SWI2C_Set3DOnOff(u8 OnOff);
 extern void SWI2C_ToggleInsert(void);
 extern void SWI2C_Set_deep(u8 deep);
 extern void SWI2C_UpdateTimer(void);
 extern void SWI2C_ErrorProcess(void);
 extern void SWI2C_SetBacklight(u8 backlight);
+
+extern void SWI2C_Set3D_9View(void);
+extern void SWI2C_Set3D_2DZ(void);
+extern void SWI2C_Toggle3DMode(void);
 
 #endif //__SW_I2C_H__

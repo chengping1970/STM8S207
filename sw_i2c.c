@@ -662,7 +662,7 @@ void SWI2C_Init(void)
 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF_PIN);
 	GPIO_WriteHigh(POWER_ONOFF_PORT, POWER_ONOFF1_PIN);
 	
-	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
+	GPIO_Init(FPGA_RESET_PORT, FPGA_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	
 	GPIO_Init(IT680X_RESET_PORT, IT680X_RESET_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);
 	
 	GPIO_Init(LED_R_PORT, LED_R_PIN, GPIO_MODE_OUT_PP_HIGH_FAST);	
@@ -825,7 +825,9 @@ void SWI2C_SystemPowerUp(void)
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 #endif
 #if !DATA_STORAGE_FLASH
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	storage_init();
+	GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 #endif
 	UART_InitMachineNo();
 #if ENABLE_HDMI_HPD
@@ -946,7 +948,7 @@ void SWI2C_ProcessPower(void)
 	}
 }
 /*==========================================================================*/
-static void SWI2C_Set3DOnOff(u8 OnOff)
+void SWI2C_Set3DOnOff(u8 OnOff)
 {
 #if SUPPORT_4K_PANEL
 	u8 reg_value, insert, retry;
@@ -973,9 +975,7 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 	}
 #else
 	u8 switch3D, insert, retry;
-	
-
-	
+		
 	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
 	#if SUPPORT_1080P_9VIEW
 	if (OnOff)
@@ -992,12 +992,28 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 	if (OnOff)
 	{
 		switch3D = 0x40;
+		#if DATA_STORAGE_FLASH
+		retry = FLASH_ReadByte(EEPROM_START_ADDRESS + 19);
+		#else
+		SWI2C_ReadEEPROM(0xA0, 19, 1, &retry);
+		#endif
+		if (retry&0x10)
+		{
+			insert &= 0xDF;
+			insert |= 0x10;
+		}
+		else
+		{
+			insert &= 0xEF;
+			insert |= 0x20;
+		}
 	}
 	else
 	{
 		switch3D = 0x0;
+		insert &= 0xEF;
+		insert |= 0x20;
 	}
-	insert |= 0x20;
 	#endif
 	for (retry = 0; retry < 3; retry++)
 	{
@@ -1011,6 +1027,70 @@ static void SWI2C_Set3DOnOff(u8 OnOff)
 		}
 	}
 #endif
+}
+/*==========================================================================*/
+void SWI2C_Set3D_2DZ(void)
+{
+	u8 switch3D, insert, retry;
+			
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+
+	switch3D = 0x40;
+	insert &= 0xEF;
+	insert |= 0x20;
+	for (retry = 0; retry < 3; retry++)
+	{
+		u8 value;
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, switch3D);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, insert);
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
+		if (value == switch3D)
+		{
+			break;
+		}
+	}
+}
+/*==========================================================================*/
+void SWI2C_Set3D_9View(void)
+{
+	u8 switch3D, insert, retry;
+			
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+
+	switch3D = 0x40;
+	insert &= 0xDF;
+	insert |= 0x10;
+	for (retry = 0; retry < 3; retry++)
+	{
+		u8 value;
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, switch3D);
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, insert);
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
+		if (value == switch3D)
+		{
+			break;
+		}
+	}
+}
+/*==========================================================================*/
+void SWI2C_Toggle3DMode(void)
+{	
+	if (Set3DOn)
+	{
+		u8 val;
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &val);
+		if (val&0x10)
+		{
+			val &= 0xEF;
+			val |= 0x20;
+		}
+		else
+		{
+			val &= 0xDF;
+			val |= 0x10;
+		}
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, val);
+	}
 }
 /*==========================================================================*/
 void SWI2C_Toggle3DOnOff(void)

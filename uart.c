@@ -29,12 +29,17 @@ typedef enum
 	DATA_COMMAND_WRITE_TWO_BYTE,
 	DATA_COMMAND_WRITE_CONFIG,
 	DATA_COMMAND_WRITE_ID,
+	DATA_COMMAND_CONTROL_ALL = 0x80,
 	DATA_COMMAND_COMMUNICATION_ERROR = 0xFE,
 	DATA_COMMAND_IIC_ERROR = 0xFF
 }EXTERN_COMMAND_ENUM;
 
 #define MULTI_BYTE_RW		1
 
+#define LED_G_PORT				GPIOD
+#define LED_G_PIN				GPIO_PIN_4
+#define LED_R_PORT				GPIOD
+#define LED_R_PIN				GPIO_PIN_3
 
 static u8 uart_rx_buffer[UART_BUFFER_MAX_LENGTH + 2];
 static u16 uart_rx_index;
@@ -150,16 +155,26 @@ void UART_PutChar(char c)
 void UART_Send(u8 * reply, u16 count)
 {
 	u16 i;
-	
+#if UART_FOR_WALL
+	UART1_Init((uint32_t)9600, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TX_ENABLE);
+#endif
 	for (i = 0; i < count;i++)
 	{
 		UART_PutChar(* reply++);
 	}
+#if UART_FOR_WALL
+	IR_DelayNMiliseconds(20);
+	UART1_Init((uint32_t)9600, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_RX_ENABLE);
+#endif
 }
 /*==========================================================================*/
 void UART_Init(void)
 {
+#if UART_FOR_WALL	
+	UART1_Init((uint32_t)9600, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_RX_ENABLE);
+#else
 	UART1_Init((uint32_t)115200, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TXRX_ENABLE);
+#endif
 	#if (!DEBUG_USE_UART1)
 	UART1_ITConfig(UART1_IT_RXNE, ENABLE);
 	#endif
@@ -208,6 +223,65 @@ void UART_Update(void)
 					uart_rxtx_data[DP_COMMAND] = DATA_COMMAND_COMMUNICATION_ERROR;
 				}
 				UART_Send(uart_rxtx_data, 8);
+		}
+		else if (uart_rxtx_data[DP_COMMAND] == DATA_COMMAND_CONTROL_ALL)
+		{
+			if (Power_status)
+			{
+				switch (uart_rxtx_data[DP_DEVICE_ADDR])
+				{
+					case 0x80:
+						#if SUPPORT_4K_PANEL
+						Set3DOn = TRUE;
+						SWI2C_Set3DOnOff(TRUE);
+						#elif SUPPORT_1080P_9VIEW
+						#else
+						Set3DOn = TRUE;
+						SWI2C_Set3D_2DZ();
+						#endif
+						break;
+					case 0x88:
+						#if SUPPORT_4K_PANEL
+						Set3DOn = TRUE;
+						SWI2C_Set3DOnOff(TRUE);
+						#elif SUPPORT_1080P_9VIEW
+						Set3DOn = TRUE;
+						SWI2C_Set3DOnOff(TRUE);
+						#else
+						Set3DOn = TRUE;
+						SWI2C_Set3D_9View();
+						#endif
+						break;
+					case 0x81:
+						Set3DOn = FALSE;
+						SWI2C_Set3DOnOff(FALSE);
+						break;
+					case 0x82:
+						I2C_stop = TRUE;
+						GPIO_WriteHigh(LED_R_PORT, LED_R_PIN);			
+						GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+						break;
+					case 0x83:
+						I2C_stop = FALSE;
+						GPIO_WriteLow(LED_R_PORT, LED_R_PIN);			
+						GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+						break;
+					case 0x84:
+						SWI2C_WriteWeavingTable(0);
+						break;
+					case 0x85:
+						SWI2C_WriteWeavingTable(1);
+						break;
+					case 0x86:
+						SWI2C_WriteWeavingTable(2);
+						break;
+					case 0x87:
+						SWI2C_WriteWeavingTable(3);
+						break;
+					default:
+						break;
+				}
+			}
 		}
 		else if (machine_No == uart_rxtx_data[DP_SUB_ADDR_2])
 		{
@@ -409,6 +483,7 @@ void UART_Update(void)
 								case 3:
 									SWI2C_WriteEEPROM(0xA0, BACKLIGHT_POSITION, 1, &uart_rxtx_data[DP_SUB_ADDR]);
 									SWI2C_SetBacklight(uart_rxtx_data[DP_SUB_ADDR]);
+									UART_Send(uart_rxtx_data, 8);
 									break;
 								
 								case 0x80:
