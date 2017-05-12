@@ -43,18 +43,10 @@ struct interrupt_vector const _vectab[] = {
 	{0x82, NonHandledInterrupt}, /* irq15 */
 	{0x82, NonHandledInterrupt}, /* irq16 */
 	{0x82, NonHandledInterrupt}, /* irq17 */
-	#if DEBUG_USE_UART1
-	{0x82, NonHandledInterrupt}, /* irq18 */
-	#else
 	{0x82, (interrupt_handler_t)UART_ISR}, /* irq18 */
-	#endif
 	{0x82, NonHandledInterrupt}, /* irq19 */
 	{0x82, NonHandledInterrupt}, /* irq20 */
-	#if DEBUG_USE_UART1
-	{0x82, (interrupt_handler_t)UART_ISR}, /* irq21 */
-	#else
 	{0x82, NonHandledInterrupt}, /* irq21 */
-	#endif
 	{0x82, NonHandledInterrupt}, /* irq22 */
 	{0x82, (interrupt_handler_t)TIMER4_ISR}, /* irq23 */
 	{0x82, NonHandledInterrupt}, /* irq24 */

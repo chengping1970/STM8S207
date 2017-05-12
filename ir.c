@@ -12,6 +12,7 @@
 #include "stm8s_adc2.h"
 
 #include "ir.h"
+#include "uart.h"
 #include "sw_i2c.h"
 #include "it680x.h"
 #include "Mhlrx.h"
@@ -72,6 +73,11 @@ KEY_TEST0,
 KEY_TEST1,
 KEY_TEST2,
 KEY_TEST3,
+
+KEY_2DZ,
+KEY_9VIEW,
+KEY_2D,
+
 KEY_DUMMY = 0xFF
 }IR_KEY_ENUM;
 
@@ -141,6 +147,11 @@ static u8 _convert_IR(void)
 			case 0x52:		return KEY_TEST2;
 			case 0x53:		return KEY_TEST3;
 			#endif
+			#if IR_SEND_UART
+			case 0x7:		return KEY_2DZ;
+			case 0x8:		return KEY_9VIEW;
+			case 0x9:		return KEY_2D;
+			#endif
 			default:
 				return KEY_DUMMY;
 		}
@@ -168,6 +179,11 @@ static u8 _convert_IR(void)
 			case 0x52:		return KEY_TEST1;
 			case 0x5D:		return KEY_TEST2;
 			case 0x5C:		return KEY_TEST3;
+			#endif
+			#if IR_SEND_UART
+			case 0x4C:		return KEY_2DZ;
+			case 0x0E:		return KEY_9VIEW;
+			case 0x0D:		return KEY_2D;
 			#endif
 			default:
 				return KEY_DUMMY;
@@ -274,6 +290,50 @@ void IR_Update(void)
 					break;
 				case KEY_TEST3:
 					SWI2C_WriteWeavingTable(3);
+					break;
+				#endif
+				#if IR_SEND_UART
+				case KEY_2DZ:
+					{
+						u8 uart_command[8];
+						uart_command[0] = 0xFF;
+						uart_command[1] = 0x55;
+						uart_command[2] = 0x80;
+						uart_command[3] = 0x80;
+						uart_command[4] = 0x0;
+						uart_command[5] = 0x0;
+						uart_command[6] = 0x0;
+						uart_command[7] = 0x80;
+						UART_IRSend(uart_command);
+					}
+					break;
+				case KEY_9VIEW:
+					{
+						u8 uart_command[8];
+						uart_command[0] = 0xFF;
+						uart_command[1] = 0x55;
+						uart_command[2] = 0x80;
+						uart_command[3] = 0x88;
+						uart_command[4] = 0x0;
+						uart_command[5] = 0x0;
+						uart_command[6] = 0x0;
+						uart_command[7] = 0x78;
+						UART_IRSend(uart_command);
+					}
+					break;
+				case KEY_2D:
+					{
+						u8 uart_command[8];
+						uart_command[0] = 0xFF;
+						uart_command[1] = 0x55;
+						uart_command[2] = 0x80;
+						uart_command[3] = 0x81;
+						uart_command[4] = 0x0;
+						uart_command[5] = 0x0;
+						uart_command[6] = 0x0;
+						uart_command[7] = 0x7F;
+						UART_IRSend(uart_command);
+					}
 					break;
 				#endif
 				default:

@@ -35,7 +35,7 @@ ExternDep= stm8s_uart1.c  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.
 ExternDep= stm8s_uart1.c  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h" stm8s_uart1.h  stm8s.h stm8s_conf.h stm8s_clk.h stm8s_gpio.h
 
 [Root.Source Files.ir.c.Config.0]
-ExternDep= ir.c "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h"  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\stdio.h" stm8s.h stm8s_conf.h  stm8s_clk.h stm8s_gpio.h stm8s_exti.h stm8s_tim1.h stm8s_tim2.h stm8s_tim4.h  stm8s_flash.h stm8s_adc2.h ir.h sw_i2c.h it680x.h Mhlrx.h Mhlrx_reg.h
+ExternDep= ir.c "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h"  "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\stdio.h" stm8s.h stm8s_conf.h  stm8s_clk.h stm8s_gpio.h stm8s_exti.h stm8s_tim1.h stm8s_tim2.h stm8s_tim4.h  stm8s_flash.h stm8s_adc2.h ir.h uart.h sw_i2c.h it680x.h Mhlrx.h Mhlrx_reg.h
 
 [Root.Source Files.ir.c.Config.1]
 ExternDep= ir.c "C:\Program Files (x86)\COSMIC\CXSTM8_32K\Hstm8\modsl.h"  stm8s.h stm8s_conf.h stm8s_clk.h stm8s_gpio.h stm8s_exti.h stm8s_tim1.h  stm8s_tim2.h stm8s_tim4.h stm8s_flash.h stm8s_adc2.h ir.h sw_i2c.h

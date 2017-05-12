@@ -2691,7 +2691,9 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define BitVal(BIT)  ( *((unsigned char *) (AREA+(BIT)/8)) & (1<<(7-(BIT)%8)) )
 
 /* Exported functions ------------------------------------------------------- */
-#define DEBUG_PRINTF(x)			x
+#define DEBUG_PRINTF(x)			//x
+#define IR_SEND_UART			1
+#define UART_FOR_WALL			1
 
 #define INIT_VERTICAL_PANEL		1
 
@@ -2716,8 +2718,6 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define FPGA_KEY_VERIFY			0
 #define FPGA_KEY_VERIFY_AUTO	0
 
-#define DEBUG_USE_UART1			0
-#define UART_FOR_WALL			1
 #endif /* __STM8S_H */
 
 /**

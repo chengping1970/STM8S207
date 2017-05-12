@@ -52,49 +52,6 @@ extern u8 Power_status;
 extern u8 I2C_stop;
 extern u8 Set3DOn;
 /*==========================================================================*/
-#if DEBUG_USE_UART1
-INTERRUPT_HANDLER(UART_ISR, 21)
-{
-	uart_rx_buffer[uart_rx_index] = UART3_ReceiveData8();
-	UART3_ClearITPendingBit(UART3_IT_RXNE);
-
-	if (uart_rx_index == 0)
-	{
-		if (uart_rx_buffer[0] != 0xFF)
-		{
-			uart_rx_index = 0;
-			return;
-		}
-	}
-	else if (uart_rx_index == 1)
-	{
-		if (uart_rx_buffer[1] != 0x55)
-		{
-			uart_rx_index = 0;
-			return;
-		}
-	}
-	if (uart_rx_buffer[2] == DATA_COMMAND_WRITE_BANK)
-	{
-		uart_data_length = UART_BUFFER_MAX_LENGTH + 2;
-	}
-	else if (uart_rx_buffer[2] == DATA_COMMAND_WRITE_CONFIG)
-	{
-		uart_data_length = 27;
-	}
-	else
-	{
-		uart_data_length = 8;
-	}
-	uart_rx_index++;
-	
-	if (uart_rx_index == uart_data_length)
-	{
-		uart_rx_index = 0;
-		uart_received = TRUE;
-	}
-}
-#else
 INTERRUPT_HANDLER(UART_ISR, 18)
 {
 	uart_rx_buffer[uart_rx_index] = UART1_ReceiveData8();
@@ -136,21 +93,18 @@ INTERRUPT_HANDLER(UART_ISR, 18)
 		uart_received = TRUE;
 	}
 }
-#endif
 /*==========================================================================*/
-#if DEBUG_USE_UART1
-void UART_PutChar(char c)
-{
-  UART3_SendData8(c);
-  while (UART3_GetFlagStatus(UART1_FLAG_TXE) == RESET);
-}
-#else
-void UART_PutChar(char c)
+void UART1_PutChar(char c)
 {
   UART1_SendData8(c);
   while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET);
 }
-#endif
+/*==========================================================================*/
+void UART3_PutChar(char c)
+{
+  UART3_SendData8(c);
+  while (UART3_GetFlagStatus(UART3_FLAG_TXE) == RESET);
+}
 /*==========================================================================*/
 void UART_Send(u8 * reply, u16 count)
 {
@@ -160,13 +114,28 @@ void UART_Send(u8 * reply, u16 count)
 #endif
 	for (i = 0; i < count;i++)
 	{
-		UART_PutChar(* reply++);
+		UART1_PutChar(* reply++);
 	}
 #if UART_FOR_WALL
 	IR_DelayNMiliseconds(20);
 	UART1_Init((uint32_t)9600, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_RX_ENABLE);
 #endif
 }
+/*==========================================================================*/
+#if IR_SEND_UART
+void UART_IRSend(u8 * reply)
+{
+	u16 i;
+	UART3_Init((uint32_t)9600, UART3_WORDLENGTH_8D, UART3_STOPBITS_1, UART3_PARITY_NO, UART3_MODE_TXRX_ENABLE);
+	IR_DelayNMiliseconds(10);
+	for (i = 0; i < 8;i++)
+	{
+		UART3_PutChar(* reply++);
+	}
+	IR_DelayNMiliseconds(20);
+	UART3_Init((uint32_t)115200, UART3_WORDLENGTH_8D, UART3_STOPBITS_1, UART3_PARITY_NO, UART3_MODE_TXRX_ENABLE);
+}
+#endif
 /*==========================================================================*/
 void UART_Init(void)
 {
@@ -175,15 +144,10 @@ void UART_Init(void)
 #else
 	UART1_Init((uint32_t)115200, UART1_WORDLENGTH_8D, UART1_STOPBITS_1, UART1_PARITY_NO, UART1_SYNCMODE_CLOCK_DISABLE, UART1_MODE_TXRX_ENABLE);
 #endif
-	#if (!DEBUG_USE_UART1)
 	UART1_ITConfig(UART1_IT_RXNE, ENABLE);
-	#endif
 	UART1_Cmd(ENABLE);
 
 	UART3_Init((uint32_t)115200, UART3_WORDLENGTH_8D, UART3_STOPBITS_1, UART3_PARITY_NO, UART3_MODE_TXRX_ENABLE);
-	#if DEBUG_USE_UART1
-	UART3_ITConfig(UART3_IT_RXNE, ENABLE);
-	#endif
 	UART3_Cmd(ENABLE);
 	
 	uart_rx_index = 0;
@@ -548,17 +512,6 @@ void UART_Update(void)
 	}
 }
 /*==========================================================================*/
-#if DEBUG_USE_UART1
-char putchar(char c)
-{
-	 /* Write a character to the UART1 */
-	UART1_SendData8(c);
-	/* Loop until the end of transmission */
-	while (UART1_GetFlagStatus(UART1_FLAG_TXE) == RESET);
-
-	return (c);
-}
-#else
 char putchar(char c)
 {
 	/* Write a character to the UART1 */
@@ -568,5 +521,4 @@ char putchar(char c)
 
 	return (c);
 }
-#endif
 /*==========================================================================*/
