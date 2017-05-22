@@ -48,6 +48,7 @@ extern void SWI2C_WriteWeavingTable(u8 index);
 extern void FPGA_Init(void);
 extern void HDMI_HotPlug(u8 value);
 extern void SWI2C_Toggle3DOnOff(void);
+extern void SWI2C_Toggle3DMode(void);
 extern void SWI2C_ToggleInsert(void);
 extern void SWI2C_Set_deep(u8 deep);
 extern void SWI2C_UpdateTimer(void);

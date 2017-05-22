@@ -2693,7 +2693,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 /* Exported functions ------------------------------------------------------- */
 
 #define INIT_VERTICAL_PANEL		0
-#define SUPPORT_1080P_2DZ		0
+#define SUPPORT_1080P_2DZ		1
 #define SUPPORT_1080P_2DZ_ORI	0
 
 #define WRITE_SHORT_TABLE		0
@@ -2708,7 +2708,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define CHECK_SIGNAL_RESOLUTION	1
 #define DEBUG_USE_UART1			1
 #define MHL_IIC_ERROR_RESET		1
-#define DEBUG_PRINTF(x)			x
+#define DEBUG_PRINTF(x)			//x
 
 #endif /* __STM8S_H */
 

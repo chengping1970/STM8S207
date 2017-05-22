@@ -785,6 +785,8 @@ void SWI2C_ToggleI2CMode(void)
 					FLASH_ProgramByte(EEPROM_START_ADDRESS + 4, value);
 					SWI2C_ReadByte(FPGA_ADDRESS, 0xCB, &value);
 					FLASH_ProgramByte(EEPROM_START_ADDRESS + 5, value);
+					SWI2C_ReadByte(FPGA_ADDRESS, 0x47, &value);
+					FLASH_ProgramByte(EEPROM_START_ADDRESS + 7, value);
 					IR_DelayNMiliseconds(200);
 					WWDG->CR |= 0x80;
 					WWDG->CR &= ~0x40;
@@ -813,41 +815,77 @@ static u8 Set3DOn = FALSE;
 static void SWI2C_Set3DOnOff(u8 OnOff)
 {
 	u8 switch3D, insert, retry;
-	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
+	
 	#if SUPPORT_1080P_2DZ
+	insert = FLASH_ReadByte(EEPROM_START_ADDRESS + 19);
 	if (OnOff)
 	{
 		switch3D = 0x40;
+		if (insert&0x10)
+		{
+			insert = insert&0xDF;
+			insert = insert|0x10;
+		}
+		else
+		{
+			insert = insert&0xEF;
+			insert = insert|0x20;
+		}
 	}
 	else
 	{
 		switch3D = 0x0;
+		insert = insert&0xEF;
+		insert = insert|0x20;
 	}
-	insert |= 0x20;
 	#else
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
 	if (OnOff)
 	{
 		switch3D = 0x40;
-		insert &= 0xDF;
+		insert = insert&0xDF;
 	}
 	else
 	{
 		switch3D = 0x0;
-		insert |= 0x20;
+		insert = insert|0x20;
 	}
 	#endif
 	for (retry = 0; retry < 3; retry++)
 	{
-		u8 value;
+		u8 sw_val, ins_val;
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x57, switch3D);
 		SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, insert);
-		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &value);
-		if (value == switch3D)
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x57, &sw_val);
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &ins_val);
+		if ((sw_val == switch3D) && (ins_val == insert))
 		{
 			break;
 		}
 	}
 }
+/*==========================================================================*/
+#if SUPPORT_1080P_2DZ
+void SWI2C_Toggle3DMode(void)
+{	
+	if (Set3DOn)
+	{
+		u8 val;
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &val);
+		if (val&0x10)
+		{
+			val = val&0xEF;
+			val = val|0x20;
+		}
+		else
+		{
+			val = val&0xDF;
+			val = val|0x10;
+		}
+		SWI2C_WriteByte(FPGA_ADDRESS, 0x0D, val);
+	}
+}
+#endif
 /*==========================================================================*/
 void SWI2C_Toggle3DOnOff(void)
 {	
