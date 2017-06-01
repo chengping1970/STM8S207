@@ -2691,7 +2691,7 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define BitVal(BIT)  ( *((unsigned char *) (AREA+(BIT)/8)) & (1<<(7-(BIT)%8)) )
 
 /* Exported functions ------------------------------------------------------- */
-#define DEBUG_PRINTF(x)			//x
+#define DEBUG_PRINTF(x)			x
 #define IR_SEND_UART			1
 #define UART_FOR_WALL			1
 

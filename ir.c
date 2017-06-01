@@ -389,11 +389,11 @@ u8 IR_GetHDMIPort5V(u8 port)
 {
 	if (port)
 	{
-		return (HDMI1_5V > 300);
+		return (HDMI1_5V > 400);
 	}
 	else
 	{
-		return (HDMI0_5V > 300);
+		return (HDMI0_5V > 400);
 	}
 }
 /*==========================================================================*/
