@@ -2703,16 +2703,19 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define SUPPORT_1080P_9VIEW		0
 #define SUPPORT_1080P_2DZ_ORI	0
 
-#define START_RESET_HDMI		1
-#define ENABLE_HDMI_HPD			1
-#define CHECK_SIGNAL_RESOLUTION	1
-#define MHL_IIC_ERROR_RESET		1
+#define START_RESET_HDMI		0
+#define ENABLE_HDMI_HPD			0
+#define MHL_IIC_ERROR_RESET		0
+#define NO_SIGNAL_RESET_FPGA	0
+#define CHECK_SIGNAL_RESOLUTION	0
+
+#define SIGNAL_INPUT_LVDS		1
+
 #define DATA_STORAGE_FLASH		0
 #define CONTROL_FRC_BOARD		0
-#define NO_SIGNAL_RESET_FPGA	1
 
 #define WRITE_WEAVING_TABLE		0
-#define WRITE_SHORT_TABLE		1
+#define WRITE_SHORT_TABLE		0
 #define TEST_WEAVING_TABLE		1
 
 #define FPGA_KEY_VERIFY			0

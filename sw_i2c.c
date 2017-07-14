@@ -294,6 +294,25 @@ static u8 _SWI2C_ReceiveByte(u8 send_ack)
 /*==========================================================================*/
 static u8 SWI2C_GetSignalStatus(void)
 {
+#if SIGNAL_INPUT_LVDS
+	u8 val;
+	u16 HActive, VActive;
+	
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x83, &val);
+	HActive = val;
+	HActive = HActive<<8;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x82, &val);
+	HActive += val;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x87, &val);
+	VActive = val;
+	VActive = VActive<<8;
+	SWI2C_ReadByte(FPGA_ADDRESS, 0x86, &val);
+	VActive += val;
+	if (HActive == 1920 && VActive == 1080)
+		return 1;
+	else
+		return 0;
+#else
 	u8 port_status, port_sel;
 	#if CHECK_SIGNAL_RESOLUTION
 	u8 val;
@@ -336,6 +355,7 @@ static u8 SWI2C_GetSignalStatus(void)
 	}
 	
 	return 0;
+#endif
 }
 /*==========================================================================*/
 #if WRITE_WEAVING_TABLE
@@ -760,8 +780,10 @@ void SWI2C_Update(void)
 				if (current_signal_status && singal_change_count > SIGNAL_STABLE_COUNT)
 				{
 					signal_status = TRUE;
-					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
+					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);					
+#if !SIGNAL_INPUT_LVDS
 					SWI2C_FirstResetFPGA();
+#endif
 					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
@@ -828,6 +850,11 @@ void SWI2C_SystemPowerUp(void)
 #if !DATA_STORAGE_FLASH
 	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
 	storage_init();
+	GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+#endif
+#if SIGNAL_INPUT_LVDS
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	IR_DelayNMiliseconds(200);
 	GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
 #endif
 	UART_InitMachineNo();
