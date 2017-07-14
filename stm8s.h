@@ -2706,10 +2706,13 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define START_RESET_HDMI		1
 #define ENABLE_HDMI_HPD			1
 #define CHECK_SIGNAL_RESOLUTION	1
-#define DEBUG_USE_UART1			1
 #define MHL_IIC_ERROR_RESET		1
-#define DEBUG_PRINTF(x)			//x
+#define NO_SIGNAL_RESET_FPGA	1
+#define SIGNAL_INPUT_LVDS		0
 
+#define DEBUG_USE_UART1			0
+#define DEBUG_PRINTF(x)			//x
+#define UART_FOR_WALL			1
 #endif /* __STM8S_H */
 
 /**

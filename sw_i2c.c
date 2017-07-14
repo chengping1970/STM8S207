@@ -641,7 +641,9 @@ void SWI2C_Update(void)
 				{
 					signal_status = TRUE;
 					GPIO_WriteHigh(LED_G_PORT, LED_G_PIN);
-					SWI2C_FirstResetFPGA();
+#if !SIGNAL_INPUT_LVDS
+					SWI2C_FirstResetFPGA();					
+#endif
 					SWI2C_ResetFPGA();
 					SET_VPANEL_ON();
 					Backlight_on_timer = BACKLIGHT_DELAY_TIME;
@@ -653,7 +655,9 @@ void SWI2C_Update(void)
 					SET_BACKLIGHT_OFF();
 					IR_DelayNMiliseconds(200);
 					SET_VPANEL_OFF();
+					#if NO_SIGNAL_RESET_FPGA
 					GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+					#endif
 				}
 			}
 			else
@@ -701,6 +705,11 @@ void SWI2C_SystemPowerUp(void)
 	IR_DelayNMiliseconds(50);
 	Power_status = TRUE;	
 	SWI2C_ResetIT680x();
+#if SIGNAL_INPUT_LVDS
+	GPIO_WriteLow(FPGA_RESET_PORT, FPGA_RESET_PIN);
+	IR_DelayNMiliseconds(200);
+	GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
+#endif
 	Have_FRC = SWI2C_TestDevice(FRC_BOARD_ADDRESS);
 	singal_change_count = 0;
 	signal_status = FALSE;
