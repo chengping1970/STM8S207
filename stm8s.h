@@ -2703,12 +2703,12 @@ Comments :    The idea is to handle directly with the bit name. For that, it is
 #define FPGA_KEY_VERIFY			0
 #define FPGA_KEY_VERIFY_AUTO	0
 
-#define START_RESET_HDMI		1
-#define ENABLE_HDMI_HPD			1
-#define CHECK_SIGNAL_RESOLUTION	1
-#define MHL_IIC_ERROR_RESET		1
-#define NO_SIGNAL_RESET_FPGA	1
-#define SIGNAL_INPUT_LVDS		0
+#define START_RESET_HDMI		0
+#define ENABLE_HDMI_HPD			0
+#define CHECK_SIGNAL_RESOLUTION	0
+#define MHL_IIC_ERROR_RESET		0
+#define NO_SIGNAL_RESET_FPGA	0
+#define SIGNAL_INPUT_LVDS		1
 
 #define DEBUG_USE_UART1			0
 #define DEBUG_PRINTF(x)			//x

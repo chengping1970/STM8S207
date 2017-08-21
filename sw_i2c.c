@@ -262,6 +262,25 @@ static u8 _SWI2C_ReceiveByte(u8 send_ack)
 /*==========================================================================*/
 static u8 SWI2C_GetSignalStatus(void)
 {
+#if SIGNAL_INPUT_LVDS
+		u8 val;
+		u16 HActive, VActive;
+		
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x83, &val);
+		HActive = val;
+		HActive = HActive<<8;
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x82, &val);
+		HActive += val;
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x87, &val);
+		VActive = val;
+		VActive = VActive<<8;
+		SWI2C_ReadByte(FPGA_ADDRESS, 0x86, &val);
+		VActive += val;
+		if (HActive == 1920 && VActive == 1080)
+			return 1;
+		else
+			return 0;
+#else
 	u8 p0_status;
 	#if CHECK_SIGNAL_RESOLUTION
 	u8 val;
@@ -291,6 +310,7 @@ static u8 SWI2C_GetSignalStatus(void)
 	}
 	
 	return 0;
+#endif
 }
 /*==========================================================================*/
 #if WRITE_WEAVING_TABLE
