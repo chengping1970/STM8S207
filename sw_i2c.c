@@ -764,7 +764,7 @@ void SWI2C_FirstResetFPGA(void)
 		SWI2C_WriteByte(0x90, 0x14, 0x0);
 #else
 		GPIO_WriteHigh(FPGA_RESET_PORT, FPGA_RESET_PIN);
-		IR_DelayNMiliseconds(200);
+		IR_DelayNMiliseconds(500);
 #endif
 	}
 }

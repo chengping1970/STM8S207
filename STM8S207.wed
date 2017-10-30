@@ -1,3 +1,5 @@
+[WorkState_v1-Edit.Breakpoints]
+Break0=TypeFile, ir.c, 364, 0, 0, 1,
 
 [WorkState_v1_2]
 ptn_Child1=DockState
@@ -1804,6 +1806,8 @@ Title=ST Visual Develop - STM8S207.stw - [sw_i2c.c]
 
 [WorkState_v1_2.Frames.ChildFrames]
 ptn_Child1=Document-0
+ptn_Child2=Document-1
+ptn_Child3=Document-2
 
 [WorkState_v1_2.Frames.ChildFrames.Document-0]
 ptn_Child1=ViewFrame-0
@@ -1814,4 +1818,26 @@ DocumentString=
 DocTemplateIndex=0
 WindowPlacement=MCAAAAAACAAAAAAADAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPMJAAAAAAMJAAAAAAIPFAAAAAOFCAAAAA
 IsActiveChildFrame=True
+IsFrameVisible=True
+
+[WorkState_v1_2.Frames.ChildFrames.Document-1]
+ptn_Child1=ViewFrame-0
+
+[WorkState_v1_2.Frames.ChildFrames.Document-1.ViewFrame-0]
+DocPathName=ir.c
+DocumentString=
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPKBAAAAAAKBAAAAAAKHFAAAAAAOBAAAAA
+IsActiveChildFrame=False
+IsFrameVisible=True
+
+[WorkState_v1_2.Frames.ChildFrames.Document-2]
+ptn_Child1=ViewFrame-0
+
+[WorkState_v1_2.Frames.ChildFrames.Document-2.ViewFrame-0]
+DocPathName=stm8s_gpio.c
+DocumentString=
+DocTemplateIndex=0
+WindowPlacement=MCAAAAAAAAAAAAAABAAAAAAAPPPPPPPPPPPPPPPPIPPPPPPPBOPPPPPPEDAAAAAAEDAAAAAAMIDAAAAAKPBAAAAA
+IsActiveChildFrame=False
 IsFrameVisible=True

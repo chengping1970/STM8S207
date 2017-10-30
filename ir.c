@@ -244,7 +244,11 @@ void IR_Update(void)
 					break;
 				#endif
 				case KEY_VERIFY_SECRET:
+					#if FPGA_KEY_VERIFY
 					SWI2C_VerifyKey();
+					#else
+					SWI2C_ResetFPGA();
+					#endif
 					break;
 				case KEY_INSERT_OFF:	
 					SWI2C_ToggleInsert();
