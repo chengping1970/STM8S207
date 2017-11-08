@@ -302,7 +302,11 @@ static u8 SWI2C_GetSignalStatus(void)
 	if ((p0_status&0x0C) == 0x0C)
 	{
 		#if CHECK_SIGNAL_RESOLUTION
+#if SUPPORT_WALL_2X2
+		if (HActive == 3840 && VActive == 2160)
+#else
 		if (HActive == 1920 && VActive == 1080)
+#endif
 		#endif
 		{
 			return 1;
