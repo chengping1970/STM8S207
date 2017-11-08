@@ -269,7 +269,7 @@ void IR_Update(void)
 				case KEY_POWER:
 					SWI2C_ProcessPower();
 					break;
-				#if !SUPPORT_1080P_9VIEW
+				#if SUPPORT_1080P_2DZ
                 case KEY_TOGGLE_3D_MODE:
 					SWI2C_Toggle3DMode();
 					break;

@@ -465,7 +465,7 @@ _CODE unsigned char bCSCMtx_YUV2RGB_ITU709_0_255[] =
 
 #ifdef  _SUPPORT_EDID_RAM_
 _CODE unsigned char Default_Edid_Block[256] = {
-#if SUPPORT_4K_PANEL
+#if (SUPPORT_4K_PANEL || SUPPORT_WALL_2X2)
 
 // 0 for IT6802 4K2k  EDID
 // 0       1       2       3       4        5       6       7       8       9       A        B       C      D       E       F

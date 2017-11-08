@@ -198,7 +198,7 @@ void UART_Update(void)
 						#if SUPPORT_4K_PANEL
 						Set3DOn = TRUE;
 						SWI2C_Set3DOnOff(TRUE);
-						#elif SUPPORT_1080P_9VIEW
+						#elif (!SUPPORT_1080P_2DZ)
 						#else
 						Set3DOn = TRUE;
 						SWI2C_Set3D_2DZ();
@@ -208,7 +208,7 @@ void UART_Update(void)
 						#if SUPPORT_4K_PANEL
 						Set3DOn = TRUE;
 						SWI2C_Set3DOnOff(TRUE);
-						#elif SUPPORT_1080P_9VIEW
+						#elif (!SUPPORT_1080P_2DZ)
 						Set3DOn = TRUE;
 						SWI2C_Set3DOnOff(TRUE);
 						#else

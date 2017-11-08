@@ -341,9 +341,9 @@ static u8 SWI2C_GetSignalStatus(void)
 	#endif
 	if ((port_status&0x0C) == 0x0C)
 	{
-		DEBUG_PRINTF(printf("res %ldx%ld\r\n", HActive, VActive));
 		#if CHECK_SIGNAL_RESOLUTION
-		#if SUPPORT_4K_PANEL
+		DEBUG_PRINTF(printf("res %ldx%ld\r\n", HActive, VActive));
+		#if (SUPPORT_4K_PANEL || SUPPORT_WALL_2X2)
 		if (HActive == 3840 && VActive == 2160)
 		#else
 		if (HActive == 1920 && VActive == 1080)
@@ -1007,7 +1007,7 @@ void SWI2C_Set3DOnOff(u8 OnOff)
 	u8 switch3D, insert, retry;
 		
 	SWI2C_ReadByte(FPGA_ADDRESS, 0x0D, &insert);
-	#if SUPPORT_1080P_9VIEW
+	#if (!SUPPORT_1080P_2DZ)
 	if (OnOff)
 	{
 		switch3D = 0x40;
@@ -1061,7 +1061,7 @@ void SWI2C_Set3DOnOff(u8 OnOff)
 #endif
 }
 /*==========================================================================*/
-#if !SUPPORT_1080P_9VIEW
+#if SUPPORT_1080P_2DZ
 void SWI2C_Set3D_2DZ(void)
 {
 	u8 switch3D, insert, retry;
